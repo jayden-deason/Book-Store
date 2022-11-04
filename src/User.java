@@ -1,9 +1,11 @@
+package src;
+
 public class User {
     private String username; // the user's username
     private String password; // the user's password
 
     /**
-     * Creates a new User object with a blank username and password
+     * Creates a new src.User object with a blank username and password
      */
     public User() {
         this.username = "";
@@ -11,7 +13,7 @@ public class User {
     }
 
     /**
-     * Creates a new User object with a specified username and password
+     * Creates a new src.User object with a specified username and password
      * @param username the user's username
      * @param password the user's password
      */

@@ -1,7 +1,9 @@
+package src;
+
 import java.util.ArrayList;
 
 /**
- * Buyer
+ * src.Buyer
  *
  * An object representing a buyer user in the marketplace
  *
@@ -12,7 +14,7 @@ public class Buyer extends User {
     private ArrayList<Product> shoppingCart; // the user's shopping cart of products
 
     /**
-     * Creates a new Buyer with a given username & password, and an empty shopping cart
+     * Creates a new src.Buyer with a given username & password, and an empty shopping cart
      * @param username the buyer's username
      * @param password the buyer's password
      */
@@ -22,7 +24,7 @@ public class Buyer extends User {
     }
 
     /**
-     * Creates a new Buyer with a given username, password, and shopping cart
+     * Creates a new src.Buyer with a given username, password, and shopping cart
      * @param username the buyer's username
      * @param password the buyer's password
      * @param shoppingCart the buyer's shopping cart
@@ -33,7 +35,7 @@ public class Buyer extends User {
     }
 
     /**
-     * Creates a new Buyer from a text file
+     * Creates a new src.Buyer from a text file
      * @param filename path to the file describing the buyer
      */
     public Buyer(String filename) {

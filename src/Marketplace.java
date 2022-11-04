@@ -1,7 +1,9 @@
+package src;
+
 import java.util.ArrayList;
 
 /**
- * Marketplace
+ * src.Marketplace
  *
  * An object representing a marketplace consisting of buyers and sellers
  *

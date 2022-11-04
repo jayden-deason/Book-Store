@@ -1,5 +1,7 @@
+package src;
+
 /**
- * Main
+ * src.Main
  *
  * The main class used to launch a dashboard for a user to log in and perform actions in the marketplace
  *
