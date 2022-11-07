@@ -1,16 +1,14 @@
-package src;
-
 import java.util.ArrayList;
 
 /**
- * src.Marketplace
+ * Market
  *
  * An object representing a marketplace consisting of buyers and sellers
  *
  * @author
  * @version
  */
-public class Marketplace {
+public class Market {
     private ArrayList<Buyer> buyers; // the list of buyers in the marketplace
     private ArrayList<Seller> sellers; // the list of sellers in the marketplace
 

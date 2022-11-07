@@ -1,9 +1,7 @@
-package src;
-
 import java.util.ArrayList;
 
 /**
- * src.Seller
+ * Seller
  *
  * An object representing a seller user in the marketplace
  *

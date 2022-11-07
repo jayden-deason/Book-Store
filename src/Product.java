@@ -1,7 +1,5 @@
-package src;
-
 /**
- * src.Product
+ * Product
  *
  * A class describing an available product in the marketplace
  *

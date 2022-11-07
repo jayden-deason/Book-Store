@@ -1,5 +1,6 @@
-package src;
+/*
 
+ */
 public class User {
     private String username; // the user's username
     private String password; // the user's password
