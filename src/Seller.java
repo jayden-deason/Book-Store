@@ -9,17 +9,17 @@ import java.util.ArrayList;
  * @version
  */
 public class Seller extends User {
-    private ArrayList<Product> products; // the seller's products
+    private ArrayList<Store> stores; // the seller's stores
 
     /**
      * Create  a new seller with a given username, password, and list of products
      * @param username the seller's username
      * @param password the seller's password
-     * @param products the seller's product list
+     * @param stores the seller's store list
      */
-    public Seller(String username, String password, ArrayList<Product> products) {
+    public Seller(String username, String password, ArrayList<Store> stores) {
         super(username, password);
-        this.products = products;
+        this.stores = stores;
     }
 
     /**
@@ -31,19 +31,19 @@ public class Seller extends User {
     }
 
     /**
-     * Get the seller's available product
-     * @return the list of products
+     * Get the seller's stores
+     * @return the list of stores
      */
-    public ArrayList<Product> getProducts() {
-        return products;
+    public ArrayList<Store> getStores() {
+        return stores;
     }
 
     /**
-     * Set the seller's product list
-     * @param products an updated list of products
+     * Set the seller's store list
+     * @param stores an updated list of stores
      */
-    public void setProducts(ArrayList<Product> products) {
-        this.products = products;
+    public void setStores(ArrayList<Store> stores) {
+        this.stores = stores;
     }
 
     /**

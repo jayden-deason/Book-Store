@@ -36,6 +36,10 @@ public class Store {
         this.revenue = revenue;
     }
 
+    public Store(String line) {
+        // store constructor from line in file
+    }
+
     public void writeToFile(String storeFile) {
 
     }
