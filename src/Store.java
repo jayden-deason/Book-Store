@@ -4,16 +4,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Store {
-    private String name;
+    private String storeName;
     private String sellerName;
     private String productFile;
     private HashMap<Product, Integer> products; // This way the sales can be tracked for each individual product
     private HashMap<Buyer, Integer> customerData; // This way the sales for each buyer can be tracked
     private int sales;
     private int revenue;
-
-    public Store(String name, String sellerName, String productFile, int sales, int revenue) {
-        this.name = name;
+    public Store(String storeName, String sellerName, String productFile, int sales, int revenue) {
+        this.storeName = storeName;
         this.sellerName = sellerName;
         this.productFile = productFile;
         products = new HashMap<>();

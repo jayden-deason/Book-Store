@@ -28,7 +28,7 @@ public class User {
      * @return username
      */
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     /**
@@ -36,7 +36,7 @@ public class User {
      * @return password
      */
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     /**
