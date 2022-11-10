@@ -8,7 +8,7 @@
  */
 public class Product {
     private String name; // the name of the product
-    private Seller seller; // the seller associated with the product
+    private String sellerName; // the seller associated with the product
     private String description; // a text description of the product
     private int quantity; // the quantity available of the product
     private double price; // the price of the product
@@ -16,14 +16,14 @@ public class Product {
     /**
      * Creates a new product object with the specified parameters
      * @param name the name of the product
-     * @param seller the seller associated with the product
+     * @param sellerName the seller associated with the product
      * @param description the text description of the product
      * @param quantity the quantity available of the product
      * @param price the price of the product
      */
-    public Product(String name, Seller seller, String description, int quantity, double price) {
+    public Product(String name, String sellerName, String description, int quantity, double price) {
         this.name = name;
-        this.seller = seller;
+        this.sellerName = sellerName;
         this.description = description;
         this.quantity = quantity;
         this.price = price;
@@ -42,8 +42,8 @@ public class Product {
      * Get the seller associated with this product
      * @return seller
      */
-    public Seller getSeller() {
-        return seller;
+    public String getSellerName() {
+        return sellerName;
     }
 
     /**
@@ -79,11 +79,11 @@ public class Product {
     }
 
     /**
-     * Set the seller of the product
-     * @param seller a new seller for the product
+     * Set the name of seller of the product
+     * @param sellerName a new seller for the product
      */
-    public void setSeller(Seller seller) {
-        this.seller = seller;
+    public void setSellerName(String sellerName) {
+        this.sellerName = sellerName;
     }
 
     /**
