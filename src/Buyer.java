@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -9,8 +10,7 @@ import java.util.ArrayList;
  * @version
  */
 public class Buyer extends User {
-    private ArrayList<Product> shoppingCart; // the user's shopping cart of products
-
+    File customers = new File("customers.csv");
     /**
      * Creates a new src.Buyer with a given username & password, and an empty shopping cart
      * @param username the buyer's username
@@ -18,26 +18,33 @@ public class Buyer extends User {
      */
     public Buyer(String username, String password) {
         super(username, password);
-        this.shoppingCart = new ArrayList<>();
-    }
+        int index = 0;
+        if (customers.exists()) {
+            try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
+                String line = bfr.readLine();
+                while (line != null) {
+                    index++;
+                    line = bfr.readLine();
+                }
+                FileOutputStream fos = new FileOutputStream("customers.csv", true);
+                PrintWriter pw = new PrintWriter(fos);
+                pw.printf("%d,%s,%s,<>\n", index, this.getUsername(), this.getPassword());
 
-    /**
-     * Creates a new src.Buyer with a given username, password, and shopping cart
-     * @param username the buyer's username
-     * @param password the buyer's password
-     * @param shoppingCart the buyer's shopping cart
-     */
-    public Buyer(String username, String password, ArrayList<Product> shoppingCart) {
-        super(username, password);
-        this.shoppingCart = shoppingCart;
-    }
+                pw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                FileOutputStream fos = new FileOutputStream("customers.csv", true);
+                PrintWriter pw = new PrintWriter(fos);
+                pw.printf("0,%s,%s,<>\n", this.getUsername(), this.getPassword());
 
-    /**
-     * Creates a new src.Buyer from a text file
-     * @param filename path to the file describing the buyer
-     */
-    public Buyer(String filename) {
-        //TODO: implement
+                pw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -45,15 +52,8 @@ public class Buyer extends User {
      * @return the list of products in the buyer's shopping cart
      */
     public ArrayList<Product> getShoppingCart() {
-        return shoppingCart;
-    }
-
-    /**
-     * Set the buyer's shopping cart
-     * @param shoppingCart
-     */
-    public void setShoppingCart(ArrayList<Product> shoppingCart) {
-        this.shoppingCart = shoppingCart;
+       // TODO: implement with file i/o
+        return new ArrayList<Product>();
     }
 
     /**
@@ -61,7 +61,7 @@ public class Buyer extends User {
      * @param product the product to be added
      */
     public void addProductToCart(Product product) {
-        shoppingCart.add(product);
+        // TODO: implement with file i/o
     }
 
     /**
