@@ -131,9 +131,9 @@ public class Market {
      */
     private Seller getSellerByEmail(String email) {
         for (Seller s : sellers) {
-//            if (s.getEmail().equals(email)) {
-//                return s;
-//            }
+            if (s.getUsername().equals(email)) { // TODO: email vs. username confusion
+                return s;
+            }
         }
         return null;
     }
@@ -213,7 +213,7 @@ public class Market {
         }
     }
 
-    private ArrayList<Product> sortByPrice() {
+    public ArrayList<Product> sortByPrice() {
         products.sort((s1, s2) -> {
             return (int) (100 * (s1.getPrice() - s2.getPrice()));
             // multiply by 100 so integer cast doesn't truncate down to 0 if < 1
@@ -222,9 +222,37 @@ public class Market {
         return products;
     }
 
-    private ArrayList<Product> sortByQuantity() {
+    public ArrayList<Product> sortByQuantity() {
         products.sort((s1, s2) -> s1.getQuantity() - s2.getQuantity());
 
         return products;
     }
+
+    /**
+     * Returns a list of products that match the following conditions (provided they are not null)
+     *
+     * @param name        a name that the product has to match
+     * @param storeName   a storename to match the product's storename
+     * @param description a description that the product's description must contain
+     * @return a list of products matching name, storename, and containing the description
+     */
+    public ArrayList<Product> matchConditions(String name, String storeName, String description) {
+        ArrayList<Product> out = new ArrayList<>();
+
+        for (Product p : products) {
+            if (name == null || p.getName().equalsIgnoreCase(name)) {
+                if (storeName == null || p.getStoreName().equalsIgnoreCase(storeName)) {
+                    // decided to do .contains() for description instead of equals...
+                    // doesn't really make sense to have to type the entire description?
+                    if (description != null && p.getDescription().contains(description)) {
+                        out.add(p);
+                    }
+                }
+            }
+        }
+
+        return out;
+    }
+
+
 }
