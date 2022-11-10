@@ -168,4 +168,5 @@ public class Product {
         return String.format("%d,%s,%s,%s,%d,%.2f",
                 getIndex(), getName(), getStoreName(), getDescription(), getQuantity(), getPrice());
     }
+
 }

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Market
@@ -22,9 +23,10 @@ public class Market {
 
     /**
      * Create a new Market object by reading from 4 files
-     * @param buyersFile file with buyer info
-     * @param sellersFile file with seller info
-     * @param storesFile file with store info
+     *
+     * @param buyersFile   file with buyer info
+     * @param sellersFile  file with seller info
+     * @param storesFile   file with store info
      * @param productsFile file with product info
      */
     public Market(String buyersFile, String sellersFile, String storesFile, String productsFile) {
@@ -79,6 +81,7 @@ public class Market {
 
     /**
      * Reads contents of file as an arraylist of lines
+     *
      * @param filename path to file
      * @return lines of the file
      */
@@ -105,6 +108,7 @@ public class Market {
     /**
      * Get a product from the masterlist by its index. Typically just access that index of the list, but in case that
      * doesn't match -- loop through and find equivalent index
+     *
      * @param idx index of product
      * @return product at that index, null if no matches
      */
@@ -121,20 +125,22 @@ public class Market {
 
     /**
      * Find a seller by their email
+     *
      * @param email seller's email
      * @return seller with matching email, null if none found
      */
     private Seller getSellerByEmail(String email) {
         for (Seller s : sellers) {
-            if (s.getEmail().equals(email)) {
-                return s;
-            }
+//            if (s.getEmail().equals(email)) {
+//                return s;
+//            }
         }
         return null;
     }
 
     /**
      * Find a store with a given name
+     *
      * @param name name of store
      * @return store with that name, null if none found
      */
@@ -167,6 +173,7 @@ public class Market {
 
     /**
      * Get a list of all users in the market
+     *
      * @return combined list of buyers and sellers
      */
     public ArrayList<User> getAllUsers() {
@@ -189,7 +196,8 @@ public class Market {
 
     /**
      * Print contents of an arraylist to a file using toString
-     * @param list a list of objects
+     *
+     * @param list     a list of objects
      * @param filename the file to write to
      */
     private void printToFile(ArrayList list, String filename) {
@@ -203,5 +211,20 @@ public class Market {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private ArrayList<Product> sortByPrice() {
+        products.sort((s1, s2) -> {
+            return (int) (100 * (s1.getPrice() - s2.getPrice()));
+            // multiply by 100 so integer cast doesn't truncate down to 0 if < 1
+        });
+
+        return products;
+    }
+
+    private ArrayList<Product> sortByQuantity() {
+        products.sort((s1, s2) -> s1.getQuantity() - s2.getQuantity());
+
+        return products;
     }
 }
