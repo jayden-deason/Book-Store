@@ -22,7 +22,7 @@ public class Product {
      * @param description the text description of the product
      * @param quantity    the quantity available of the product
      * @param price       the price of the product
-     * @param index       the index of the product in the csv
+     * @param index       the index of the product in the index.csv file
      */
     public Product(String name, String storeName, String description, int quantity, double price, int index) {
         this.name = name;
@@ -149,9 +149,9 @@ public class Product {
     }
 
     /**
-     * Set the product's index in the csv
+     * Set the index
      *
-     * @param index new index
+     * @param index the new index
      */
     public void setIndex(int index) {
         this.index = index;
@@ -162,9 +162,9 @@ public class Product {
      *
      * @return string description of the product
      */
+
     @Override
     public String toString() {
-
         return String.format("%d,%s,%s,%s,%d,%.2f",
                 getIndex(), getName(), getStoreName(), getDescription(), getQuantity(), getPrice());
     }

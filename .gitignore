@@ -1,2 +1,4 @@
 /.idea/
 /out/
+!/src/project4.iml
+/src/.idea
