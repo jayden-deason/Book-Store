@@ -8,8 +8,8 @@ import java.io.FileWriter;
  *
  * An object representing a seller user in the marketplace
  *
- * @author
- * @version
+ * @author Visv Shah
+ * @version 11/9/22
  */
 public class Seller extends User {
     private ArrayList<Store> stores; // the seller's products
@@ -111,5 +111,22 @@ public class Seller extends User {
             s.displayStatistics();
         }
     }
-    
+    /**
+     * Prints the seller's dashboard with filters
+     */
+    public void printSortedDashBoard() {
+        for(Store s : stores) {
+            System.out.println("Store: " + s.getName());
+            s.displayStatistics();
+        }
+    }
+    public String toString() {
+        String storesStr = "<";
+        for(Store s: this.stores) {
+            storesStr += s.getIndex() + "/";
+        }
+        storesStr = storesStr.substring(storesStr.length() - 1) + ">";
+        return String.format("%s,%s,%s", this.getUsername(), this.getPassword(), storesStr);
+
+    }
 }
