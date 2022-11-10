@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -36,16 +33,18 @@ public class Store {
         this.revenue = revenue;
     }
 
-    public void writeToFile(String storeFile) {
-
-    }
-
-    public void addBuyer(Buyer buyer) {
-        customerData.put(buyer, 1);
-    }
-
-    public void purchaseMade(Buyer buyer, int quantity) {
-        customerData.computeIfPresent(buyer, (k, v) -> v + quantity);
+    public void makePurchase(Buyer buyer, int quantity, Product product) {
+        if (product.getQuantity() < quantity) {
+            System.out.printf("Store only have %d %s left in stock\n", product.getQuantity(), product.getName());
+        } else {
+            if (customerData.containsKey(buyer)) {
+                customerData.compute(buyer, (k, v) -> v + quantity);
+            } else {
+                customerData.put(buyer, quantity);
+            }
+            products.compute(product, (k, v) -> v - quantity);
+            product.setQuantity(product.getQuantity() - quantity);
+        }
     }
 
     public void addProduct(Product product) {
@@ -69,10 +68,19 @@ public class Store {
 
     }
 
-    public void displayStatistics() {
+    public void statisticsForBuyer() {
+        System.out.println("Store: " + name);
+        System.out.println("Total Sales: " + sales);
+    }
+    public void statisticsForSeller() {
+        System.out.println(name + " Statistics:");
+        System.out.println("Total Sales: " + sales);
+        System.out.println("Total Revenue: " + revenue);
+        System.out.println("Sales by product: ");
         for (Product product : products.keySet()) {
             System.out.println(product.getName() + ": " + products.get(product));
         }
+        System.out.println("Sales by customer: ");
         for (Buyer buyer : customerData.keySet()) {
             System.out.println(buyer.getUsername() + ": " + customerData.get(buyer));
         }
