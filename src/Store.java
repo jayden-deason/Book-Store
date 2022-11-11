@@ -4,27 +4,28 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Store {
+    private int index;
     private String storeName;
     private String sellerName;
     private String productFile;
-    private HashMap<Product, Integer> products; // This way the sales can be tracked for each individual product
+    private ArrayList<Product> products; // This way the sales can be tracked for each individual product
     private HashMap<Buyer, Integer> customerData; // This way the sales for each buyer can be tracked
     private int sales;
     private int revenue;
-    private int index;
-    public Store(String storeName, String sellerName, String productFile, int sales, int revenue, int index) {
+    public Store(int index, String storeName, String sellerName, String productFile, int sales, int revenue) {
         this.storeName = storeName;
         this.sellerName = sellerName;
         this.productFile = productFile;
-        products = new HashMap<>();
+        products = new ArrayList<>();
         customerData = new HashMap<>();
         try {
             File file = new File(productFile);
             BufferedReader bfr = new BufferedReader(new FileReader(file));
             for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
                 String[] splitLine = line.split(",");
-                products.put(new Product(splitLine[0], splitLine[1], splitLine[2], Integer.parseInt(splitLine[3]),
-                        Double.parseDouble(splitLine[4]), Integer.parseInt(splitLine[5])), 0);
+                // needs to be updated to reflect the csv format
+                products.add(new Product(splitLine[0], splitLine[1], splitLine[2], Integer.parseInt(splitLine[3]),
+                        Double.parseDouble(splitLine[4]), Integer.parseInt(splitLine[5])));
             }
         } catch (IOException e) {
             System.out.println("File Error"); // Temporary message
@@ -43,21 +44,20 @@ public class Store {
             } else {
                 customerData.put(buyer, quantity);
             }
-            products.compute(product, (k, v) -> v - quantity);
             product.setQuantity(product.getQuantity() - quantity);
         }
     }
 
     public void addProduct(Product product) {
-        if (!products.containsKey(product)) {
-            products.put(product, 1);
+        if (!products.contains(product)) {
+            products.add(product);
         } else {
             System.out.println("Store already sells " + product.getName());
         }
     }
 
     public void removeProduct(Product product) {
-        if (products.containsKey(product)) {
+        if (products.contains(product)) {
             products.remove(product);
         } else {
             System.out.println("Store does not sell " + product.getName());
@@ -66,7 +66,7 @@ public class Store {
 
     // Checks through HashMap to find the same product by name and then changes it to the argument
     public void modifyProduct(Product product) {
-        for(Product p : products.keySet()) {
+        for(Product p : products) {
             if(product.getName().equals(p.getName())) {
                 p = product;
             }
@@ -95,8 +95,8 @@ public class Store {
         System.out.println("Total Revenue: " + revenue);
         if(sortType == 0) {
             System.out.println("Sales by product: ");
-            for (Product product : products.keySet()) {
-                System.out.println(product.getName() + ": " + products.get(product));
+            for (Product product : products) {
+                System.out.println(product.getName() + ": " + products.get(products.indexOf(product)));
             }
             System.out.println("Sales by customer: ");
             for (Buyer buyer : customerData.keySet()) {
@@ -105,7 +105,7 @@ public class Store {
         }
         else {
             ArrayList<Product> sortedProducts = new ArrayList<Product>();
-            for (Product product : products.keySet()) {
+            for (Product product : products) {
                 sortedProducts.add(product);
             }
             if(sortType == 1) {
@@ -117,7 +117,7 @@ public class Store {
             System.out.println("Sales by product " + ((sortType == 1) ? "sorted alphabetically:" : "sorted by " +
                     "quantity:"));
             for (Product product : sortedProducts) {
-                System.out.println(product.getName() + ": " + products.get(product));
+                System.out.println(product.getName() + ": " + products.get(products.indexOf(product)));
             }
             //ArrayList to track all of the buyers
             ArrayList<Buyer> sortedBuyers = new ArrayList<Buyer>();
@@ -179,7 +179,7 @@ public class Store {
         this.productFile = productFile;
     }
 
-    public HashMap<Product, Integer> getProducts() {
+    public ArrayList<Product> getProducts() {
         return products;
     }
 
