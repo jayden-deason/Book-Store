@@ -19,15 +19,21 @@ public class Seller extends User {
      * @param username the seller's username
      * @param password the seller's password
      */
-    public Seller(String username, String password) {
+    public Seller(String username, String password) throws badNamingException{
         super(username, password);
+        if(username.contains(",")) {
+            throw new badNamingException("Please do not have a comma in your username!");
+        }
+        if(password.contains(",")) {
+            throw new badNamingException("Please do not have a comma in your password!");
+        }
         this.stores = new ArrayList<Store>();
     }
     /**
      * Writes over stores.csv to add a new store to it
-     * @return the list of stores
+     * @return the index of the store
      */
-    public boolean writeStoresFile(String fileName, Store s) {
+    public int writeStoresFile(String fileName, Store s) {
         ArrayList<String> lines = new ArrayList<String>();
         BufferedReader br = null;
         try {
@@ -66,11 +72,11 @@ public class Seller extends User {
             }
             line = line.substring(0, line.length() - 1) + ">";
             fw.write(line + "\n");
-            return true;
+            return lastIndex;
         }
         catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return -1;
         }
         finally {
             if(fw != null) {
@@ -79,7 +85,7 @@ public class Seller extends User {
                 }
                 catch (IOException e) {
                     e.printStackTrace();
-                    return false;
+                    return -1;
                 }
             }
         }
@@ -98,9 +104,15 @@ public class Seller extends User {
      * Creates a store and adds it to the stores ArrayList and to the stores.csv file
      */
     public void addStore(String storeName, String sellerName, String productFile, int sales, int revenue){
-        Store s = new Store(storeName, sellerName, productFile, sales, revenue);
+        Store s = new Store(storeName, sellerName, productFile, sales, revenue, 0);
         stores.add(s);
-        writeStoresFile("stores.csv", s);
+        int index = writeStoresFile("stores.csv", s);
+        if(index == -1) {
+            System.out.println("Something went wrong with adding your store!");
+        }
+        else {
+            s.setIndex(index);
+        }
     }
     /**
      * Prints the seller's dashboard
@@ -114,10 +126,10 @@ public class Seller extends User {
     /**
      * Prints the seller's dashboard with filters
      */
-    public void printSortedDashBoard() {
+    public void printSortedDashBoard(int sortType) {
         for(Store s : stores) {
             System.out.println("Store: " + s.getName());
-            s.displayStatistics();
+            s.statisticsForSeller(sortType);
         }
     }
     public String toString() {
