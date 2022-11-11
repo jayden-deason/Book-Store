@@ -100,7 +100,6 @@ public class Seller extends User {
 
     /**
      * Set the seller's store list
-     *
      * @param stores an updated list of stores
      */
     public void setStores(ArrayList<Store> stores) {
