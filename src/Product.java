@@ -12,6 +12,7 @@ public class Product {
     private String description; // a text description of the product
     private int quantity; // the quantity available of the product
     private double price; // the price of the product
+    private int index;
 
     /**
      * Creates a new product object with the specified parameters
@@ -20,13 +21,15 @@ public class Product {
      * @param description the text description of the product
      * @param quantity the quantity available of the product
      * @param price the price of the product
+     * @param index the index of the product in the index.csv file
      */
-    public Product(String name, String sellerName, String description, int quantity, double price) {
+    public Product(String name, String sellerName, String description, int quantity, double price, int index) {
         this.name = name;
         this.sellerName = sellerName;
         this.description = description;
         this.quantity = quantity;
         this.price = price;
+        this.index = index;
     }
 
     /**
@@ -68,6 +71,13 @@ public class Product {
      */
     public double getPrice() {
         return price;
+    }
+    /**
+     * Get the index of the product
+     * @return
+     */
+    public int getIndex() {
+        return index;
     }
 
     /**
@@ -111,9 +121,18 @@ public class Product {
     }
 
     /**
+     * Set the index
+     * @param index the new index
+     */
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    /**
      * Get a string description of the product, can be used to save to a file
      * @return string description of the product
      */
+
     @Override
     public String toString() {
         // TODO: implement based on decided format
