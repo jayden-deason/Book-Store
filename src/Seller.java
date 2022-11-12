@@ -13,13 +13,14 @@ import java.io.FileWriter;
  */
 public class Seller extends User {
     private ArrayList<Store> stores; // the seller's products
+    int index;
 
     /**
      * Create  a new seller with a given username, password, and list of products
      * @param username the seller's username
      * @param password the seller's password
      */
-    public Seller(String username, String password) throws badNamingException{
+    public Seller(int index, String username, String password) throws badNamingException{
         super(username, password);
         if(username.contains(",")) {
             throw new badNamingException("Please do not have a comma in your username!");
@@ -28,6 +29,50 @@ public class Seller extends User {
             throw new badNamingException("Please do not have a comma in your password!");
         }
         this.stores = new ArrayList<Store>();
+        this.index = index;
+    }
+    /**
+     * Create a new seller using the line store in the seller.csv file
+     * @param username the seller's username
+     * @param password the seller's password
+     */
+    public Seller(String line) {
+        String[] parts = line.split(",");
+        super(parts[1], parts[2]);
+        this.index = parts[0];
+        String[] storesIndex = parts[3].substring(1, parts[3].length() - 2).split("/");
+        this.stores = new ArrayList<Store>();
+        int i = 0;
+        try {
+            br = new BufferedReader(new FileReader("Stores.csv"));
+            String line = br.readLine();
+            while(line != null) {
+                for(String n : storesIndex) {
+                    if(Integer.parseInt(n) == i) {
+                        Store s = new Store(line);
+                        this.stores.add(s);
+                        break;
+                    }
+                }
+                line = br.readLine();
+                i++;
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        finally {
+            if(br != null) {
+                try {
+                    br.close();
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                    return -1;
+                }
+            }
+        }
     }
     /**
      * Writes over stores.csv to add a new store to it
@@ -68,7 +113,7 @@ public class Seller extends User {
             }
             int lastIndex = Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]);
             String line = lastIndex + "," + s.getName() + "," + super.getUsername() + ",<";
-            for (Product product : s.getProducts().keySet()) {
+            for (Product product : s.getProducts()) {
                 line += product.getIndex() + ":" + product.getQuantity() + "/";
             }
             line = line.substring(0, line.length() - 1) + ">";
@@ -102,7 +147,7 @@ public class Seller extends User {
                 try {
                     fw = new FileWriter(fileName);
                     int index = 0;
-                    for(Product product : s.getProducts().keySet()) {
+                    for(Product product : s.getProducts()) {
                         fw.write(index + "," + product.toString() + "\n");
                         index++;
                     }
