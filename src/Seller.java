@@ -68,7 +68,7 @@ public class Seller extends User {
             }
             int lastIndex = Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]);
             String line = lastIndex + "," + s.getName() + "," + super.getUsername() + ",<";
-            for (Product product : s.getProducts().keySet()) {
+            for (Product product : s.getProducts()) {
                 line += product.getIndex() + ":" + product.getQuantity() + "/";
             }
             line = line.substring(0, line.length() - 1) + ">";
@@ -102,7 +102,7 @@ public class Seller extends User {
                 try {
                     fw = new FileWriter(fileName);
                     int index = 0;
-                    for(Product product : s.getProducts().keySet()) {
+                    for(Product product : s.getProducts()) {
                         fw.write(index + "," + product.toString() + "\n");
                         index++;
                     }
