@@ -7,25 +7,30 @@ public class Store {
     private int index;
     private String storeName;
     private String sellerName;
-    private String productFile;
-    private ArrayList<Product> products; // This way the sales can be tracked for each individual product
+    private ArrayList<Product> products;
+    private ArrayList<Integer> productsByIndex;
     private HashMap<Buyer, Integer> customerData; // This way the sales for each buyer can be tracked
     private int sales;
-    private int revenue;
-    public Store(int index, String storeName, String sellerName, String productFile, int sales, int revenue) {
+    private double revenue;
+    public Store(int index, String storeName, String sellerName, int sales, double revenue, String productIndices) {
         this.storeName = storeName;
         this.sellerName = sellerName;
-        this.productFile = productFile;
-        products = new ArrayList<>();
-        customerData = new HashMap<>();
+        this.productsByIndex = new ArrayList<>();
+        this.products = new ArrayList<>();
+        this.customerData = new HashMap<>();
+        String[] splitProducts = productIndices.split("/");
+        for (String productIndex : splitProducts) {
+            productsByIndex.add(Integer.parseInt(productIndex.split(":")[0]));
+        }
         try {
-            File file = new File(productFile);
+            File file = new File("Products.csv");
             BufferedReader bfr = new BufferedReader(new FileReader(file));
             for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
                 String[] splitLine = line.split(",");
-                // needs to be updated to reflect the csv format
-                products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
-                        Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+                if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
+                    products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
+                            Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+                }
             }
         } catch (IOException e) {
             System.out.println("File Error"); // Temporary message
@@ -33,6 +38,40 @@ public class Store {
         this.sales = sales;
         this.revenue = revenue;
         this.index = index;
+    }
+
+    public Store(String fileLine) {
+        String[] split = fileLine.split(",");
+        this.index = Integer.parseInt(split[0]);
+        this.storeName = split[1];
+        this.sellerName = split[2];
+        this.sales = Integer.parseInt(split[3]);
+        this.revenue = Double.parseDouble(split[4]);
+        String[] products = split[5].split("/");
+        for (String productIndex : products) {
+            productsByIndex.add(Integer.parseInt(productIndex.split(":")[0]));
+        }
+        try {
+            File file = new File("Products.csv");
+            BufferedReader bfr = new BufferedReader(new FileReader(file));
+            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+                String[] splitLine = line.split(",");
+                if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
+                    this.products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
+                            Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("File Error"); // Temporary message
+        }
+    }
+
+    public ArrayList<Integer> getProductsByIndex() {
+        return productsByIndex;
+    }
+
+    public void setProductsByIndex(ArrayList<Integer> productsByIndex) {
+        this.productsByIndex = productsByIndex;
     }
 
     public void makePurchase(Buyer buyer, int quantity, Product product) {
@@ -170,14 +209,6 @@ public class Store {
         this.sellerName = sellerName;
     }
 
-    public String getProductFile() {
-        return productFile;
-    }
-
-    public void setProductFile(String productFile) {
-        this.productFile = productFile;
-    }
-
     public ArrayList<Product> getProducts() {
         return products;
     }
@@ -190,11 +221,11 @@ public class Store {
         this.sales = sales;
     }
 
-    public int getRevenue() {
+    public double getRevenue() {
         return revenue;
     }
 
-    public void setRevenue(int revenue) {
+    public void setRevenue(double revenue) {
         this.revenue = revenue;
     }
     // Need some way to track customer data
