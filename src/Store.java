@@ -3,28 +3,52 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+/**
+ * Store
+ *
+ * A class describing a store that a seller owns and manages, which a buyer can purchase from.
+ *
+ * @author Griffin Chittenden, section 001
+ * @version 11-09-2022
+ */
 public class Store {
+    private int index;
     private String storeName;
     private String sellerName;
-    private String productFile;
-    private HashMap<Product, Integer> products; // This way the sales can be tracked for each individual product
+    private ArrayList<Product> products;
+    private ArrayList<Integer> productsByIndex;
     private HashMap<Buyer, Integer> customerData; // This way the sales for each buyer can be tracked
     private int sales;
-    private int revenue;
-    private int index;
-    public Store(String storeName, String sellerName, String productFile, int sales, int revenue, int index) {
+    private double revenue;
+
+    /**
+     * Creates a new Store object with the given parameters
+     * @param index          the index of the given store in the Stores.csv file
+     * @param storeName      the name of the store
+     * @param sellerName     the name of the seller who owns the store
+     * @param sales          the total number of sales the store has done
+     * @param revenue        the total revenue from sales the store has done
+     * @param productIndices the indices of the product file of the products the store has
+     */
+    public Store(int index, String storeName, String sellerName, int sales, double revenue, String productIndices) {
         this.storeName = storeName;
         this.sellerName = sellerName;
-        this.productFile = productFile;
-        products = new HashMap<>();
-        customerData = new HashMap<>();
+        this.productsByIndex = new ArrayList<>();
+        this.products = new ArrayList<>();
+        this.customerData = new HashMap<>();
+        String[] splitProducts = productIndices.split("/");
+        for (String productIndex : splitProducts) {
+            productsByIndex.add(Integer.parseInt(productIndex.split(":")[0]));
+        }
         try {
-            File file = new File(productFile);
+            File file = new File("Products.csv");
             BufferedReader bfr = new BufferedReader(new FileReader(file));
             for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
                 String[] splitLine = line.split(",");
-                products.put(new Product(splitLine[0], splitLine[1], splitLine[2], Integer.parseInt(splitLine[3]),
-                        Double.parseDouble(splitLine[4])), 0);
+                if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
+                    products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
+                            Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+                }
             }
         } catch (IOException e) {
             System.out.println("File Error"); // Temporary message
@@ -34,6 +58,53 @@ public class Store {
         this.index = index;
     }
 
+    /**
+     * Creates a new store object given a line of the Stores.csv file
+     *
+     * @param fileLine the line of the Stores.csv file
+     */
+    public Store(String fileLine) {
+        String[] split = fileLine.split(",");
+        this.index = Integer.parseInt(split[0]);
+        this.storeName = split[1];
+        this.sellerName = split[2];
+        this.sales = Integer.parseInt(split[3]);
+        this.revenue = Double.parseDouble(split[4]);
+        String[] products = split[5].split("/");
+        for (String productIndex : products) {
+            productsByIndex.add(Integer.parseInt(productIndex.split(":")[0]));
+        }
+        try {
+            File file = new File("Products.csv");
+            BufferedReader bfr = new BufferedReader(new FileReader(file));
+            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+                String[] splitLine = line.split(",");
+                if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
+                    this.products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
+                            Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("File Error"); // Temporary message
+        }
+    }
+
+    public ArrayList<Integer> getProductsByIndex() {
+        return productsByIndex;
+    }
+
+    public void setProductsByIndex(ArrayList<Integer> productsByIndex) {
+        this.productsByIndex = productsByIndex;
+    }
+
+    /**
+     * Checks to see if the product the buyer wants to purchase has enough stock then updates the number of
+     * purchases that buyer has made at this store and updates the quantity of the purchase product.
+     *
+     * @param buyer    the buyer who is making the purchase
+     * @param quantity the amount of product being sold
+     * @param product  the product being sold
+     */
     public void makePurchase(Buyer buyer, int quantity, Product product) {
         if (product.getQuantity() < quantity) {
             System.out.printf("Store only have %d %s left in stock\n", product.getQuantity(), product.getName());
@@ -43,36 +114,54 @@ public class Store {
             } else {
                 customerData.put(buyer, quantity);
             }
-            products.compute(product, (k, v) -> v - quantity);
             product.setQuantity(product.getQuantity() - quantity);
         }
     }
 
+    /**
+     * Adds a product to the list of products being sold by the store
+     *
+     * @param product the product being added to the store
+     */
     public void addProduct(Product product) {
-        if (!products.containsKey(product)) {
-            products.put(product, 1);
+        if (!products.contains(product)) {
+            products.add(product);
+            productsByIndex.add(product.getIndex());
         } else {
             System.out.println("Store already sells " + product.getName());
         }
     }
 
+    /**
+     * Removes a product from the list of products being sold by the store
+     *
+     * @param product the product being removed from the store
+     */
     public void removeProduct(Product product) {
-        if (products.containsKey(product)) {
+        if (products.contains(product)) {
             products.remove(product);
+            productsByIndex.remove(product.getIndex());
         } else {
             System.out.println("Store does not sell " + product.getName());
         }
     }
 
-    // Checks through HashMap to find the same product by name and then changes it to the argument
+    /**
+     * Modifies a product that a store sells
+     *
+     * @param product the product being modified
+     */
     public void modifyProduct(Product product) {
-        for(Product p : products.keySet()) {
+        for(Product p : products) {
             if(product.getName().equals(p.getName())) {
                 p = product;
             }
         }
     }
 
+    /**
+     * Prints out the store's statistics for a buyer to view
+     */
     public void statisticsForBuyer() {
         System.out.println("Store: " + this.storeName);
         System.out.println("Total Sales: " + this.sales);
@@ -95,8 +184,8 @@ public class Store {
         System.out.println("Total Revenue: " + revenue);
         if(sortType == 0) {
             System.out.println("Sales by product: ");
-            for (Product product : products.keySet()) {
-                System.out.println(product.getName() + ": " + products.get(product));
+            for (Product product : products) {
+                System.out.println(product.getName() + ": " + products.get(products.indexOf(product)));
             }
             System.out.println("Sales by customer: ");
             for (Buyer buyer : customerData.keySet()) {
@@ -105,7 +194,7 @@ public class Store {
         }
         else {
             ArrayList<Product> sortedProducts = new ArrayList<Product>();
-            for (Product product : products.keySet()) {
+            for (Product product : products) {
                 sortedProducts.add(product);
             }
             if(sortType == 1) {
@@ -117,7 +206,7 @@ public class Store {
             System.out.println("Sales by product " + ((sortType == 1) ? "sorted alphabetically:" : "sorted by " +
                     "quantity:"));
             for (Product product : sortedProducts) {
-                System.out.println(product.getName() + ": " + products.get(product));
+                System.out.println(product.getName() + ": " + products.get(products.indexOf(product)));
             }
             //ArrayList to track all of the buyers
             ArrayList<Buyer> sortedBuyers = new ArrayList<Buyer>();
@@ -171,15 +260,7 @@ public class Store {
         this.sellerName = sellerName;
     }
 
-    public String getProductFile() {
-        return productFile;
-    }
-
-    public void setProductFile(String productFile) {
-        this.productFile = productFile;
-    }
-
-    public HashMap<Product, Integer> getProducts() {
+    public ArrayList<Product> getProducts() {
         return products;
     }
 
@@ -191,11 +272,11 @@ public class Store {
         this.sales = sales;
     }
 
-    public int getRevenue() {
+    public double getRevenue() {
         return revenue;
     }
 
-    public void setRevenue(int revenue) {
+    public void setRevenue(double revenue) {
         this.revenue = revenue;
     }
     // Need some way to track customer data
