@@ -6,14 +6,16 @@ import java.util.Collections;
  * Buyer
  * An object representing a buyer user in the marketplace
  *
- * @author
+ * @author Jayden Deason
  * @version
  */
 public class Buyer extends User {
     int index;
     File customers = new File("customers.csv");
+
     /**
-     * Creates a new src.Buyer with a given username & password, and an empty shopping cart
+     * Creates a new src.Buyer with a given username & password, and an empty shopping cart and purchase history
+     *
      * @param username the buyer's username
      * @param password the buyer's password
      */
@@ -48,9 +50,23 @@ public class Buyer extends User {
             }
         }
     }
+    /**
+     * Creates a new src.Buyer with the index, username, password, shopping cart, and purchase history
+     * passed as a parameter string
+     *
+     * @param buyerLine formatted string containing all relevant info to create a Buyer
+     */
+    public Buyer(String buyerLine) {
+        String[] buyerInfo = buyerLine.split(",");
+        this.index = Integer.parseInt(buyerInfo[0]);
+        this.setUsername(buyerInfo[1]);
+        this.setPassword(buyerInfo[2]);
+    }
+
 
     /**
      * Get the buyer's shopping cart contents
+     *
      * @return the list of products in the buyer's shopping cart in the form index:quantity
      */
     public ArrayList<String> getShoppingCart() {
@@ -140,9 +156,13 @@ public class Buyer extends User {
                         }
                     }
                     for (int j = 0; j < cartListings.length; j++) {
-                        cartString += cartListings[j] + "/";
+                        if (!cartListings[j].contains("0"))
+                            cartString += cartListings[j] + "/";
                     }
-                    lineArray[3] = cartString.substring(0, cartString.length() - 1) + ">";
+                    if (cartString.length() > 2)
+                        lineArray[3] = cartString.substring(0, cartString.length() - 1) + ">";
+                    else
+                        lineArray[3] = cartString + ">";
                 } else if (i < customerInfo.size() - 1 && !productFound) {
                     System.out.println("No matching product in cart");
                 }
@@ -198,7 +218,7 @@ public class Buyer extends User {
     }
 
     /**
-     * Return the index of the buyer
+     * Returns the index of the buyer
      */
     public int getIndex() {
         return index;
@@ -206,6 +226,7 @@ public class Buyer extends User {
 
     /**
      * Export the buyer info to a file
+     *
      * @param filename path to export file
      */
     @Override
@@ -213,6 +234,7 @@ public class Buyer extends User {
         File file = new File(filename);
         if (!file.exists()) {
             ArrayList<String> customerInfo = new ArrayList<String>();
+            ArrayList<String> productInfo = new ArrayList<String>();
             try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
                 String line = bfr.readLine();
                 while (line != null) {
@@ -221,12 +243,26 @@ public class Buyer extends User {
                 }
                 FileOutputStream fos = new FileOutputStream(filename, true);
                 PrintWriter pw = new PrintWriter(fos);
+                pw.println("Product,Quantity");
                 for (int i = 0; i < customerInfo.size(); i++) {
                     String[] lineArray = customerInfo.get(i).split(",");
                     if (Integer.parseInt(lineArray[0]) == this.getIndex()) {
                         String[] purchases = lineArray[4].substring(1, lineArray[4].length() - 1).split("/");
+                        BufferedReader productReader = new BufferedReader(new FileReader("products.csv"));
+                        line = productReader.readLine();
+                        while (line != null) {
+                            productInfo.add(line);
+                            line = productReader.readLine();
+                        }
                         for (int j = 0; j < purchases.length; j++) {
-                            pw.println(purchases[j]);
+                            for (int k = 0; k < productInfo.size(); k++) {
+                                String[] productArray = productInfo.get(k).split(",");
+                                if (Integer.parseInt(productArray[0]) == Integer.parseInt(purchases[j].substring(0, 1))) {
+                                    purchases[j] = productArray[1] + "," + purchases[j].substring(2, 3);
+                                    pw.println(purchases[j]);
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -243,6 +279,53 @@ public class Buyer extends User {
      */
     @Override
     public void printDashboard() {
-        // TODO: determine a format for a buyer's dashboard
+        ArrayList<String> storeLines = new ArrayList<String>();
+        ArrayList<String[]> storeProducts = new ArrayList<String[]>();
+        String[] storeInfo;
+        try (BufferedReader bfr = new BufferedReader(new FileReader("stores.csv"))) {
+            String line = bfr.readLine();
+            while (line != null) {
+                storeLines.add(line);
+                line = bfr.readLine();
+            }
+            for (int i = 0; i < storeLines.size(); i++) {
+                storeInfo = storeLines.get(i).split(",");
+                storeProducts.add(storeInfo[3].substring(1, storeLines.size() - 1).split("/"));
+                System.out.println(storeInfo[1] + ":");
+                for (int j = 0; j < storeLines.size(); j++) {
+                    ArrayList<String> productLines = new ArrayList<String>();
+                    BufferedReader productReader = new BufferedReader(new FileReader("products.csv"));
+                    String prodLine = productReader.readLine();
+                    while (line != null) {
+                        productLines.add(prodLine);
+                        prodLine = productReader.readLine();
+                    }
+
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public String toString() {
+        String customerString = "No existing customer";
+        ArrayList<String> customerInfo = new ArrayList<String>();
+        try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
+            String line = bfr.readLine();
+            while (line != null) {
+                customerInfo.add(line);
+                line = bfr.readLine();
+            }
+            for (int i = 0; i < customerInfo.size(); i++) {
+                String[] lineArray = customerInfo.get(i).split(",");
+                if (Integer.parseInt(lineArray[0]) == this.getIndex()) {
+                    customerString = customerInfo.get(i);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return customerString;
     }
 }
