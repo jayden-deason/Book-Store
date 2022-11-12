@@ -3,6 +3,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+/**
+ * Store
+ *
+ * A class describing a store that a seller owns and manages, which a buyer can purchase from.
+ *
+ * @author Griffin Chittenden, section 001
+ * @version 11-09-2022
+ */
 public class Store {
     private int index;
     private String storeName;
@@ -12,6 +20,16 @@ public class Store {
     private HashMap<Buyer, Integer> customerData; // This way the sales for each buyer can be tracked
     private int sales;
     private double revenue;
+
+    /**
+     * Creates a new Store object with the given parameters
+     * @param index          the index of the given store in the Stores.csv file
+     * @param storeName      the name of the store
+     * @param sellerName     the name of the seller who owns the store
+     * @param sales          the total number of sales the store has done
+     * @param revenue        the total revenue from sales the store has done
+     * @param productIndices the indices of the product file of the products the store has
+     */
     public Store(int index, String storeName, String sellerName, int sales, double revenue, String productIndices) {
         this.storeName = storeName;
         this.sellerName = sellerName;
@@ -40,6 +58,11 @@ public class Store {
         this.index = index;
     }
 
+    /**
+     * Creates a new store object given a line of the Stores.csv file
+     *
+     * @param fileLine the line of the Stores.csv file
+     */
     public Store(String fileLine) {
         String[] split = fileLine.split(",");
         this.index = Integer.parseInt(split[0]);
@@ -74,6 +97,14 @@ public class Store {
         this.productsByIndex = productsByIndex;
     }
 
+    /**
+     * Checks to see if the product the buyer wants to purchase has enough stock then updates the number of
+     * purchases that buyer has made at this store and updates the quantity of the purchase product.
+     *
+     * @param buyer    the buyer who is making the purchase
+     * @param quantity the amount of product being sold
+     * @param product  the product being sold
+     */
     public void makePurchase(Buyer buyer, int quantity, Product product) {
         if (product.getQuantity() < quantity) {
             System.out.printf("Store only have %d %s left in stock\n", product.getQuantity(), product.getName());
@@ -87,22 +118,39 @@ public class Store {
         }
     }
 
+    /**
+     * Adds a product to the list of products being sold by the store
+     *
+     * @param product the product being added to the store
+     */
     public void addProduct(Product product) {
         if (!products.contains(product)) {
             products.add(product);
+            productsByIndex.add(product.getIndex());
         } else {
             System.out.println("Store already sells " + product.getName());
         }
     }
 
+    /**
+     * Removes a product from the list of products being sold by the store
+     *
+     * @param product the product being removed from the store
+     */
     public void removeProduct(Product product) {
         if (products.contains(product)) {
             products.remove(product);
+            productsByIndex.remove(product.getIndex());
         } else {
             System.out.println("Store does not sell " + product.getName());
         }
     }
 
+    /**
+     * Modifies a product that a store sells
+     *
+     * @param product the product being modified
+     */
     public void modifyProduct(Product product) {
         for(Product p : products) {
             if(product.getName().equals(p.getName())) {
@@ -111,6 +159,9 @@ public class Store {
         }
     }
 
+    /**
+     * Prints out the store's statistics for a buyer to view
+     */
     public void statisticsForBuyer() {
         System.out.println("Store: " + this.storeName);
         System.out.println("Total Sales: " + this.sales);
