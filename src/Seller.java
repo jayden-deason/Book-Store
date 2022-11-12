@@ -157,9 +157,9 @@ public class Seller extends User {
     /**
      * Prints the seller's dashboard with a sortType
      *@param sortType if sortType == 0, then it will not sort
-      *                 if sortType == 1, then it will print everything ordered alphabetically
-      *                 if sortType == 2, then it will print everything based on the quantity of products being dealt
-      *                 wit
+     *                 if sortType == 1, then it will print everything ordered alphabetically
+     *                 if sortType == 2, then it will print everything based on the quantity of products being dealt
+     *                 wit
      */
     public void printDashboard(int sortType) {
         for(Store s : stores) {
