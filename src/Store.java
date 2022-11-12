@@ -24,8 +24,8 @@ public class Store {
             for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
                 String[] splitLine = line.split(",");
                 // needs to be updated to reflect the csv format
-                products.add(new Product(splitLine[0], splitLine[1], splitLine[2], Integer.parseInt(splitLine[3]),
-                        Double.parseDouble(splitLine[4]), Integer.parseInt(splitLine[5])));
+                products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
+                        Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
             }
         } catch (IOException e) {
             System.out.println("File Error"); // Temporary message
@@ -64,7 +64,6 @@ public class Store {
         }
     }
 
-    // Checks through HashMap to find the same product by name and then changes it to the argument
     public void modifyProduct(Product product) {
         for(Product p : products) {
             if(product.getName().equals(p.getName())) {
