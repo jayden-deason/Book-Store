@@ -19,18 +19,24 @@ public class Buyer extends User {
      * @param username the buyer's username
      * @param password the buyer's password
      */
-    public Buyer(String username, String password) {
+    public Buyer(String username, String password) throws badNamingException {
         super(username, password);
+        if(username.contains(",")) {
+            throw new badNamingException("Please do not have a comma in your username!");
+        }
+        if(password.contains(",")) {
+            throw new badNamingException("Please do not have a comma in your password!");
+        }
         int index = 0;
         if (customers.exists()) {
-            try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
+            try (BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"))) {
                 String line = bfr.readLine();
                 while (line != null) {
                     index = Integer.parseInt(line.split(",")[0]) + 1;
                     line = bfr.readLine();
                 }
                 this.index = index;
-                FileOutputStream fos = new FileOutputStream("customers.csv", true);
+                FileOutputStream fos = new FileOutputStream("Customers.csv", true);
                 PrintWriter pw = new PrintWriter(fos);
                 pw.printf("%d,%s,%s,<>,<>\n", index, this.getUsername(), this.getPassword());
 
@@ -40,7 +46,7 @@ public class Buyer extends User {
             }
         } else {
             try {
-                FileOutputStream fos = new FileOutputStream("customers.csv", true);
+                FileOutputStream fos = new FileOutputStream("Customers.csv", true);
                 PrintWriter pw = new PrintWriter(fos);
                 pw.printf("0,%s,%s,<>,<>\n", this.getUsername(), this.getPassword());
 
@@ -72,7 +78,7 @@ public class Buyer extends User {
     public ArrayList<String> getShoppingCart() {
         ArrayList<String> cartItems = new ArrayList<String>();
         String cart = "";
-        try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
+        try (BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"))) {
             String line = bfr.readLine();
             while (line != null) {
                 if (Integer.parseInt(line.split(",")[0]) == this.getIndex()) {
@@ -96,13 +102,13 @@ public class Buyer extends User {
      */
     public void addProductToCart(int productIndex, int quantity) {
         ArrayList<String> customerInfo = new ArrayList<String>();
-        try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
+        try (BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"))) {
             String line = bfr.readLine();
             while (line != null) {
                 customerInfo.add(line);
                 line = bfr.readLine();
             }
-            FileOutputStream fos = new FileOutputStream("customers.csv", false);
+            FileOutputStream fos = new FileOutputStream("Customers.csv", false);
             PrintWriter pw = new PrintWriter(fos);
             for (int i = 0; i < customerInfo.size(); i++) {
                 String[] lineArray = customerInfo.get(i).split(",");
@@ -135,13 +141,13 @@ public class Buyer extends User {
     public void editProductQuantity(int productIndex, int newQuantity) {
         boolean productFound = false;
         ArrayList<String> customerInfo = new ArrayList<String>();
-        try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
+        try (BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"))) {
             String line = bfr.readLine();
             while (line != null) {
                 customerInfo.add(line);
                 line = bfr.readLine();
             }
-            FileOutputStream fos = new FileOutputStream("customers.csv", false);
+            FileOutputStream fos = new FileOutputStream("Customers.csv", false);
             PrintWriter pw = new PrintWriter(fos);
             for (int i = 0; i < customerInfo.size(); i++) {
                 String[] lineArray = customerInfo.get(i).split(",");
@@ -184,13 +190,13 @@ public class Buyer extends User {
      */
     public void makePurchase() {
         ArrayList<String> customerInfo = new ArrayList<String>();
-        try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
+        try (BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"))) {
             String line = bfr.readLine();
             while (line != null) {
                 customerInfo.add(line);
                 line = bfr.readLine();
             }
-            FileOutputStream fos = new FileOutputStream("customers.csv", false);
+            FileOutputStream fos = new FileOutputStream("Customers.csv", false);
             PrintWriter pw = new PrintWriter(fos);
             for (int i = 0; i < customerInfo.size(); i++) {
                 String[] lineArray = customerInfo.get(i).split(",");
@@ -235,7 +241,7 @@ public class Buyer extends User {
         if (!file.exists()) {
             ArrayList<String> customerInfo = new ArrayList<String>();
             ArrayList<String> productInfo = new ArrayList<String>();
-            try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
+            try (BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"))) {
                 String line = bfr.readLine();
                 while (line != null) {
                     customerInfo.add(line);
@@ -248,7 +254,7 @@ public class Buyer extends User {
                     String[] lineArray = customerInfo.get(i).split(",");
                     if (Integer.parseInt(lineArray[0]) == this.getIndex()) {
                         String[] purchases = lineArray[4].substring(1, lineArray[4].length() - 1).split("/");
-                        BufferedReader productReader = new BufferedReader(new FileReader("products.csv"));
+                        BufferedReader productReader = new BufferedReader(new FileReader("Products.csv"));
                         line = productReader.readLine();
                         while (line != null) {
                             productInfo.add(line);
@@ -282,7 +288,7 @@ public class Buyer extends User {
         ArrayList<String> storeLines = new ArrayList<String>();
         ArrayList<String[]> storeProducts = new ArrayList<String[]>();
         String[] storeInfo;
-        try (BufferedReader bfr = new BufferedReader(new FileReader("stores.csv"))) {
+        try (BufferedReader bfr = new BufferedReader(new FileReader("Stores.csv"))) {
             String line = bfr.readLine();
             while (line != null) {
                 storeLines.add(line);
@@ -294,7 +300,7 @@ public class Buyer extends User {
                 System.out.println(storeInfo[1] + ":");
                 for (int j = 0; j < storeLines.size(); j++) {
                     ArrayList<String> productLines = new ArrayList<String>();
-                    BufferedReader productReader = new BufferedReader(new FileReader("products.csv"));
+                    BufferedReader productReader = new BufferedReader(new FileReader("Products.csv"));
                     String prodLine = productReader.readLine();
                     while (line != null) {
                         productLines.add(prodLine);
@@ -311,7 +317,7 @@ public class Buyer extends User {
     public String toString() {
         String customerString = "No existing customer";
         ArrayList<String> customerInfo = new ArrayList<String>();
-        try (BufferedReader bfr = new BufferedReader(new FileReader("customers.csv"))) {
+        try (BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"))) {
             String line = bfr.readLine();
             while (line != null) {
                 customerInfo.add(line);
