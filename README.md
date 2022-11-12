@@ -19,29 +19,21 @@ This application can be used by buyers to search for a variety of books in an on
 * Main.java
     * The Main class is what is actually ran when the application is started. It contains a menu that a user can go through to complete actions such as logging in, buying items, creating stores, editting products, etc. If the program is ever ended prematurely the data that was changed persists through csv files.
 
-## Getting Started
-
-
-
 ### Executing program
 
 * How to run the program
-* Step-by-step bullets
+* Compile all the files
 ```
-code blocks for commands
+javac "filenamehere"
 ```
-
-## Help
-
-Any advise for common problems or issues.
+* Run the main method
 ```
-command to run if program contains helper info
+java main
 ```
 
 ## Authors
-
-Contributors names and contact info
-
-
-## Version History
-
+Visv Shah
+Katya Teodorovich
+Megan Long
+Jayden Deason
+Griffin Chittenden
