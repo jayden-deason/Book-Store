@@ -1,3 +1,5 @@
+import com.sun.jdi.ArrayReference;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -120,6 +122,7 @@ public class Store {
                 productsBySales.put(product, 0);
             }
             bfr.close();
+            this.updateProducts();
         } catch (FileNotFoundException e) {
             System.out.println("File does not exist.");
         } catch (IOException e) {
@@ -128,10 +131,27 @@ public class Store {
     }
 
     public void updateProducts() {
+        BufferedReader bfr;
+        ArrayList<String> productFile = new ArrayList<>();
+        try {
+            bfr = new BufferedReader(new FileReader(new File("Products.csv")));
+            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+                for (Product product : products) {
+                    if (product.getIndex() == Integer.parseInt(line.split(",")[0])) {
+                        productFile.add(product.toString());
+                    }
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("Could not find file!");
+        } catch (IOException e) {
+            System.out.println("Could not read from file!");
+        }
         try {
             PrintWriter pw = new PrintWriter("Products.csv");
-            for (Product product : products) {
-                pw.write(product.toString());
+            for (String product : productFile) {
+                pw.write(product);
             }
             pw.close();
         } catch (FileNotFoundException e) {
@@ -187,6 +207,7 @@ public class Store {
             products.add(product);
             productsByIndex.add(product.getIndex());
             productsBySales.put(product, 0);
+            this.updateProducts();
         } else {
             System.out.println("Store already sells " + product.getName());
         }
@@ -202,6 +223,7 @@ public class Store {
             products.remove(product);
             productsByIndex.remove(product.getIndex());
             productsBySales.remove(product);
+            this.updateProducts();
         } else {
             System.out.println("Store does not sell " + product.getName());
         }
@@ -244,9 +266,9 @@ public class Store {
         System.out.println("Total Sales: " + sales);
         System.out.println("Total Revenue: " + revenue);
         if(sortType == 0) {
-            System.out.println("Sales by product: ");
-            for (Product product : products) {
-                System.out.println(product.getName() + ": " + products.get(products.indexOf(product)));
+            System.out.println("Products by sales: ");
+            for (Product product : productsBySales.keySet()) {
+                System.out.println(product.getName() + ": " + productsBySales.get(product));
             }
             System.out.println("Sales by customer: ");
             for (Buyer buyer : customerData.keySet()) {
@@ -352,5 +374,18 @@ public class Store {
 
     public String getProductIndices() {
         return productIndices;
+    }
+
+    public String productsBySalesToString() {
+        String retString = "<";
+        for (Product product : productsBySales.keySet()) {
+            retString = retString + product.getIndex() + ":" + productsBySales.get(product) + "/";
+        }
+        return retString.substring(0, retString.length() - 1) + ">";
+    }
+
+    public String toString() {
+        return String.format("%s,%s,<%s>,%d,%d,%s,%s", storeName, sellerName, sales,
+                revenue, productsByIndex.toString(), this.productsBySalesToString());
     }
 }
