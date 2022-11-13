@@ -13,14 +13,14 @@ import java.io.FileWriter;
  */
 public class Seller extends User {
     private ArrayList<Store> stores; // the seller's products
-    int index;
+    private int index;
 
     /**
      * Create  a new seller with a given username, password, and list of products
      * @param username the seller's username
      * @param password the seller's password
      */
-    public Seller(int index, String username, String password) throws badNamingException{
+    public Seller(String username, String password) throws badNamingException{
         super(username, password);
         if(username.contains(",")) {
             throw new badNamingException("Please do not have a comma in your username!");
@@ -29,38 +29,36 @@ public class Seller extends User {
             throw new badNamingException("Please do not have a comma in your password!");
         }
         this.stores = new ArrayList<Store>();
-        this.index = index;
     }
     /**
-     * Create a new seller using the line store in the seller.csv file
-     * @param username the seller's username
-     * @param password the seller's password
+     * Create a new seller using the line store in the Seller.csv file
+     * @param line the line taken from the Seller.csv file
      */
     public Seller(String line) {
+        super(line.split(",")[1], line.split(",")[2]);
         String[] parts = line.split(",");
-        super(parts[1], parts[2]);
-        this.index = parts[0];
+        this.index = Integer.parseInt(parts[0]);
         String[] storesIndex = parts[3].substring(1, parts[3].length() - 2).split("/");
         this.stores = new ArrayList<Store>();
         int i = 0;
+        BufferedReader br = null;
         try {
             br = new BufferedReader(new FileReader("Stores.csv"));
-            String line = br.readLine();
-            while(line != null) {
+            String l = br.readLine();
+            while(l != null) {
                 for(String n : storesIndex) {
                     if(Integer.parseInt(n) == i) {
-                        Store s = new Store(line);
+                        Store s = new Store(l);
                         this.stores.add(s);
                         break;
                     }
                 }
-                line = br.readLine();
+                l = br.readLine();
                 i++;
             }
         }
         catch (Exception e) {
             e.printStackTrace();
-            return -1;
         }
         finally {
             if(br != null) {
@@ -69,7 +67,6 @@ public class Seller extends User {
                 }
                 catch (IOException e) {
                     e.printStackTrace();
-                    return -1;
                 }
             }
         }
@@ -181,7 +178,7 @@ public class Seller extends User {
     }
     /**
      * Creates a store and adds it to the stores ArrayList and to the stores.csv file
-     */
+
     public void addStore(String storeName, String sellerName, String productFile, int sales, int revenue){
         for(Store store : stores) {
             if(store.getName().equals(storeName)) {
@@ -189,7 +186,7 @@ public class Seller extends User {
                 return;
             }
         }
-        Store s = new Store(storeName, sellerName, productFile, sales, revenue, 0);
+        Store s = new Store(storeName, sellerName, sales, revenue);
         stores.add(s);
         int index = writeStoresFile("stores.csv", s);
         if(index == -1) {
@@ -199,6 +196,7 @@ public class Seller extends User {
             s.setIndex(index);
         }
     }
+     */
     /**
      * Prints the seller's dashboard with a sortType
      *@param sortType if sortType == 0, then it will not sort
@@ -221,5 +219,9 @@ public class Seller extends User {
         storesStr = storesStr.substring(storesStr.length() - 1) + ">";
         return String.format("%s,%s,%s", this.getUsername(), this.getPassword(), storesStr);
 
+    }
+    public static void main(String[] args) throws badNamingException{
+        Seller s = new Seller("0,bob@gmail.com,bob123,<1/2>");
+        System.out.println(s);
     }
 }
