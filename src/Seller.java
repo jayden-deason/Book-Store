@@ -1,8 +1,10 @@
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
+
 /**
  * Seller
  *
@@ -81,37 +83,45 @@ public class Seller extends User {
     public int writeStoresFile(String fileName, Store s) {
 
         ArrayList<String> lines = new ArrayList<String>();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(fileName));
-            String line = br.readLine();
-            while(line != null) {
-                lines.add(line);
-                line = br.readLine();
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-        finally {
-            if(br != null) {
-                try {
-                    br.close();
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                    return -1;
+
+        File f = new File(fileName);
+        if(f.exists()) {
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(new FileReader(fileName));
+                String line = br.readLine();
+                while(line != null) {
+                    lines.add(line);
+                    line = br.readLine();
                 }
             }
+            catch (Exception e) {
+                e.printStackTrace();
+                return -1;
+            }
+            finally {
+                if(br != null) {
+                    try {
+                        br.close();
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                        return -1;
+                    }
+                }
+            }
         }
+
         FileWriter fw = null;
         try {
             fw = new FileWriter(fileName);
             for(String str : lines) {
                 fw.write(str + "\n");
             }
-            int lastIndex = Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]);
+            int lastIndex = 0;
+            if(lines.size() != 1) {
+                Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]);
+            }
             s.setIndex(lastIndex);
             int updateSellerFile = updateSellerFile(lastIndex);
             if(updateSellerFile == -1) {
