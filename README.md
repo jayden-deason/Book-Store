@@ -2,6 +2,18 @@
 
 This application can be used by buyers to search for a variety of books in an online market and make purchases from there. Sellers can use this application to set up stores where their books are sold on the market.
 
+### Executing program
+
+* How to run the program
+* Compile all the files
+```
+javac "filenamehere"
+```
+* Run the main method
+```
+java main
+```
+
 ## Description
 
 * User.java
@@ -19,17 +31,6 @@ This application can be used by buyers to search for a variety of books in an on
 * Main.java
     * The Main class is what is actually ran when the application is started. It contains a menu that a user can go through to complete actions such as logging in, buying items, creating stores, editting products, etc. If the program is ever ended prematurely the data that was changed persists through csv files.
 
-### Executing program
-
-* How to run the program
-* Compile all the files
-```
-javac "filenamehere"
-```
-* Run the main method
-```
-java main
-```
 
 ## Authors
 Visv Shah

@@ -293,5 +293,24 @@ public class Market {
         return out;
     }
 
+    /**
+     * Adds a new user (buyer or seller to the masterlist)
+     *
+     * @param user the user to be added
+     */
+    public void createUser(User user) {
+        if (user instanceof Buyer) {
+            Buyer b = (Buyer) user;
+            b.setIndex(buyers.size());
+            buyers.add(b);
+        } else if (user instanceof Seller) {
+            Seller s = (Seller) user;
+            s.setIndex(sellers.size());
+            sellers.add(s);
+        }
+
+        updateAllFiles();
+    }
+
 
 }
