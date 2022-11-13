@@ -97,8 +97,10 @@ public class Market {
             while (line != null) {
                 lines.add(line);
                 line = br.readLine();
-                br.close();
             }
+
+            br.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
