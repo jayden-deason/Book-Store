@@ -32,7 +32,6 @@ public class Seller extends User {
             throw new badNamingException("Please do not have a comma in your password!");
         }
         this.stores = new ArrayList<Store>();
-
     }
     /**
      * Create a new seller using the line store in the Seller.csv file, this does not add a new line to the Seller
@@ -328,7 +327,24 @@ public class Seller extends User {
     public int getIndex() {
         return index;
     }
-
+    public void viewProductsInCart(ArrayList<Buyer> buyers, ArrayList<Product> products) {
+        System.out.println("In Customer Carts: ");
+        for(Buyer b : buyers) {
+            ArrayList<String> items = b.getShoppingCart();
+            for(int i = 0; i < items.size(); i++) {
+                int number = 1;
+                for(Store s : stores) {
+                    Product p = products.get(Integer.parseInt(items.get(i).split(":")[0]));
+                    if(p.getStoreName().equals(s.getName())) {
+                        System.out.println(number + ".)");
+                        number++;
+                        System.out.println("Product: " + p.getName() + "| Quantity: " + items.get(i).split(":")[1]);
+                        System.out.println("Store: " + p.getStoreName() + "| Description: " + p.getDescription());
+                    }
+                }
+            }
+        }
+    }
     public void setIndex(int index) {
         this.index = index;
     }
