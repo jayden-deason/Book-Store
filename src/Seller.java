@@ -17,6 +17,7 @@ public class Seller extends User {
 
     /**
      * Create  a new seller with a given username, password, and list of products
+     * When a seller gets created using this constructor, it gets added to the Sellers.csv file
      * @param username the seller's username
      * @param password the seller's password
      */
@@ -29,9 +30,11 @@ public class Seller extends User {
             throw new badNamingException("Please do not have a comma in your password!");
         }
         this.stores = new ArrayList<Store>();
+
     }
     /**
-     * Create a new seller using the line store in the Seller.csv file
+     * Create a new seller using the line store in the Seller.csv file, this does not add a new line to the Seller
+     * .csv file because it is only used to create a new Marketplace after relaunching the application
      * @param line the line taken from the Seller.csv file
      */
     public Seller(String line) {
@@ -109,6 +112,7 @@ public class Seller extends User {
                 fw.write(str + "\n");
             }
             int lastIndex = Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]);
+            s.setIndex(lastIndex);
             String line = lastIndex + "," + s.getName() + "," + super.getUsername() + ",<";
             for (Product product : s.getProducts()) {
                 line += product.getIndex() + ":" + product.getQuantity() + "/";
@@ -178,17 +182,19 @@ public class Seller extends User {
     }
     /**
      * Creates a store and adds it to the stores ArrayList and to the stores.csv file
-
-    public void addStore(String storeName, String sellerName, String productFile, int sales, int revenue){
+     */
+    public void addStore(String storeName){
         for(Store store : stores) {
             if(store.getName().equals(storeName)) {
                 System.out.println("Error: You already have a store with the same name!");
                 return;
             }
         }
-        Store s = new Store(storeName, sellerName, sales, revenue);
+        Store s = new Store(0, storeName, this.getUsername(), 0, 0, "", "0");
+        //int index, String storeName, String sellerName, int sales, double revenue, String productIndices,
+        //                 String productSales
         stores.add(s);
-        int index = writeStoresFile("stores.csv", s);
+        int index = writeStoresFile("Stores.csv", s);
         if(index == -1) {
             System.out.println("Something went wrong with adding your store!");
         }
@@ -196,7 +202,7 @@ public class Seller extends User {
             s.setIndex(index);
         }
     }
-     */
+
     /**
      * Prints the seller's dashboard with a sortType
      *@param sortType if sortType == 0, then it will not sort
