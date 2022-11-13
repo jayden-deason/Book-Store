@@ -237,7 +237,7 @@ public class Store {
                 sortedProducts.sort((p1, p2) -> p1.getName().compareTo(p2.getName()));
             }
             if(sortType == 2) {
-                sortedProducts.sort((p1,p2) -> Integer.compare(p1.getQuantity(), p2.getQuantity()));
+                sortedProducts.sort((p1,p2) -> Integer.compare(productsBySales.get(p1), productsBySales.get(p2)));
             }
             System.out.println("Sales by product " + ((sortType == 1) ? "sorted alphabetically:" : "sorted by " +
                     "quantity:"));

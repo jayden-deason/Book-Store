@@ -1,8 +1,10 @@
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
+
 /**
  * Seller
  *
@@ -17,6 +19,7 @@ public class Seller extends User {
 
     /**
      * Create  a new seller with a given username, password, and list of products
+     * When a seller gets created using this constructor, it gets added to the Sellers.csv file
      * @param username the seller's username
      * @param password the seller's password
      */
@@ -29,9 +32,11 @@ public class Seller extends User {
             throw new badNamingException("Please do not have a comma in your password!");
         }
         this.stores = new ArrayList<Store>();
+
     }
     /**
-     * Create a new seller using the line store in the Seller.csv file
+     * Create a new seller using the line store in the Seller.csv file, this does not add a new line to the Seller
+     * .csv file because it is only used to create a new Marketplace after relaunching the application
      * @param line the line taken from the Seller.csv file
      */
     public Seller(String line) {
@@ -78,12 +83,96 @@ public class Seller extends User {
     public int writeStoresFile(String fileName, Store s) {
 
         ArrayList<String> lines = new ArrayList<String>();
+
+        File f = new File(fileName);
+        if(f.exists()) {
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(new FileReader(fileName));
+                String line = br.readLine();
+                while(line != null) {
+                    lines.add(line);
+                    line = br.readLine();
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return -1;
+            }
+            finally {
+                if(br != null) {
+                    try {
+                        br.close();
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                        return -1;
+                    }
+                }
+            }
+        }
+
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(fileName);
+            for(String str : lines) {
+                fw.write(str + "\n");
+            }
+            int lastIndex = 0;
+            if(lines.size() != 1) {
+                Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]);
+            }
+            s.setIndex(lastIndex);
+            int updateSellerFile = updateSellerFile(lastIndex);
+            if(updateSellerFile == -1) {
+                System.out.println("Something went wrong with updating your profile!");
+                return -1;
+            }
+            String line = lastIndex + "," + s.getName() + "," + super.getUsername() + ",<";
+            for (Product product : s.getProducts()) {
+                line += product.getIndex() + ":" + product.getQuantity() + "/";
+            }
+            line = line.substring(0, line.length() - 1) + ">";
+            fw.write(line + "\n");
+            return lastIndex;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        finally {
+            if(fw != null) {
+                try {
+                    fw.close();
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                    return -1;
+                }
+            }
+        }
+    }
+    /**
+     * Updates Seller.csv when a new store is added, by storing a reference to that store in the seller's row.
+     * @params indexToAdd : states the index of the new store in the Store.csv file
+     */
+    public int updateSellerFile(int indexToAdd) {
+        ArrayList<String> lines = new ArrayList<String>();
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader(fileName));
+            br = new BufferedReader(new FileReader("Seller.csv"));
             String line = br.readLine();
             while(line != null) {
-                lines.add(line);
+                if(line.split(",")[1].equals(this.getUsername())) {
+                    String[] parts = line.split(",");
+                    String storesStringArray = parts[3].substring(1, parts[3].length() - 1) + "/" + indexToAdd;
+                    String newLine = String.format("%s,%s,%s,%s", parts[0], parts[1], parts[2], storesStringArray);
+                    lines.add(newLine);
+                }
+                else {
+                    lines.add(line);
+                }
+
                 line = br.readLine();
             }
         }
@@ -104,18 +193,11 @@ public class Seller extends User {
         }
         FileWriter fw = null;
         try {
-            fw = new FileWriter(fileName);
+            fw = new FileWriter("Seller.csv");
             for(String str : lines) {
                 fw.write(str + "\n");
             }
-            int lastIndex = Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]);
-            String line = lastIndex + "," + s.getName() + "," + super.getUsername() + ",<";
-            for (Product product : s.getProducts()) {
-                line += product.getIndex() + ":" + product.getQuantity() + "/";
-            }
-            line = line.substring(0, line.length() - 1) + ">";
-            fw.write(line + "\n");
-            return lastIndex;
+            return 0;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -178,17 +260,19 @@ public class Seller extends User {
     }
     /**
      * Creates a store and adds it to the stores ArrayList and to the stores.csv file
-
-    public void addStore(String storeName, String sellerName, String productFile, int sales, int revenue){
+     */
+    public void addStore(String storeName){
         for(Store store : stores) {
             if(store.getName().equals(storeName)) {
                 System.out.println("Error: You already have a store with the same name!");
                 return;
             }
         }
-        Store s = new Store(storeName, sellerName, sales, revenue);
+        Store s = new Store(0, storeName, this.getUsername(), 0, 0, "", "0");
+        //int index, String storeName, String sellerName, int sales, double revenue, String productIndices,
+        //                 String productSales
         stores.add(s);
-        int index = writeStoresFile("stores.csv", s);
+        int index = writeStoresFile("Stores.csv", s);
         if(index == -1) {
             System.out.println("Something went wrong with adding your store!");
         }
@@ -196,7 +280,7 @@ public class Seller extends User {
             s.setIndex(index);
         }
     }
-     */
+
     /**
      * Prints the seller's dashboard with a sortType
      *@param sortType if sortType == 0, then it will not sort
