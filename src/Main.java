@@ -13,15 +13,17 @@ import java.util.ArrayList;
 public class Main {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
-        System.out.println("What is the buyer file?");
-        String buyerFile = scan.nextLine();
-        System.out.println("What is the seller file?");
-        String sellerFile = scan.nextLine();
-        System.out.println("What is the store file?");
-        String storesFile = scan.nextLine();
-        System.out.println("What is the product file?");
-        String productsFile = scan.nextLine();
-        Market market = new Market(buyerFile, sellerFile, storesFile, productsFile);
+//        System.out.println("What is the buyer file?");
+//        String buyerFile = scan.nextLine();
+//        System.out.println("What is the seller file?");
+//        String sellerFile = scan.nextLine();
+//        System.out.println("What is the store file?");
+//        String storesFile = scan.nextLine();
+//        System.out.println("What is the product file?");
+//        String productsFile = scan.nextLine();
+//        Market market = new Market(buyerFile, sellerFile, storesFile, productsFile);
+
+        Market market = new Market("Customers.csv", "Sellers.csv", "Stores.csv", "Products.csv");
         while (true) {
             System.out.println("Are you a buyer or a seller? (buyer/seller)");
             String answer = scan.nextLine();

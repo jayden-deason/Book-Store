@@ -33,6 +33,7 @@ public class Store {
      * @param sales          the total number of sales the store has done
      * @param revenue        the total revenue from sales the store has done
      * @param productIndices the indices of the product file of the products the store has
+     * @param productSales   the index of the product by the number of sales of the product
      */
     public Store(int index, String storeName, String sellerName, int sales, double revenue, String productIndices,
                  String productSales) {
@@ -82,6 +83,7 @@ public class Store {
     public Store(String fileLine) {
         this.products = new ArrayList<>();
         this.productsByIndex = new ArrayList<>();
+        this.productsBySales = new HashMap<>();
         String[] split = fileLine.split(",");
         this.index = Integer.parseInt(split[0]);
         this.storeName = split[1];
@@ -419,7 +421,7 @@ public class Store {
     }
 
     public String toString() {
-        return String.format("%s,%s,<%s>,%d,%d,%s,%s", storeName, sellerName, sales,
+        return String.format("%d,%s,<%s>,%d,%d,%s,%s", storeName, sellerName, sales,
                 revenue, productsByIndex.toString(), this.productsBySalesToString());
     }
 }
