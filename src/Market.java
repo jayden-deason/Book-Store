@@ -97,8 +97,10 @@ public class Market {
             while (line != null) {
                 lines.add(line);
                 line = br.readLine();
-                br.close();
             }
+
+            br.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -326,5 +328,19 @@ public class Market {
         updateAllFiles();
     }
 
+    public ArrayList<Buyer> getBuyers() {
+        return buyers;
+    }
 
+    public ArrayList<Seller> getSellers() {
+        return sellers;
+    }
+
+    public ArrayList<Store> getStores() {
+        return stores;
+    }
+
+    public ArrayList<Product> getProducts() {
+        return products;
+    }
 }

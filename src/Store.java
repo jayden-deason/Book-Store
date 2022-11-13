@@ -83,6 +83,7 @@ public class Store {
     public Store(String fileLine) {
         this.products = new ArrayList<>();
         this.productsByIndex = new ArrayList<>();
+        this.productsBySales = new HashMap<>();
         String[] split = fileLine.split(",");
         this.index = Integer.parseInt(split[0]);
         this.storeName = split[1];

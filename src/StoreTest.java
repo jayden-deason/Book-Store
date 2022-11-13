@@ -1,11 +1,11 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-
-public class StoreTest {
-    public static void main(String[] args) {
+//import java.io.BufferedReader;
+//import java.io.File;
+//import java.io.FileReader;
+//import java.io.IOException;
+//import java.util.ArrayList;
+//
+//public class StoreTest {
+//    public static void main(String[] args) {
 //        ArrayList<Store> stores = new ArrayList<>();
 //        try {
 //
@@ -22,5 +22,5 @@ public class StoreTest {
 //        for (Store store : stores) {
 //            System.out.println(store);
 //        }
-    }
-}
+//    }
+//}
