@@ -14,6 +14,10 @@ javac "filenamehere"
 java main
 ```
 
+### Submissions
+* [INSERT NAME HERE] -- Submitted report on Brightspace
+* [INSERT NAME HERE] -- Submitted code on Vocareum
+
 ## Description
 
 * User.java
@@ -27,14 +31,14 @@ java main
 * Product.java
     * The Product class stores all the information related to the products being sold and purchased: name, the name of the store it is sold in, a description, a quantity, a price, and it's index in the Products.csv file. Products do not have much functionality outside of getters and setters and a toString method. Products and their attributes are used by almost every other class.
 * Market.java
-    * (I honestly don't know what to put here)
+    * The Market class is the general container which includes the lists of all Products, Users, and Stores in the entire marketplace. It has functionality for updating all the CSV files and filtering all the lists of products when interacting with the user. 
 * Main.java
     * The Main class is what is actually ran when the application is started. It contains a menu that a user can go through to complete actions such as logging in, buying items, creating stores, editting products, etc. If the program is ever ended prematurely the data that was changed persists through csv files.
 
 
 ## Authors
-Visv Shah
-Katya Teodorovich
-Megan Long
-Jayden Deason
-Griffin Chittenden
+* Visv Shah
+* Katya Teodorovich
+* Megan Long
+* Jayden Deason
+* Griffin Chittenden
