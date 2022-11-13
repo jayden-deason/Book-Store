@@ -3,14 +3,15 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
  * Buyer
  * An object representing a buyer user in the marketplace
  *
- * @author Jayden Deason
- * @version
+ * @author Jayden Deason - lab sec 001
+ * @version November 13, 2022
  */
 public class Buyer extends User {
     int index;
@@ -298,74 +299,81 @@ public class Buyer extends User {
                 line = bfr.readLine();
             }
             printStoreInfo(stores);
-            int answer;
+            int answer = -1;
             do {
                 System.out.println("1. Sort by products sold");
                 System.out.println("2. Sort by purchase history");
                 System.out.println("3. Exit Dashboard");
-                answer = scan.nextInt();
-                if (answer == 1) {
-                    stores.sort((s1, s2) -> Integer.compare(s1.getSales(), s2.getSales()));
-                    Collections.reverse(stores);
-                    printStoreInfo(stores);
-                }
-                if (answer == 2) {
-                    ArrayList<Store> storesByHistory = new ArrayList<Store>();
-                    for (int i = 0; i < stores.size(); i++) {
-                        Store store = new Store(stores.get(i).getIndex(), stores.get(i).getName(),
-                                stores.get(i).getSellerName(), 0, 0.0, stores.get(i).getProductIndices(),
-                                "<0:0>");
-                        storesByHistory.add(i, store);
-                    }
-                    String history;
-                    ArrayList<String> purchaseHistory = new ArrayList<String>();
-                    BufferedReader customerReader = new BufferedReader(new FileReader("Customers.csv"));
-                    String customerLine = customerReader.readLine();
-                    while (customerLine != null) {
-                        if (Integer.parseInt(customerLine.split(",")[0]) == this.getIndex()) {
-                            if (customerLine.split(",")[4].equals("<>")) {
-                                System.out.println("No history to compare to");
-                                break;
-                            } else {
-                                history = customerLine.split(",")[4].substring(1,
-                                        customerLine.split(",")[4].length() - 1);
-                                if (history.length() > 3)
-                                    Collections.addAll(purchaseHistory, history.split("/"));
-                                else
-                                    purchaseHistory.add(history);
-                            }
-                        }
-                        customerLine = customerReader.readLine();
-                    }
-                    //ArrayList<ArrayList<String>> products = new ArrayList<ArrayList<String>>();
-                    ArrayList<Product> productList = new ArrayList<Product>();
-                    for (String productInfo : purchaseHistory) {
-                        BufferedReader productReader = new BufferedReader(new FileReader("Products.csv"));
-                        String productLine = productReader.readLine();
-                        while (productLine != null) {
-                            if (productInfo.substring(0,1).equals(productLine.split(",")[0])) {
-                                Product product = new Product(productLine);
-                                product.setQuantity(Integer.parseInt(productInfo.substring(2)));
-                                productList.add(product);
-                            }
-                            productLine = productReader.readLine();
-                        }
-                    }
 
-                    for (int i = 0; i < storesByHistory.size(); i++) {
-                        ArrayList<String> temp = new ArrayList<>();
-                        for (int j = 0; j < productList.size(); j++) {
-                            if (storesByHistory.get(i).getName().equals(productList.get(j).getStoreName())) {
-                           //     temp.add(purchaseHistory.get(j));
-                                storesByHistory.get(i).setSales(storesByHistory.get(i).getSales()
-                                        + Integer.parseInt(purchaseHistory.get(j).substring(2)));
+                try {
+                    answer = scan.nextInt();
+                    scan.nextLine();
+                    if (answer < 1 || answer > 3)
+                        throw new NumberFormatException();
+                    if (answer == 1) {
+                        stores.sort((s1, s2) -> Integer.compare(s1.getSales(), s2.getSales()));
+                        Collections.reverse(stores);
+                        printStoreInfo(stores);
+                    }
+                    if (answer == 2) {
+                        ArrayList<Store> storesByHistory = new ArrayList<Store>();
+                        for (int i = 0; i < stores.size(); i++) {
+                            Store store = new Store(stores.get(i).getIndex(), stores.get(i).getName(),
+                                    stores.get(i).getSellerName(), 0, 0.0, stores.get(i).getProductIndices(),
+                                    "<0:0>");
+                            storesByHistory.add(i, store);
+                        }
+                        String history;
+                        ArrayList<String> purchaseHistory = new ArrayList<String>();
+                        BufferedReader customerReader = new BufferedReader(new FileReader("Customers.csv"));
+                        String customerLine = customerReader.readLine();
+                        while (customerLine != null) {
+                            if (Integer.parseInt(customerLine.split(",")[0]) == this.getIndex()) {
+                                if (customerLine.split(",")[4].equals("<>")) {
+                                    System.out.println("No history to compare to");
+                                    break;
+                                } else {
+                                    history = customerLine.split(",")[4].substring(1,
+                                            customerLine.split(",")[4].length() - 1);
+                                    if (history.length() > 3)
+                                        Collections.addAll(purchaseHistory, history.split("/"));
+                                    else
+                                        purchaseHistory.add(history);
+                                }
+                            }
+                            customerLine = customerReader.readLine();
+                        }
+                        ArrayList<Product> productList = new ArrayList<Product>();
+                        for (String productInfo : purchaseHistory) {
+                            BufferedReader productReader = new BufferedReader(new FileReader("Products.csv"));
+                            String productLine = productReader.readLine();
+                            while (productLine != null) {
+                                if (productInfo.substring(0, 1).equals(productLine.split(",")[0])) {
+                                    Product product = new Product(productLine);
+                                    product.setQuantity(Integer.parseInt(productInfo.substring(2)));
+                                    productList.add(product);
+                                }
+                                productLine = productReader.readLine();
                             }
                         }
-                      //  products.add(i, temp);
+
+                        for (int i = 0; i < storesByHistory.size(); i++) {
+                            for (int j = 0; j < productList.size(); j++) {
+                                if (storesByHistory.get(i).getName().equals(productList.get(j).getStoreName())) {
+                                    storesByHistory.get(i).setSales(storesByHistory.get(i).getSales()
+                                            + Integer.parseInt(purchaseHistory.get(j).substring(2)));
+                                }
+                            }
+                        }
+                        storesByHistory.sort((s1, s2) -> Integer.compare(s1.getSales(), s2.getSales()));
+                        Collections.reverse(storesByHistory);
+                        printStoreInfo(storesByHistory);
                     }
-                    storesByHistory.sort((s1, s2) -> Integer.compare(s1.getSales(), s2.getSales()));
-                    Collections.reverse(storesByHistory);
-                    printStoreInfo(storesByHistory);
+                } catch (NumberFormatException e) {
+                    System.out.println("Enter a valid integer");
+                } catch (InputMismatchException e) {
+                    System.out.println("Enter an integer");
+                    scan.nextLine();
                 }
             } while (answer != 3);
         } catch (IOException e) {
