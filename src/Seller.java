@@ -36,14 +36,14 @@ public class Seller extends User {
     }
     /**
      * Create a new seller using the line store in the Seller.csv file, this does not add a new line to the Seller
-     * .csv file because it is only used to create a new Marketplace after relaunching the application
+     * .csv file because it is only used to create a new Marketplace after relaunching the application.
      * @param line the line taken from the Seller.csv file
      */
     public Seller(String line) {
         super(line.split(",")[1], line.split(",")[2]);
         String[] parts = line.split(",");
         this.index = Integer.parseInt(parts[0]);
-        String[] storesIndex = parts[3].substring(1, parts[3].length() - 2).split("/");
+        String[] storesIndex = parts[3].substring(1, parts[3].length() - 1).split("/");
         this.stores = new ArrayList<Store>();
         int i = 0;
         BufferedReader br = null;
@@ -216,7 +216,7 @@ public class Seller extends User {
         }
     }
     /**
-     * Exports a
+     * Exports a csv of all the products in a store that a seller has.
      * @return the index of the store
      */
     public void exportProducts(String fileName, String storeName){
@@ -248,10 +248,7 @@ public class Seller extends User {
             }
         }
     }
-    /**
-     * Get the seller's available stores
-     * @return the list of stores
-     */
+
     public ArrayList<Store> getStores() {
         return stores;
     }
@@ -259,7 +256,9 @@ public class Seller extends User {
         this.stores = stores;
     }
     /**
-     * Creates a store and adds it to the stores ArrayList and to the stores.csv file
+     * This function is used to create a new store. It makes no store with the same name exists already for that
+     * seller. Then, It will call the functions to save that store in the stores.csv and update the seller.csv row
+     * with a reference to the new store.
      */
     public void addStore(String storeName){
         for(Store store : stores) {
@@ -294,18 +293,43 @@ public class Seller extends User {
             s.statisticsForSeller(sortType);
         }
     }
-
+    /**
+     * Prints the seller object in a format that matches the Seller.csv row. It does not include the index.
+     */
     public String toString() {
         String storesStr = "<";
         for(Store s: this.stores) {
             storesStr += s.getIndex() + "/";
         }
         storesStr = storesStr.substring(storesStr.length() - 1) + ">";
-        return String.format("%s,%s,%s", this.getUsername(), this.getPassword(), storesStr);
+        return String.format("%d,%s,%s,%s", this.getIndex(), this.getUsername(), this.getPassword(), storesStr);
 
     }
     public static void main(String[] args) throws badNamingException{
-        Seller s = new Seller("0,bob@gmail.com,bob123,<1/2>");
-        System.out.println(s);
+        //Testing the creation of a seller
+        Seller s1 = new Seller("0,bob@gmail.com,bob123,<1/2>");
+        System.out.println(s1 + "==" + "0,bob@gmail.com,bob123,<1/2> : " + s1.toString().equals("0,bob@gmail.com," +
+                "bob123,<1/2>"));
+        //Testing the creation of a seller and an edge case that comes when creating a Seller with a "," in the
+        try {
+            Seller s2 = new Seller("bob@gmail.com" , "bob,123");
+        }
+        catch (badNamingException e) {
+            System.out.println("badNamingException thrown for password: bob,123");
+        }
+        //Testing the printDashBoard without a sort
+
+        //Testing the printDashBoard with sorting based on products
+        //Testing the printDashBoard with the edge-case of a non-supported parameter
+        //Testing the addStore method updates the files appropriately
+        //Testing the addSTore method with the edge case of a already existing store
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

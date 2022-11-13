@@ -130,6 +130,36 @@ public class Store {
         }
     }
 
+    public void updateStores() {
+        BufferedReader bfr;
+        ArrayList<String> storeFile = new ArrayList<>();
+        try {
+            bfr = new BufferedReader(new FileReader(new File("Stores.csv")));
+            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+                if (Integer.parseInt(line.split(",")[0]) == this.index) {
+                    storeFile.add(this.toString());
+                } else {
+                    storeFile.add(line);
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("Could not find file!");
+        } catch (IOException e) {
+            System.out.println("Could not read from file!");
+        }
+        try {
+            PrintWriter pw = new PrintWriter("Products.csv");
+            for (String store : storeFile) {
+                pw.write(store);
+            }
+            pw.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("Could not find file.");
+        } catch (IOException e) {
+            System.out.println("Could not write to file.");
+        }
+    }
     public void updateProducts() {
         BufferedReader bfr;
         ArrayList<String> productFile = new ArrayList<>();
@@ -139,6 +169,8 @@ public class Store {
                 for (Product product : products) {
                     if (product.getIndex() == Integer.parseInt(line.split(",")[0])) {
                         productFile.add(product.toString());
+                    } else {
+                        productFile.add(line);
                     }
                 }
             }
@@ -208,6 +240,7 @@ public class Store {
             productsByIndex.add(product.getIndex());
             productsBySales.put(product, 0);
             this.updateProducts();
+            this.updateStores();
         } else {
             System.out.println("Store already sells " + product.getName());
         }
@@ -224,6 +257,7 @@ public class Store {
             productsByIndex.remove(product.getIndex());
             productsBySales.remove(product);
             this.updateProducts();
+            this.updateStores();
         } else {
             System.out.println("Store does not sell " + product.getName());
         }
@@ -236,7 +270,7 @@ public class Store {
      */
     public void modifyProduct(Product product) {
         for(Product p : products) {
-            if(product.getName().equals(p.getName())) {
+            if (product.getName().equals(p.getName())) {
                 p = product;
             }
         }
