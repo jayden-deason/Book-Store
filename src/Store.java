@@ -18,6 +18,7 @@ public class Store {
     private ArrayList<Product> products;
     private ArrayList<Integer> productsByIndex;
     private HashMap<Buyer, Integer> customerData; // This way the sales for each buyer can be tracked
+    private HashMap<Product, Integer> productsBySales;
     private int sales;
     private double revenue;
 
@@ -30,12 +31,14 @@ public class Store {
      * @param revenue        the total revenue from sales the store has done
      * @param productIndices the indices of the product file of the products the store has
      */
-    public Store(int index, String storeName, String sellerName, int sales, double revenue, String productIndices) {
+    public Store(int index, String storeName, String sellerName, int sales, double revenue, String productIndices,
+                 String productSales) {
         this.storeName = storeName;
         this.sellerName = sellerName;
         this.productsByIndex = new ArrayList<>();
         this.products = new ArrayList<>();
         this.customerData = new HashMap<>();
+        this.productsBySales = new HashMap<>();
         String[] splitProducts = productIndices.split("/");
         for (String productIndex : splitProducts) {
             productsByIndex.add(Integer.parseInt(productIndex.split(":")[0]));
@@ -52,6 +55,14 @@ public class Store {
             }
         } catch (IOException e) {
             System.out.println("File Error"); // Temporary message
+        }
+        String[] splitProductsBySales = productSales.split("/");
+        for (String productIndex : splitProducts) {
+            for (Product product : products) {
+                if (product.getIndex() == Integer.parseInt(productIndex.split(":")[0])) {
+                    productsBySales.put(product, Integer.parseInt(productIndex.split(":")[1]));
+                }
+            }
         }
         this.sales = sales;
         this.revenue = revenue;
@@ -89,6 +100,31 @@ public class Store {
         }
     }
 
+    public void importProducts(String fileName) {
+        try {
+            File file = new File(fileName);
+            BufferedReader bfr = new BufferedReader(new FileReader(file));
+            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+                String[] splitLine = line.split(",");
+                Product product = new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
+                        Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0]));
+                products.add(product);
+                productsByIndex.add(Integer.parseInt(splitLine[0]));
+                productsBySales.put(product, 0);
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File does not exist.");
+        } catch (IOException e) {
+            System.out.println("Error reading from file.");
+        }
+    }
+    public HashMap<Product, Integer> getProductsBySales() {
+        return productsBySales;
+    }
+
+    public void setProductsBySales(HashMap<Product, Integer> productsBySales) {
+        this.productsBySales = productsBySales;
+    }
     public ArrayList<Integer> getProductsByIndex() {
         return productsByIndex;
     }
