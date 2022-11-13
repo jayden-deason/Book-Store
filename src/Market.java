@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -122,6 +123,44 @@ public class Market {
         }
         return null;
     }
+
+
+    /**
+     * Make a purchase by calling the store's makePurchase method for every product in a shopping cart.
+     * Also empties buyer's shopping cart via the buyer's makePurchase method.
+     * Throws a runtime exception if an object is out of stock.
+     *
+     * @param buyer the buyer making the purchase
+     */
+    private void makePurchase(Buyer buyer) {
+        ArrayList<Product> products = new ArrayList<>();
+        ArrayList<Integer> quantities = new ArrayList<>();
+
+        for (String line : buyer.getShoppingCart()) {
+            int productIndex = Integer.parseInt(line.split(",")[0]);
+
+            Product p = getProductByIndex(productIndex);
+
+            if (p.getQuantity() <= 0) {
+                throw new RuntimeException(String.format("\"%s\"out of stock!", p.getName()));
+            }
+
+            products.add(p);
+            quantities.add(Integer.parseInt(line.split(",")[4])); // TODO: double check quantity position in csv
+        }
+
+        for (int i = 0; i < products.size(); i++) {
+            Product p = products.get(i);
+            int quantity = quantities.get(i);
+
+            Store s = getStoreByName(p.getStoreName());
+            s.makePurchase(buyer, quantity, p);
+        }
+
+
+        buyer.makePurchase();
+    }
+
 
     /**
      * Find a seller by their email
