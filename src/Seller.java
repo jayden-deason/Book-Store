@@ -43,7 +43,7 @@ public class Seller extends User {
         super(line.split(",")[1], line.split(",")[2]);
         String[] parts = line.split(",");
         this.index = Integer.parseInt(parts[0]);
-        String[] storesIndex = parts[3].substring(1, parts[3].length() - 2).split("/");
+        String[] storesIndex = parts[3].substring(1, parts[3].length() - 1).split("/");
         this.stores = new ArrayList<Store>();
         int i = 0;
         BufferedReader br = null;
