@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.io.IOException;
-import java.io.BufferedReader;
+import java.io.BufferedReadern;
 import java.io.FileReader;
 import java.io.FileWriter;
 
