@@ -17,11 +17,11 @@ public class Store {
     private String sellerName;
     private ArrayList<Product> products;
     private ArrayList<Integer> productsByIndex;
-    // Might not need this
     private HashMap<Buyer, Integer> customerData; // This way the sales for each buyer can be tracked
     private HashMap<Product, Integer> productsBySales;
     private int sales;
     private double revenue;
+    private String productIndices;
 
     /**
      * Creates a new Store object with the given parameters
@@ -34,6 +34,7 @@ public class Store {
      */
     public Store(int index, String storeName, String sellerName, int sales, double revenue, String productIndices,
                  String productSales) {
+        this.productIndices = productIndices;
         this.storeName = storeName;
         this.sellerName = sellerName;
         this.productsByIndex = new ArrayList<>();
@@ -77,10 +78,13 @@ public class Store {
      * @param fileLine the line of the Stores.csv file
      */
     public Store(String fileLine) {
+        this.products = new ArrayList<>();
+        this.productsByIndex = new ArrayList<>();
         String[] split = fileLine.split(",");
         this.index = Integer.parseInt(split[0]);
         this.storeName = split[1];
         this.sellerName = split[2];
+        this.productIndices = split[5];
         this.sales = Integer.parseInt(split[3]);
         this.revenue = Double.parseDouble(split[4]);
         String[] products = split[5].replace("<","").replace(">","").split("/");
@@ -344,5 +348,9 @@ public class Store {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public String getProductIndices() {
+        return productIndices;
     }
 }
