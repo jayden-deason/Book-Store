@@ -55,6 +55,8 @@ java -cp src src/Main.java
     * The Seller class is a subclass of User. In addition to a username and a password, Seller has a list of Stores that
       it owns. A seller can export the products in their stores to a file, write all of their stores to a file, and
       printout a dashboard of statistics including the purchase history of their customers.
+    * The testing for this class is done inside of the main method of Seller.java. It tests various parts of the required functionality and checks for how
+      the functions deal with edge cases.
 * [Store.java](src/Store.java)
     * The Store class is utilized by both the Seller and the Buyer class. Stores have an index in the Store.csv file, a
       name, the name of the seller that owns the store, total sales the store has done, total revenue the store has
