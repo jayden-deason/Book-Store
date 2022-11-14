@@ -68,9 +68,8 @@ java -cp src src/Main.java
     * The Market class is the general container which includes the lists of all Products, Users, and Stores in the
       entire marketplace. It has functionality for updating all the CSV files and filtering all the lists of products
       when interacting with the user. The testing of Market largely overlaps with the testing of Main, as it is
-      basically the container for the objects that are actually referred to in the Main method. 
+      basically the container for the objects that are actually referred to in the Main method.
 * [Main.java](src/Main.java)
     * The Main class is what is actually ran when the application is started. It contains a menu that a user can go
       through to complete actions such as logging in, buying items, creating stores, editing products, etc. If the
       program is ever ended prematurely the data that was changed persists through csv files.
-

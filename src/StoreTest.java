@@ -87,4 +87,3 @@ public class StoreTest {
 //        storeOne.statisticsForSeller(2);
     }
 }
-
