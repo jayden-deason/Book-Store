@@ -2,6 +2,7 @@ import com.sun.jdi.ArrayReference;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -19,7 +20,6 @@ public class Store {
     private String sellerName;
     private ArrayList<Product> products;
     private ArrayList<Integer> productsByIndex;
-    private HashMap<Buyer, Integer> customerData; // This way the sales for each buyer can be tracked
     private ArrayList<Product> productsForSales;
     private ArrayList<Integer> salesForProducts;
     private int sales;
@@ -44,7 +44,6 @@ public class Store {
         this.sellerName = sellerName;
         this.productsByIndex = new ArrayList<>();
         this.products = new ArrayList<>();
-        this.customerData = new HashMap<>();
         this.productsForSales = new ArrayList<>();
         this.salesForProducts = new ArrayList<>();
         String[] splitProducts = productIndices.replace("<", "").replace(">", "").split("/");
@@ -235,16 +234,15 @@ public class Store {
         if (product.getQuantity() < quantity) {
             System.out.printf("Store only have %d %s left in stock\n", product.getQuantity(), product.getName());
         } else {
+            this.reReadProducts();
             salesForProducts.set(productsForSales.indexOf(product),
                     salesForProducts.get(productsForSales.indexOf(product)) + quantity);
             sales += quantity;
             revenue += quantity * product.getPrice();
-            products.set(products.indexOf(product), new Product(product.getName(), product.getStoreName(),
-                    product.getDescription(), product.getQuantity() - quantity,
-                    product.getPrice(), product.getIndex()));
+            products.get(products.indexOf(product)).setQuantity(product.getQuantity() - quantity);
+            this.updateProducts();
+            this.updateStores();
         }
-        this.updateProducts();
-        this.updateStores();
     }
 
     /**
@@ -320,6 +318,40 @@ public class Store {
         }
     }
 
+    public String generateCustomerData() {
+        String retString = "";
+        ArrayList<String> customerDataList = new ArrayList<>();
+        try {
+            BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"));
+            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+                customerDataList.add(line.split(",")[1] + "=" + line.split(",")[4].replace("<", "").replace(">", "").trim());
+            }
+            bfr.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("Error reading file.");
+        } catch (IOException e) {
+            System.out.println("IO error");
+        }
+        for (int i = 0; i < customerDataList.size(); i++) {
+            String[] firstSplit = customerDataList.get(i).split("=");
+            if (firstSplit.length > 1) {
+                int purchases = 0;
+                String buyerName = firstSplit[0];
+                String[] secondSplit = firstSplit[1].split("/");
+                for (String split : secondSplit) {
+                    String[] thirdSplit = split.split(":");
+                    if (!(split.isEmpty()) && productsByIndex.contains(Integer.parseInt(thirdSplit[0]))) {
+                        purchases += Integer.parseInt(thirdSplit[1]);
+                    }
+                }
+                if (purchases > 0) {
+                    retString += buyerName + ":" + purchases + "/";
+                }
+            }
+        }
+        return retString.substring(0, retString.length() - 1);
+    }
+
     /**
      * Prints the store's statistics sorted based on how the seller wants
      *
@@ -329,6 +361,7 @@ public class Store {
      *                 wit
      */
     public void statisticsForSeller(int sortType) {
+        String[] customerData = generateCustomerData().split("/");
         if (sortType > 2 || sortType < 0) {
             System.out.println("Sort type is invalid, pick a number from 0-2");
             return;
@@ -342,8 +375,8 @@ public class Store {
                 System.out.println(product.getName() + ": " + salesForProducts.get(productsForSales.indexOf(product)));
             }
             System.out.println("Sales by customer: ");
-            for (Buyer buyer : customerData.keySet()) {
-                System.out.println(buyer.getUsername() + ": " + customerData.get(buyer));
+            for (String data : customerData) {
+                System.out.println(data.split(":")[0] + ": " + data.split(":")[1]);
             }
         } else {
             ArrayList<Product> sortedProducts = new ArrayList<Product>();
@@ -363,29 +396,29 @@ public class Store {
                 System.out.println(product.getName() + ": " + products.get(products.indexOf(product)));
             }
             //ArrayList to track all of the buyers
-            ArrayList<Buyer> sortedBuyers = new ArrayList<Buyer>();
-            for (Buyer buyer : customerData.keySet()) {
-                sortedBuyers.add(buyer);
+            ArrayList<String> sortedBuyers = new ArrayList<>();
+            for (String data : customerData) {
+                sortedBuyers.add(data);
             }
             if (sortType == 1) {
-                sortedBuyers.sort((q1, q2) -> q1.getUsername().compareTo(q2.getUsername()));
+                sortedBuyers.sort(Comparator.comparing(q -> q.substring(0, 1)));
                 System.out.println("Sales by customer sorted alphabetically:");
-                for (Buyer buyer : sortedBuyers) {
-                    System.out.println(buyer.getUsername() + ": " + customerData.get(buyer));
+                for (String buyer : sortedBuyers) {
+                    System.out.println(buyer.split(":")[0] + ": " + buyer.split(":")[1]);
                 }
             }
             if (sortType == 2) {
                 int maxQuantity = 0;
-                for (Buyer buyer : sortedBuyers) {
-                    if (customerData.get(buyer) > maxQuantity) {
-                        maxQuantity = customerData.get(buyer);
+                for (String buyer : sortedBuyers) {
+                    if (Integer.parseInt(buyer.split(":")[1]) > maxQuantity) {
+                        maxQuantity = Integer.parseInt(buyer.split(":")[1]);
                     }
                 }
                 System.out.println("Sales by customer sorted by quantity:");
                 for (int i = maxQuantity; i > 0; i--) {
-                    for (Buyer buyer : sortedBuyers) {
-                        if (customerData.get(buyer) == i) {
-                            System.out.println(buyer.getUsername() + ": " + customerData.get(buyer));
+                    for (String buyer : sortedBuyers) {
+                        if (Integer.parseInt(buyer.split(":")[1]) == i) {
+                            System.out.println(buyer.split(":")[0] + ": " + buyer.split(":")[1]);
                         }
                     }
 
