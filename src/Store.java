@@ -43,38 +43,38 @@ public class Store {
         this.products = new ArrayList<>();
         this.productsForSales = new ArrayList<>();
         this.salesForProducts = new ArrayList<>();
-        if(productIndices.length() > 0) {
-            String[] splitProducts = productIndices.replace("<", "").replace(">", "").split("/");
-            for (String productIndex : splitProducts) {
-                productsByIndex.add(Integer.parseInt(productIndex));
-            }
-        }
-            try {
-                File file = new File("Products.csv");
-                BufferedReader bfr = new BufferedReader(new FileReader(file));
-                for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
-                    String[] splitLine = line.split(",");
-                    if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
-                        products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
-                                Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
-                    }
-                }
-                bfr.close();
-            } catch (IOException e) {
-                System.out.println("File Error"); // Temporary message
-            }
-
-        if (!productSales.equals("")) {
-            String[] splitProductsBySales = productSales.replace("<", "").replace(">", "").split("/");
-            for (String productIndex : splitProductsBySales) {
-                for (Product product : products) {
-                    if (product.getIndex() == Integer.parseInt(productIndex.split(":")[0])) {
-                        productsForSales.add(product);
-                        salesForProducts.add(Integer.parseInt(productIndex.split(":")[1]));
-                    }
-                }
-            }
-        }
+//        if (productIndices.length() > 0) {
+//            String[] splitProducts = productIndices.replace("<", "").replace(">", "").split("/");
+//            for (String productIndex : splitProducts) {
+//                productsByIndex.add(Integer.parseInt(productIndex));
+//            }
+//        }
+//        try {
+//            File file = new File("Products.csv");
+//            BufferedReader bfr = new BufferedReader(new FileReader(file));
+//            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+//                String[] splitLine = line.split(",");
+//                if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
+//                    products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
+//                            Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+//                }
+//            }
+//            bfr.close();
+//        } catch (IOException e) {
+//            System.out.println("File Error"); // Temporary message
+//        }
+//
+//        if (!productSales.equals("")) {
+//            String[] splitProductsBySales = productSales.replace("<", "").replace(">", "").split("/");
+//            for (String productIndex : splitProductsBySales) {
+//                for (Product product : products) {
+//                    if (product.getIndex() == Integer.parseInt(productIndex.split(":")[0])) {
+//                        productsForSales.add(product);
+//                        salesForProducts.add(Integer.parseInt(productIndex.split(":")[1]));
+//                    }
+//                }
+//            }
+//        }
 
         this.sales = sales;
         this.revenue = revenue;
@@ -247,12 +247,12 @@ public class Store {
      *
      * @param product the product being added to the store
      */
-    public void addProduct(Product product) {
+    public void addProduct(Product product, Market market) {
         if (!products.contains(product)) {
             products.add(product);
             productsByIndex.add(product.getIndex());
             productsForSales.add(product);
-            salesForProducts.add(0);
+            salesForProducts.add(market.getSalesForProduct(product));
 //            this.updateProducts();
 //            this.updateStores();
 //            this.reReadProducts();
@@ -324,36 +324,22 @@ public class Store {
      *
      * @return a string containing buyer sales information
      */
-    public String generateCustomerData() {
+    public String generateCustomerData(Market market) {
         String retString = "";
-        ArrayList<String> customerDataList = new ArrayList<>();
-        try { // Reading in buyer information
-            BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"));
-            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
-                customerDataList.add(line.split(",")[1] + "=" + line.split(",")[4].replace("<", "").replace(">", "").trim());
-            }
-            bfr.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("Error reading file.");
-        } catch (IOException e) {
-            System.out.println("IO error");
-        }
-        for (int i = 0; i < customerDataList.size(); i++) { // Loop over the buyer data
-            String[] firstSplit = customerDataList.get(i).split("=");
-            if (firstSplit.length > 1) {
-                int purchases = 0;
-                String buyerName = firstSplit[0]; // The name of a buyer
-                String[] secondSplit = firstSplit[1].split("/");
-                for (String split : secondSplit) {
-                    String[] thirdSplit = split.split(":");
-                    if (!(split.isEmpty()) && productsByIndex.contains(Integer.parseInt(thirdSplit[0]))) {
-                        purchases += Integer.parseInt(thirdSplit[1]); // Updating the purchase if the product is sold
-                    }
-                }
-                if (purchases > 0) { // Checking if the buyer purchased anything from this store
-                    retString += buyerName + ":" + purchases + "/";
+
+        for (Buyer buyer : market.getBuyers()) { // Loop over the buyer data
+            int purchases = 0;
+            for (String purchase : buyer.getPurchaseHistory()) {
+                Product p = market.getProductByIndex(Integer.parseInt(purchase.split(":")[0]));
+                if (p.getStoreName().equals(this.getName())) {
+//                    purchases += Integer.parseInt(purchase.split(":")[1]);
+                    purchases++;
                 }
             }
+            if (purchases > 0) { // Checking if the buyer purchased anything from this store
+                retString += buyer.getEmail() + ":" + purchases + "/";
+            }
+
         }
         return retString.substring(0, retString.length() - 1);
     }
@@ -366,24 +352,24 @@ public class Store {
      *                 if sortType == 2, then it will print everything based on the quantity of products being dealt
      *                 wit
      */
-    public void statisticsForSeller(int sortType) {
-        String[] customerData = generateCustomerData().split("/");
+    public void statisticsForSeller(int sortType, Market market) {
+        String[] customerData = generateCustomerData(market).split("/");
         if (sortType > 2 || sortType < 0) {
             System.out.println("Sort type is invalid, pick a number from 0-2");
             return;
         }
         // General statistics
         System.out.println(this.storeName + " Statistics:");
-        System.out.println("Total Sales: " + sales);
-        System.out.println("Total Revenue: " + revenue);
+        System.out.println("--Total Sales: " + sales);
+        System.out.println("--Total Revenue: " + revenue);
         if (sortType == 0) { // No sort condition
-            System.out.println("Products by sales: ");
+            System.out.println("--Products by sales: ");
             for (Product product : productsForSales) {
-                System.out.println(product.getName() + ": " + salesForProducts.get(productsForSales.indexOf(product)));
+                System.out.println("\t--" + product.getName() + ": " + market.getSalesForProduct(product));
             }
-            System.out.println("Sales by customer: ");
+            System.out.println("--Sales by customer: ");
             for (String data : customerData) {
-                System.out.println(data.split(":")[0] + ": " + data.split(":")[1]);
+                System.out.println("\t--" + data.split(":")[0] + ": " + data.split(":")[1]);
             }
         } else {
             ArrayList<Product> sortedProducts = new ArrayList<Product>();
@@ -397,10 +383,10 @@ public class Store {
                 sortedProducts.sort((p1, p2) -> Integer.compare(salesForProducts.get(productsForSales.indexOf(p1)),
                         salesForProducts.get(productsForSales.indexOf(p2))));
             }
-            System.out.println("Sales by product " + ((sortType == 1) ? "sorted alphabetically:" : "sorted by " +
+            System.out.println("--Sales by product " + ((sortType == 1) ? "sorted alphabetically:" : "sorted by " +
                     "quantity:"));
             for (Product product : sortedProducts) {
-                System.out.println(product.getName() + ": " + products.get(products.indexOf(product)));
+                System.out.println("\t--" + product.getName() + ": " + products.get(products.indexOf(product)));
             }
             //ArrayList to track all of the buyers
             ArrayList<String> sortedBuyers = new ArrayList<>();
@@ -409,9 +395,9 @@ public class Store {
             }
             if (sortType == 1) {
                 sortedBuyers.sort(Comparator.comparing(q -> q.substring(0, 1)));
-                System.out.println("Sales by customer sorted alphabetically:");
+                System.out.println("--Sales by customer sorted alphabetically:");
                 for (String buyer : sortedBuyers) {
-                    System.out.println(buyer.split(":")[0] + ": " + buyer.split(":")[1]);
+                    System.out.println("\t--" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
                 }
             }
             if (sortType == 2) {
@@ -421,11 +407,11 @@ public class Store {
                         maxQuantity = Integer.parseInt(buyer.split(":")[1]);
                     }
                 }
-                System.out.println("Sales by customer sorted by quantity:");
+                System.out.println("--Sales by customer sorted by quantity:");
                 for (int i = maxQuantity; i > 0; i--) {
                     for (String buyer : sortedBuyers) {
                         if (Integer.parseInt(buyer.split(":")[1]) == i) {
-                            System.out.println(buyer.split(":")[0] + ": " + buyer.split(":")[1]);
+                            System.out.println("\t--" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
                         }
                     }
 
@@ -436,7 +422,6 @@ public class Store {
         }
 
     }
-
 
 
     public String getName() {
@@ -459,8 +444,12 @@ public class Store {
         return products;
     }
 
-    public int getSales() {
-        return sales;
+    public int getSales(Market market) {
+        int out = 0;
+        for (Product p : products) {
+            out += market.getSalesForProduct(p);
+        }
+        return out;
     }
 
     public void setSales(int sales) {

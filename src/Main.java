@@ -111,8 +111,9 @@ public class Main {
             System.out.println("3 - View sales.");
             System.out.println("4 - View dashboard.");
             System.out.println("5 - Export books to .csv.");
-            System.out.println("6 - View books in Customer Carts.");
-            System.out.println("7 - Exit.");
+            System.out.println("6 - Import books from .csv.");
+            System.out.println("7 - View books in Customer Carts.");
+            System.out.println("8 - Exit.");
             String answer = scan.nextLine();
             if (answer.equals("1")) {
                 System.out.println("What is the store name?");
@@ -163,10 +164,9 @@ public class Main {
                         System.out.println("1 - Add Book.");
                         System.out.println("2 - Delete Book.");
                         System.out.println("3 - Edit Book.");
-                        System.out.println("4 - Import books.");
                         String answerTwo = scan.nextLine();
                         if (answerTwo.equals("1")) {
-                            store.addProduct(product);
+                            store.addProduct(product, market);
                         } else if (answerTwo.equals("2")) {
                             store.removeProduct(product);
                         } else if (answerTwo.equals("3")) {
@@ -182,10 +182,17 @@ public class Main {
                     }
                 }
             } else if (answer.equals("3")) {
+                System.out.println("------------------------------------------");
                 ArrayList<Store> stores = seller.getStores();
-                for (int i = 0; i < stores.size(); i++) {
-                    System.out.println(stores.get(i).getSales());
+
+                if (stores.size() == 0) {
+                    System.out.println("No stores!");
                 }
+                for (Store store : seller.getStores()) {
+                    System.out.println(store.getName() + " -- " + store.getSales(market));
+                }
+                System.out.println("------------------------------------------");
+
             } else if (answer.equals("4")) {
                 while (true) {
                     System.out.println("Enter a number:");
@@ -194,13 +201,13 @@ public class Main {
                     System.out.println("3 - Sort by quantity.");
                     String answerTwo = scan.nextLine();
                     if (answerTwo.equals("1")) {
-                        seller.printDashboard(0);
+                        seller.printDashboard(0, market);
                         break;
                     } else if (answerTwo.equals("2")) {
-                        seller.printDashboard(1);
+                        seller.printDashboard(1, market);
                         break;
                     } else if (answerTwo.equals("3")) {
-                        seller.printDashboard(2);
+                        seller.printDashboard(2, market);
                         break;
                     } else {
                         // if answer is not 1, 2, or 3
@@ -212,13 +219,23 @@ public class Main {
                 String fileName = scan.nextLine();
                 System.out.println("What is the store name?");
                 String store = scan.nextLine();
-                seller.exportProducts(fileName, store);
+//                seller.exportProducts(fileName, store);
+                market.printToFile(market.getStoreByName(store).getProducts(), fileName);
                 System.out.println("Export complete!");
             } else if (answer.equals("6")) {
+                System.out.println("What is the file name to import from?");
+                String fileName = scan.nextLine();
+                market.addProductsFromFile(fileName);
+                System.out.println("Import complete!");
+            }else if (answer.equals("7")) {
+                System.out.println("------------------------------------------");
                 seller.viewProductsInCart(market);
-            } else if (answer.equals("7")) {
+                System.out.println("------------------------------------------");
+
+            } else if (answer.equals("8")) {
                 System.out.println("Have a nice day!");
                 return;
+
             } else {
                 System.out.println("Invalid input.");
             }

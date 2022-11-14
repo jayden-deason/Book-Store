@@ -229,7 +229,7 @@ public class Seller extends User {
                 try {
                     fw = new FileWriter(fileName);
 
-                    for (Product product: s.getProducts()) {
+                    for (Product product : s.getProducts()) {
                         fw.write(product.toString() + "\n");
                     }
                 } catch (Exception e) {
@@ -294,11 +294,11 @@ public class Seller extends User {
      *                 if sortType == 2, then it will print everything based on the quantity of products being dealt
      *                 with
      */
-    public void printDashboard(int sortType) {
+    public void printDashboard(int sortType, Market market) {
         System.out.println("------------------------------------------");
         for (Store s : stores) {
             System.out.println("Store: " + s.getName());
-            s.statisticsForSeller(sortType);
+            s.statisticsForSeller(sortType, market);
         }
         System.out.println("------------------------------------------");
 
@@ -328,23 +328,24 @@ public class Seller extends User {
     /**
      * Prints all of the products in customer carts
      *
-     * @param market   the entire marketplace that this seller is in
+     * @param market the entire marketplace that this seller is in
      */
     public void viewProductsInCart(Market market) {
         System.out.println("In Customer Carts: ");
+        int number = 1;
         for (Buyer b : market.getBuyers()) {
             ArrayList<String> items = b.getShoppingCart();
             for (String item : items) {
-                int number = 1;
-                for (Store s : stores) {
-                    Product p = market.getProductByIndex(Integer.parseInt(item.split(":")[0]));
-                    System.out.println(number + ")");
+                Product p = market.getProductByIndex(Integer.parseInt(item.split(":")[0]));
+                if (market.getStoreByName(p.getStoreName()).getSellerName().equals(this.getEmail())) {
+                    System.out.println(number + ") " + b.getEmail());
                     number++;
-                    System.out.println("Product: " + p.getName() + "| Quantity: " + item.split(":")[1]);
-                    System.out.println("Store: " + p.getStoreName() + "| Description: " + p.getDescription());
-
+                    System.out.println("Product: " + p.getName() + " | Quantity: " + item.split(":")[1]);
+                    System.out.println("Store: " + p.getStoreName() + " | Description: " + p.getDescription());
                 }
             }
+
+
         }
     }
 
@@ -394,7 +395,7 @@ public class Seller extends User {
             int index = -1;
             while (line != null) {
                 line = br1.readLine();
-                if(line != null) {
+                if (line != null) {
                     line2 = line;
                 }
                 index++;
@@ -423,7 +424,7 @@ public class Seller extends User {
             String line = br2.readLine();
             String line2 = "";
             while (line != null) {
-                if(line != null && s1.getEmail().equals(line.split(",")[1])) {
+                if (line != null && s1.getEmail().equals(line.split(",")[1])) {
                     line2 = line;
                 }
                 line = br2.readLine();

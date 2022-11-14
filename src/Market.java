@@ -34,16 +34,19 @@ public class Market {
         this.storesFile = storesFile;
         this.productsFile = productsFile;
 
+        this.sellers = new ArrayList<>();
+        this.stores = new ArrayList<>();
+        this.products = new ArrayList<>();
+        this.buyers = new ArrayList<>();
+
         // sellers
         ArrayList<String> lines = readFile(sellersFile);
-        this.sellers = new ArrayList<>();
         for (String line : lines) {
             sellers.add(new Seller(line));
         }
 
         // stores
         lines = readFile(storesFile);
-        this.stores = new ArrayList<>();
         for (String line : lines) {
             Store s = new Store(line);
             stores.add(s);
@@ -52,23 +55,24 @@ public class Market {
         }
 
         // products
-        lines = readFile(productsFile);
-        this.products = new ArrayList<>();
-        for (String line : lines) {
-            Product p = new Product(line);
-
-            Store s = getStoreByName(line.split(",")[2]);
-            s.addProduct(p);
-            p.setStoreName(s.getName());
-            products.add(p);
-        }
+        addProductsFromFile(productsFile);
 
         // buyers
         lines = readFile(buyersFile);
-        this.buyers = new ArrayList<>();
         for (String line : lines) {
             Buyer b = new Buyer(line);
             buyers.add(b);
+        }
+    }
+
+    public void addProductsFromFile(String fileName) {
+        ArrayList<String> lines = readFile(fileName);
+        for (String line : lines) {
+            Product p = new Product(line);
+            Store s = getStoreByName(line.split(",")[2]);
+            s.addProduct(p, this);
+            p.setStoreName(s.getName());
+            products.add(p);
         }
     }
 
@@ -269,7 +273,7 @@ public class Market {
      * @param list     a list of objects
      * @param filename the file to write to
      */
-    private void printToFile(ArrayList list, String filename) {
+    public void printToFile(ArrayList list, String filename) {
         try {
             PrintWriter pw = new PrintWriter(new FileWriter(filename, false));
 
@@ -280,6 +284,27 @@ public class Market {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public int getSalesForProduct(Product p) {
+        int idx = products.indexOf(p);
+        return getSalesForProduct(idx);
+
+    }
+
+    public int getSalesForProduct(int index) {
+        int sales = 0;
+
+        for (Buyer buyer : buyers) {
+            for (String purchase : buyer.getPurchaseHistory()) {
+                if (Integer.parseInt(purchase.split(":")[0]) == index) {
+                    sales += Integer.parseInt(purchase.split(":")[1]);
+                }
+            }
+        }
+
+        return sales;
+
     }
 
     public ArrayList<Product> sortByPrice() {
