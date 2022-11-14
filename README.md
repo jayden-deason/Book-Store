@@ -51,9 +51,7 @@ java main
       name, the name of the seller that owns the store, total sales the store has done, total revenue the store has
       made, and a list of products that the store sells. A seller can create as many stores as they would like, and they
       can add, delete, or modify products that the store sells. Buyers make purchases from stores in the market.
-    * The testing for this class is done inside of StoreTest.java. The testing is entirely main method testing. StoreTest
-      creates a list of store objects and calls the primary functionality methods to test the output with some small edge
-      case testing.
+    * The testing for this class is done in the main method testing.
 * [Product.java](src/Product.java)
     * The Product class stores all the information related to the products being sold and purchased: name, the name of
       the store it is sold in, a description, a quantity, a price, and it's index in the Products.csv file. Products do
