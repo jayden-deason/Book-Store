@@ -42,7 +42,15 @@ java -cp src src/Main.java
       ability to print information to a user's dashboard as well as save to a file.
 * [Buyer.java](src/Buyer.java)
     * The Buyer class is a subclass of User. In addition to a username and a password, Buyer has a shopping cart, which
-      stores items that a buyer intends to purchase but has not done so yet. (Include more here once more is added)
+      stores items that a buyer intends to purchase but has not done so yet. The products in a shopping card can have
+      their quantities edited or they can be removed outright. The Buyer class also handles the tracking of purchase 
+      history. This purchase history can be exported to a .csv file. A Buyer can choose to view a dashboard displaying
+      all stores and their products which can be sorted by products sold or the Buyer's purchase history.
+    * The testing for this class was done in BuyerTest.java. The testing was entirely main method testing. BuyerTest 
+      creates new Buyers and makes calls to all the primary methods in the Buyer class. Test case results were validated
+      by manual output comparison. Edge cases for incorrect input type or value, writing to files that don't exist, 
+      attempting to export purchase history to a file that already exists, and attempting to alter the quantity of a product
+      that is not in the shopping cart were all tested and have corresponding error messages. 
 * [Seller.java](src/Seller.java)
     * The Seller class is a subclass of User. In addition to a username and a password, Seller has a list of Stores that
       it owns. A seller can export the products in their stores to a file, write all of their stores to a file, and
