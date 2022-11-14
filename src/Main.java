@@ -14,93 +14,93 @@ public class Main {
         Scanner scan = new Scanner(System.in);
 
         Market market = new Market("Customers.csv", "Sellers.csv", "Stores.csv", "Products.csv");
-        while (true) {
-            System.out.println("Welcome to the book marketplace!!");
-            System.out.println("Are you a buyer or a seller? (buyer/seller)");
-            String answer = scan.nextLine().toLowerCase();
+//        while (true) {
+        System.out.println("Welcome to the book marketplace!!");
+        System.out.println("Are you a buyer or a seller? (buyer/seller)");
+        String answer = scan.nextLine().toLowerCase();
 
-            if (answer.equals("buyer")) {
-                signUp("buyer", market, scan);
-                break;
-            } else if (answer.equals("seller")) {
-                signUp("seller", market, scan);
-                break;
-            } else {
-                // if answer is not "buyer" or "seller"
-                System.out.println("Invalid input.");
-            }
+        if (answer.equals("buyer")) {
+            signUp("buyer", market, scan);
+//            break;
+        } else if (answer.equals("seller")) {
+            signUp("seller", market, scan);
+//            break;
+        } else {
+            // if answer is not "buyer" or "seller"
+            System.out.println("Invalid input.");
         }
+//        }
     }
 
     public static void signUp(String action, Market market, Scanner scan) {
-        while (true) {
-            System.out.println("Do you have an account? (y/n)");
-            String answer = scan.nextLine().toLowerCase();
+//        while (true) {
+        System.out.println("Do you have an account? (y/n)");
+        String answer = scan.nextLine().toLowerCase();
 
-            if (answer.equals("yes") || answer.equals("y")) {
+        if (answer.equals("yes") || answer.equals("y")) {
+            while (true) {
+                String email = "";
                 while (true) {
-                    String email = "";
-                    while (true) {
-                        System.out.println("Enter your email.");
-                        email = scan.nextLine();
-                        if (email.contains("@") && email.contains(".")) {
-                            break;
-                        } else {
-                            System.out.println("Please enter a valid email.");
-                        }
-                    }
-
-                    User user = market.getUserByEmail(email);
-                    if (email == null) {
-                        System.out.println("Account does not exist.");
+                    System.out.println("Enter your email.");
+                    email = scan.nextLine();
+                    if (email.contains("@") && email.contains(".")) {
+                        break;
                     } else {
-                        System.out.println("What is your password?");
-                        String password = scan.nextLine();
-                        if (user.getPassword().equals(password)) {
-                            if (user instanceof Seller) {
-                                sell((Seller) user, market, scan);
-                            } else {
-                                buy((Buyer) user, market, scan);
-                            }
-                        } else {
-                            System.out.println("Password does not match.");
-                        }
+                        System.out.println("Please enter a valid email.");
                     }
-
-                    break;
                 }
-            } else if (answer.equals("no") || answer.equals("n")) {
-                try {
-                    String username = "";
-                    while (true) {
-                        System.out.println("Enter your username.");
-                        username = scan.nextLine();
-                        if (username.contains("@") && username.contains(".")) {
-                            break;
-                        } else {
-                            System.out.println("Please enter a valid email.");
-                        }
-                    }
-                    System.out.println("Enter your password.");
+
+                User user = market.getUserByEmail(email);
+                if (email == null) {
+                    System.out.println("Account does not exist.");
+                } else {
+                    System.out.println("What is your password?");
                     String password = scan.nextLine();
-                    if (action.equals("seller")) {
-                        Seller seller = new Seller(username, password);
-                        market.createUser(seller);
-                        sell(seller, market, scan);
+                    if (user.getPassword().equals(password)) {
+                        if (user instanceof Seller) {
+                            sell((Seller) user, market, scan);
+                        } else {
+                            buy((Buyer) user, market, scan);
+                        }
                     } else {
-                        Buyer buyer = new Buyer(username, password);
-                        market.createUser(buyer);
-                        buy(buyer, market, scan);
+                        System.out.println("Password does not match.");
                     }
-                    break;
-                } catch (BadNamingException e) {
-                    System.out.println(e.getMessage());
                 }
-            } else {
-                // if answer is not "yes" or "no"
-                System.out.println("Invalid input.");
+
+                break;
             }
+        } else if (answer.equals("no") || answer.equals("n")) {
+            try {
+                String username = "";
+                while (true) {
+                    System.out.println("Enter your username.");
+                    username = scan.nextLine();
+                    if (username.contains("@") && username.contains(".")) {
+                        break;
+                    } else {
+                        System.out.println("Please enter a valid email.");
+                    }
+                }
+                System.out.println("Enter your password.");
+                String password = scan.nextLine();
+                if (action.equals("seller")) {
+                    Seller seller = new Seller(username, password);
+                    market.createUser(seller);
+                    sell(seller, market, scan);
+                } else {
+                    Buyer buyer = new Buyer(username, password);
+                    market.createUser(buyer);
+                    buy(buyer, market, scan);
+                }
+//                    break;
+            } catch (BadNamingException e) {
+                System.out.println(e.getMessage());
+            }
+        } else {
+            // if answer is not "yes" or "no"
+            System.out.println("Invalid input.");
         }
+//        }
     }
 
     public static void sell(Seller seller, Market market, Scanner scan) {
@@ -218,7 +218,7 @@ public class Main {
                 seller.viewProductsInCart(market);
             } else if (answer.equals("7")) {
                 System.out.println("Have a nice day!");
-                break;
+                return;
             } else {
                 System.out.println("Invalid input.");
             }
@@ -230,7 +230,7 @@ public class Main {
             System.out.println("Enter a number:");
             System.out.println("1 - View marketplace.");
             System.out.println("2 - View shopping cart.");
-            System.out.println("3 - Find book.");
+            System.out.println("3 - Browse by store.");
             System.out.println("4 - Export shopping history.");
             System.out.println("5 - Checkout shopping cart.");
             System.out.println("6 - Edit/remove shopping cart.");
@@ -243,6 +243,39 @@ public class Main {
                     System.out.println(productString(products.get(i)));
                 }
                 System.out.println("------------------------------------------");
+
+                System.out.println("Would you like to select a product? (y/n)");
+                String input = scan.nextLine();
+
+                while (input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes")) {
+                    System.out.println("Enter an item's index to learn more");
+                    int idx = scan.nextInt();
+                    scan.nextLine();
+
+                    Product p = market.getProductByIndex(idx);
+                    System.out.println("------------------------------------------");
+                    System.out.println(productString(p));
+                    System.out.println(market.getProductByIndex(idx).getDescription());
+                    System.out.println("------------------------------------------");
+
+                    System.out.println("Would you like to add to cart? (y/n)");
+                    String inp = scan.nextLine();
+
+                    if (inp.equalsIgnoreCase("y") || inp.equalsIgnoreCase("yes")) {
+                        System.out.println("What is the quantity?");
+                        int quantity = scan.nextInt(); // TODO: add checks for valid input
+                        scan.nextLine();
+
+                        buyer.addProductToCart(idx, quantity);
+                        market.updateAllFiles();
+                        System.out.println("Added to cart!");
+                        printShoppingCart(buyer, market);
+
+                    }
+
+                    System.out.println("Would you like to select another product?");
+                    input = scan.nextLine();
+                }
 
             } else if (answer.equals("2")) {
                 printShoppingCart(buyer, market);
@@ -297,7 +330,7 @@ public class Main {
             } else if (answer.equals("4")) {
                 System.out.println("What is the file name to export to?");
                 String fileName = scan.nextLine();
-                buyer.exportToFile(fileName);
+                buyer.exportToFile(fileName, market);
             } else if (answer.equals("5")) {
                 market.makePurchase(buyer);
                 System.out.println("Checked out!");
@@ -321,7 +354,7 @@ public class Main {
                         ArrayList<String> products = buyer.getShoppingCart();
                         boolean exists = false;
                         for (int i = 0; i < products.size(); i++) {
-                            if (index == Integer.parseInt(products.get(i).split(",")[0])) {
+                            if (index == Integer.parseInt(products.get(i).split(":")[0])) {
                                 exists = true;
                                 while (true) {
                                     num = true;
@@ -341,6 +374,7 @@ public class Main {
                                     }
                                 }
                                 buyer.editProductQuantity(index, quantity);
+                                market.updateAllFiles();
                             }
                         }
                         if (!(exists)) {
@@ -353,7 +387,7 @@ public class Main {
                 }
             } else if (answer.equals("7")) {
                 System.out.println("Have a nice day!");
-                break;
+                return;
             } else {
                 System.out.println("Invalid input.");
             }
@@ -361,7 +395,7 @@ public class Main {
     }
 
     private static String productString(Product p) {
-        return String.format("%d) Name: %s | $%.2f | Quantity: %d | Store %s",
+        return String.format("%d) Name: %s | $%.2f | Quantity: %d | Store: %s",
                 p.getIndex(), p.getName(), p.getPrice(), p.getQuantity(), p.getStoreName());
     }
 
@@ -381,7 +415,7 @@ public class Main {
             Product p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
             int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
             System.out.printf("%d) Name: %s | Quantity: %d | Price: $%.2f\n",
-                    i + 1, p.getName(), quantity, p.getPrice() * quantity);
+                    p.getIndex(), p.getName(), quantity, p.getPrice() * quantity);
 
             price += p.getPrice() * quantity;
         }

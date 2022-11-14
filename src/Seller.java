@@ -271,7 +271,7 @@ public class Seller extends User {
                 return;
             }
         }
-        Store s = new Store(0, storeName, this.getEmail(), 0, 0, "", "0");
+        Store s = new Store(0, storeName, this.getEmail(), 0, 0, "", "");
         //int index, String storeName, String sellerName, int sales, double revenue, String productIndices,
         //                 String productSales
         stores.add(s);
@@ -303,10 +303,14 @@ public class Seller extends User {
      */
     public String toString() {
         String storesStr = "<";
-        for (Store s : this.stores) {
-            storesStr += s.getIndex() + "/";
+        for (int i = 0; i < stores.size(); i++) {
+            storesStr += stores.get(i).getIndex();
+
+            if (i != stores.size() - 1) {
+                storesStr += "/";
+            }
         }
-        storesStr = storesStr.substring(storesStr.length() - 1) + ">";
+        storesStr += ">";
         return String.format("%d,%s,%s,%s", this.getIndex(), this.getEmail(), this.getPassword(), storesStr);
 
     }

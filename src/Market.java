@@ -57,7 +57,6 @@ public class Market {
         for (String line : lines) {
             Product p = new Product(line);
 
-            System.out.println(line.split(",")[2]);
             Store s = getStoreByName(line.split(",")[2]);
             s.addProduct(p);
             p.setStoreName(s.getName());
@@ -69,13 +68,6 @@ public class Market {
         this.buyers = new ArrayList<>();
         for (String line : lines) {
             Buyer b = new Buyer(line);
-//            String cart = line.split(",")[4];
-//            String[] cartArr = cart.substring(1, cart.length() - 1).split(",");
-//
-//            for (String s : cartArr) {
-//                Product p = getProductByIndex(Integer.parseInt(s));
-//                b.addProductToCart(p.getIndex(), p.getQuantity());
-//            }
             buyers.add(b);
         }
     }

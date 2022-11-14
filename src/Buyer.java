@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -33,11 +35,15 @@ public class Buyer extends User {
         this.setPassword(info[2]);
         this.shoppingCart = new ArrayList<>();
         String cartString = info[3].substring(1, info[3].length() - 1); // remove <>
-        shoppingCart.addAll(List.of(cartString.split("/")));
+        if (cartString.length() != 0) {
+            shoppingCart.addAll(List.of(cartString.split("/")));
+        }
 
         this.purchaseHistory = new ArrayList<>();
         String histString = info[4].substring(1, info[4].length() - 1); // remove <>
-        purchaseHistory.addAll(List.of(histString.split("/")));
+        if (histString.length() != 0) {
+            purchaseHistory.addAll(List.of(histString.split("/")));
+        }
     }
 
     public int getIndex() {
@@ -74,6 +80,7 @@ public class Buyer extends User {
                 shoppingCart.set(i, productIndex + ":" + newQuantity);
             }
         }
+
     }
 
     public void makePurchase() {
@@ -101,7 +108,25 @@ public class Buyer extends User {
                 getListAsString(shoppingCart), getListAsString(purchaseHistory));
     }
 
-//    /**
+    public void exportToFile(String filename, Market market) {
+        try {
+            PrintWriter pw = new PrintWriter(new FileWriter(filename, false));
+
+            for (String item : purchaseHistory) {
+                int idx = Integer.parseInt(item.split(":")[0]);
+                int quantity = Integer.parseInt(item.split(":")[1]);
+                Product p = market.getProductByIndex(idx);
+
+                pw.printf("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
+                        p.getName(), p.getStoreName(), quantity, p.getPrice() * quantity);
+            }
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //    /**
 //     * Prints the buyer's dashboard
 //     *
 //     * @param scan a scanner used to implement the menu for the dashboard
