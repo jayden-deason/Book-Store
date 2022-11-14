@@ -251,4 +251,21 @@ public class Buyer extends User {
         System.out.println("------------------------------------------");
 
     }
+
+    /**
+     * Prints the recently purchased products
+     */
+    public void printPreviousPurchases() {
+        System.out.println("------------------------------------------");
+        for (String item : purchaseHistory) {
+            int idx = Integer.parseInt(item.split(":")[0]);
+            int quantity = Integer.parseInt(item.split(":")[1]);
+            Product p = Market.getInstance().getProductByIndex(idx);
+
+            System.out.printf("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
+                    p.getName(), p.getStoreName(), quantity, p.getPrice() * quantity);
+        }
+        System.out.println("------------------------------------------");
+
+    }
 }

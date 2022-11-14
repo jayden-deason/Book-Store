@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * The main class used to launch a dashboard for a user to log in and perform actions in the marketplace
  *
  * @author Megan Long, 001
- * @version 11/12/2022
+ * @version 11/14/2022
  */
 public class Main {
 
@@ -64,7 +64,7 @@ public class Main {
                 }
 
                 User user = market.getUserByEmail(email);
-                if (email == null) {
+                if (user == null) {
                     System.out.println("Account does not exist.");
                 } else {
                     System.out.println("What is your password?");
@@ -75,12 +75,11 @@ public class Main {
                         } else {
                             buy((Buyer) user, market, scan);
                         }
+                        break;
                     } else {
                         System.out.println("Password does not match.");
                     }
                 }
-
-                break;
             }
         } else if (answer.equals("no") || answer.equals("n")) {
             try {
@@ -285,7 +284,8 @@ public class Main {
             System.out.println("5 - Checkout shopping cart.");
             System.out.println("6 - Edit/remove shopping cart.");
             System.out.println("7 - Print dashboard.");
-            System.out.println("8 - Exit.");
+            System.out.println("8 - Review previous purchases.");
+            System.out.println("9 - Exit.");
             String answer = scan.nextLine();
             if (answer.equals("1")) {
                 printListings(market.getAllProducts(true));
@@ -465,6 +465,8 @@ public class Main {
             } else if (answer.equals("7")) {
                 buyer.printDashboard(scan, market);
             } else if (answer.equals("8")) {
+                buyer.printPreviousPurchases();
+            } else if (answer.equals("9")) {
                 System.out.println("Have a nice day!");
                 return;
             } else {
@@ -530,6 +532,9 @@ public class Main {
 
     public static void printListings(ArrayList<Product> products) {
         System.out.println("------------------------------------------");
+        if (products.size() == 0) {
+            System.out.println("Empty list!");
+        }
         for (int i = 0; i < products.size(); i++) {
             System.out.println(productString(products.get(i)));
         }

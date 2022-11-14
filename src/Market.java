@@ -24,6 +24,7 @@ public class Market {
 
     /**
      * Get the only existing instance of the market
+     *
      * @return market instance
      */
     public static Market getInstance() {
@@ -78,6 +79,7 @@ public class Market {
 
     /**
      * Add all products from a given file
+     *
      * @param fileName path to product file
      */
     public void addProductsFromFile(String fileName) {
@@ -92,6 +94,7 @@ public class Market {
 
     /**
      * Add a seller to the market
+     *
      * @param s seller
      */
     public void addSeller(Seller s) {
@@ -103,6 +106,7 @@ public class Market {
 
     /**
      * Add a buyer to the market
+     *
      * @param b buyer
      */
     public void addBuyer(Buyer b) {
@@ -114,6 +118,7 @@ public class Market {
 
     /**
      * Add a product to the market and to its respective store
+     *
      * @param p product
      */
     public void addProduct(Product p) {
@@ -127,6 +132,7 @@ public class Market {
 
     /**
      * Add a store to the market and its respective seller
+     *
      * @param s store
      */
     public void addStore(Store s) {
@@ -140,7 +146,8 @@ public class Market {
 
     /**
      * Create a new, empty store with a name & seller. Add it to the market and to the respective seller
-     * @param storeName new store name
+     *
+     * @param storeName  new store name
      * @param sellerName new store seller
      */
     public void addStore(String storeName, String sellerName) {
@@ -197,6 +204,7 @@ public class Market {
 
     /**
      * Get a product object from the masterlist given its name
+     *
      * @param name the name of the product
      * @return a product object, or null if not found
      */
@@ -212,6 +220,7 @@ public class Market {
 
     /**
      * Get a user that matches the given email
+     *
      * @param email target email
      * @return user with that email, null if none found
      */
@@ -266,6 +275,7 @@ public class Market {
 
     /**
      * Get a list of all store names in the marketplace
+     *
      * @return store names
      */
     public ArrayList<String> getStoreNames() {
@@ -389,6 +399,7 @@ public class Market {
 
     /**
      * Get the total number of sales in purchase history for a product
+     *
      * @param p product
      * @return quantity of that product sold
      */
@@ -400,6 +411,7 @@ public class Market {
 
     /**
      * Get the number of sales for a product by its index
+     *
      * @param index index of a product
      * @return quantity of that product sold
      */
@@ -420,6 +432,7 @@ public class Market {
 
     /**
      * Sort the list of products by price
+     *
      * @return the list of products, sorted
      */
     public ArrayList<Product> sortByPrice() {
@@ -433,6 +446,7 @@ public class Market {
 
     /**
      * Sort the list of products by quantity
+     *
      * @return the list of products, sorted
      */
     public ArrayList<Product> sortByQuantity() {
@@ -450,7 +464,6 @@ public class Market {
      * @return a list of products matching name, storename, and containing the description
      */
     public ArrayList<Product> matchConditions(String name, String storeName, String description) {
-        System.out.println(name + " " + storeName + " " + description);
         ArrayList<Product> out = new ArrayList<>();
 
         for (Product p : products) {
@@ -465,7 +478,6 @@ public class Market {
             }
         }
 
-        System.out.println(out);
         return out;
     }
 
@@ -488,8 +500,10 @@ public class Market {
         updateAllFiles();
     }
 
+
     /**
      * Get the list of buyers in the market
+     *
      * @return list of buyers
      */
     public ArrayList<Buyer> getBuyers() {
@@ -498,6 +512,7 @@ public class Market {
 
     /**
      * Get the list of sellers in the market
+     *
      * @return list of sellers
      */
     public ArrayList<Seller> getSellers() {
@@ -506,6 +521,7 @@ public class Market {
 
     /**
      * Get the list of stores in the market
+     *
      * @return list of stores
      */
     public ArrayList<Store> getStores() {
@@ -514,6 +530,7 @@ public class Market {
 
     /**
      * Get the list of products in the market
+     *
      * @return list of products
      */
     public ArrayList<Product> getProducts() {
