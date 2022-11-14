@@ -57,6 +57,7 @@ public class Market {
         for (String line : lines) {
             Product p = new Product(line);
 
+            System.out.println(line.split(",")[2]);
             Store s = getStoreByName(line.split(",")[2]);
             s.addProduct(p);
             p.setStoreName(s.getName());
