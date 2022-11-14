@@ -295,10 +295,13 @@ public class Seller extends User {
      *                 with
      */
     public void printDashboard(int sortType) {
-//        for (Store s : stores) {
-//            System.out.println("Store: " + s.getName());
-//            s.statisticsForSeller(sortType);
-//        }
+        System.out.println("------------------------------------------");
+        for (Store s : stores) {
+            System.out.println("Store: " + s.getName());
+            s.statisticsForSeller(sortType);
+        }
+        System.out.println("------------------------------------------");
+
     }
 
     /**
