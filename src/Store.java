@@ -256,7 +256,7 @@ public class Store {
                     salesForProducts.get(productsForSales.indexOf(product)) + quantity);
             sales += quantity;
             revenue += quantity * product.getPrice();
-            products.get(products.indexOf(product)).setQuantity(product.getQuantity() - quantity);
+            product.setQuantity(product.getQuantity() - quantity);
 //            this.updateProducts();
 //            this.updateStores();
         }
@@ -282,16 +282,33 @@ public class Store {
     }
 
     /**
+     * Check if duplicate product exists in local list
+     * @param p product
+     * @return duplicate product
+     */
+    private Product findMatchingProduct(Product p) {
+        for (Product product : products) {
+            if (p.getName().equals(product.getName()) && p.getDescription().equals(product.getDescription())) {
+                return product;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Removes a product from the list of products being sold by the store
      *
      * @param product the product being removed from the store
      */
     public void removeProduct(Product product) {
-        if (products.contains(product)) {
-            products.remove(product);
-            productsByIndex.remove(productsByIndex.indexOf(product.getIndex()));
-            salesForProducts.remove(productsForSales.indexOf(product));
-            productsForSales.remove(product);
+        Product p = findMatchingProduct(product);
+
+        if (p != null && products.contains(p)) {
+            products.remove(p);
+            productsByIndex.remove(productsByIndex.indexOf(p.getIndex()));
+//            salesForProducts.remove(productsForSales.indexOf(p));
+            productsForSales.remove(p);
 //            this.updateProducts();
 //            this.updateStores();
 //            this.reReadProducts();

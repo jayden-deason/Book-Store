@@ -284,12 +284,7 @@ public class Main {
             System.out.println("8 - Exit.");
             String answer = scan.nextLine();
             if (answer.equals("1")) {
-                ArrayList<Product> products = market.getAllProducts(true);
-                System.out.println("------------------------------------------");
-                for (int i = 0; i < products.size(); i++) {
-                    System.out.println(productString(products.get(i)));
-                }
-                System.out.println("------------------------------------------");
+                printListings(market);
 
                 System.out.println("Would you like to select a product? (y/n)");
                 String input = scan.nextLine();
@@ -375,6 +370,7 @@ public class Main {
                 System.out.println("What is the file name to export to?");
                 String fileName = scan.nextLine();
                 buyer.exportToFile(fileName, market);
+                System.out.println("Exported!");
             } else if (answer.equals("5")) {
                 market.makePurchase(buyer);
                 System.out.println("Checked out!");
@@ -489,6 +485,15 @@ public class Main {
         System.out.printf("Your total price is: $%.2f\n", price);
         System.out.println("------------------------------------------");
 
+    }
+
+    public static void printListings(Market market) {
+        ArrayList<Product> products = market.getAllProducts(true);
+        System.out.println("------------------------------------------");
+        for (int i = 0; i < products.size(); i++) {
+            System.out.println(productString(products.get(i)));
+        }
+        System.out.println("------------------------------------------");
     }
 
 }

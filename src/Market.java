@@ -255,6 +255,7 @@ public class Market {
             int quantity = quantities.get(i);
 
             Store s = getStoreByName(p.getStoreName());
+//            p.setQuantity(p.getQuantity() - quantities.get(i));
             s.makePurchase(buyer, quantity, p);
         }
 

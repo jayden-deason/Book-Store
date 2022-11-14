@@ -13,9 +13,61 @@ import java.util.ArrayList;
  */
 public class MainTestCases {
     public static void main(String[] args) {
+        testRequirements();
 //        printAllInfo();
-        creatingSellerTest();
+//        creatingSellerTest();
     }
+
+    public static void testRequirements() {
+        Market market = Market.getInstance();
+
+        // products
+        Product p = new Product("0,Blue Book,Vons,A Blue Book,30,10.99");
+        System.out.println(p.getName());
+        System.out.println(p.getStoreName());
+        System.out.println(p.getDescription());
+        System.out.println(p.getQuantity());
+        System.out.println(p.getPrice());
+
+        // print listings
+        Main.printListings(market);
+
+        Product product = market.getProductByIndex(0);
+        Main.printProductPage(product);
+
+
+        // purchases
+        Buyer b = new Buyer("1,tommy@gmail.com,bigtom69,<0:2>,<4:3/7:2/5:1>");
+        market.addBuyer(b);
+        market.makePurchase(b);
+
+        Main.printProductPage(market.getProductByIndex(0));
+        System.out.println("^^ Product quantity decreased by 2");
+
+        // sellers
+        Seller seller = market.getSellerByEmail("bob@gmail.com");
+        System.out.println(seller.getStoreNames());
+
+        Store store = market.getStoreByName(seller.getStoreNames().get(0));
+        System.out.println(store.getProductNames());
+        store.removeProduct(product);
+        System.out.println(store.getProductNames());
+        System.out.println("^^ Removed Blue Book");
+
+        System.out.println("------------------------------------------");
+        ArrayList<Store> stores = seller.getStores();
+
+        if (stores.size() == 0) {
+            System.out.println("No stores!");
+        }
+        for (Store s : seller.getStores()) {
+            System.out.println(s.getName() + " -- " + s.getSales(market));
+        }
+        System.out.println("------------------------------------------");
+
+
+    }
+
 
     public static void printAllInfo() {
         Market market = Market.getInstance();
