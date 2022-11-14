@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 /**
  * Product
  * <p>
@@ -157,11 +159,31 @@ public class Product {
         this.index = index;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, storeName, price, quantity, description, storeName);
+    }
+
     /**
      * Get a string description of the product, can be used to save to a file
      *
      * @return string description of the product
      */
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof Product)) {
+            return false;
+        } else {
+            Product obj = (Product) object;
+            return ((obj.getIndex() == this.getIndex())
+                    && obj.getName().equals(this.getName())
+                    && obj.getQuantity() == this.getQuantity()
+                    && obj.getDescription().equals(this.getDescription())
+                    && obj.getPrice() == this.getPrice()
+                    && obj.getStoreName().equals(this.getStoreName()));
+        }
+    }
     @Override
     public String toString() {
         return String.format("%d,%s,%s,%s,%d,%.2f",
