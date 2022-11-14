@@ -1,7 +1,5 @@
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Market
@@ -116,7 +114,7 @@ public class Market {
      * @param idx index of product
      * @return product at that index, null if no matches
      */
-    private Product getProductByIndex(int idx) {
+    public Product getProductByIndex(int idx) {
         if (products.get(idx).getIndex() == idx) return products.get(idx);
 
         for (Product p : products) {
@@ -124,6 +122,16 @@ public class Market {
                 return p;
             }
         }
+        return null;
+    }
+
+    public User getUserByEmail(String email) {
+        for (User user : getAllUsers()) {
+            if (user.getEmail().equals(email)) {
+                return user;
+            }
+        }
+
         return null;
     }
 
@@ -164,6 +172,16 @@ public class Market {
         buyer.makePurchase();
     }
 
+    public ArrayList<String> getStoreNames() {
+        ArrayList<String> out = new ArrayList<>();
+
+        for (Store s : stores) {
+            out.add(s.getName());
+        }
+
+        return out;
+    }
+
 
     /**
      * Find a seller by their email
@@ -173,7 +191,7 @@ public class Market {
      */
     public Seller getSellerByEmail(String email) {
         for (Seller s : sellers) {
-            if (s.getUsername().equals(email)) { // TODO: email vs. username confusion
+            if (s.getEmail().equals(email)) { // TODO: email vs. username confusion
                 return s;
             }
         }
@@ -188,7 +206,7 @@ public class Market {
      */
     public Buyer getBuyerByEmail(String email) {
         for (Buyer b : buyers) {
-            if (b.getUsername().equals(email)) {
+            if (b.getEmail().equals(email)) {
                 return b;
             }
         }
@@ -318,7 +336,8 @@ public class Market {
      */
     public void createUser(User user) {
         if (user instanceof Buyer) {
-            Buyer b = (Buyer) user; // rely on Buyer constructor having proper index
+            Buyer b = (Buyer) user;
+            b.setIndex(buyers.size());
             buyers.add(b);
         } else if (user instanceof Seller) {
             Seller s = (Seller) user;

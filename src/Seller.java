@@ -7,7 +7,7 @@ import java.io.FileWriter;
 
 /**
  * Seller
- *
+ * <p>
  * A class that representing a seller user in the marketplace, has functionality for creating and storing stores,
  * displaying content for sellers, and exporting a csv of products from a store
  *
@@ -19,25 +19,28 @@ public class Seller extends User {
     private int index; // the index of the Seller in the Seller.csv file
 
     /**
-     * Create  a new seller with a given username and password
+     * Create  a new seller with a given email and password
      * When a seller gets created using this constructor, it gets added to the Sellers.csv file
-     * @param username the seller's username
+     *
+     * @param email    the seller's email
      * @param password the seller's password
-     * throws badNaming Exception when a username of password contains a comma, as this would mess up the csv file
+     *                 throws badNaming Exception when a email of password contains a comma, as this would mess up the csv file
      */
-    public Seller(String username, String password) throws badNamingException {
-        super(username, password);
-        if (username.contains(",")) {
-            throw new badNamingException("Please do not have a comma in your username!");
+    public Seller(String email, String password) throws BadNamingException {
+        super(email, password);
+        if (email.contains(",")) {
+            throw new BadNamingException("Please do not have a comma in your email!");
         }
         if (password.contains(",")) {
-            throw new badNamingException("Please do not have a comma in your password!");
+            throw new BadNamingException("Please do not have a comma in your password!");
         }
         this.stores = new ArrayList<Store>();
     }
+
     /**
      * Create a new seller using the line stored in the Seller.csv file, when this is called, it does not add a new line
      * to the Seller .csv file because it is only used to create a new Marketplace after relaunching the application.
+     *
      * @param line the line taken from the Seller.csv file
      */
     public Seller(String line) {
@@ -52,7 +55,7 @@ public class Seller extends User {
             br = new BufferedReader(new FileReader("Stores.csv"));
             String l = br.readLine();
             while (l != null) {
-                for (String n: storesIndex) {
+                for (String n : storesIndex) {
                     if (Integer.parseInt(n) == i) {
                         Store s = new Store(l);
                         this.stores.add(s);
@@ -74,9 +77,11 @@ public class Seller extends User {
             }
         }
     }
+
     /**
      * Adds a new store to Stores.csv. First reads Stores.csv and stores the lines and then writes Stores.csv including
      * the new store
+     *
      * @return the index of the store
      */
     public int writeStoresFile(String fileName, Store s) {
@@ -110,7 +115,7 @@ public class Seller extends User {
         FileWriter fw = null;
         try {
             fw = new FileWriter(fileName);
-            for (String str: lines) {
+            for (String str : lines) {
                 fw.write(str + "\n");
             }
             int lastIndex = 0;
@@ -124,8 +129,8 @@ public class Seller extends User {
                 System.out.println("Something went wrong with updating your profile!");
                 return -1;
             }
-            String line = lastIndex + "," + s.getName() + "," + super.getUsername() + ",<";
-            for (Product product: s.getProducts()) {
+            String line = lastIndex + "," + s.getName() + "," + super.getEmail() + ",<";
+            for (Product product : s.getProducts()) {
                 line += product.getIndex() + ":" + product.getQuantity() + "/";
             }
             line = line.substring(0, line.length() - 1) + ">";
@@ -145,8 +150,10 @@ public class Seller extends User {
             }
         }
     }
+
     /**
      * Updates Seller.csv when a new store is added, by storing a reference to that store in the seller's row.
+     *
      * @params indexToAdd : states the index of the new store in the Store.csv file
      */
     public int updateSellerFile(int indexToAdd) {
@@ -156,7 +163,7 @@ public class Seller extends User {
             br = new BufferedReader(new FileReader("Sellers.csv"));
             String line = br.readLine();
             while (line != null) {
-                if (line.split(",")[1].equals(this.getUsername())) {
+                if (line.split(",")[1].equals(this.getEmail())) {
                     String[] parts = line.split(",");
                     String storesStringArray = parts[3].substring(1, parts[3].length() - 1) + "/" + indexToAdd;
                     String newLine = String.format("%s,%s,%s,%s", parts[0], parts[1], parts[2], storesStringArray);
@@ -183,7 +190,7 @@ public class Seller extends User {
         FileWriter fw = null;
         try {
             fw = new FileWriter("Sellers.csv");
-            for (String str: lines) {
+            for (String str : lines) {
                 fw.write(str + "\n");
             }
             return 0;
@@ -201,20 +208,22 @@ public class Seller extends User {
             }
         }
     }
+
     /**
      * Exports a csv of all the products in a store that a seller has.
-     * @param fileName the fileName that the user wants to write a new file to
+     *
+     * @param fileName  the fileName that the user wants to write a new file to
      * @param storeName the store that the user wants to export products from
      * @return the index of the store
      */
     public void exportProducts(String fileName, String storeName) {
-        for (Store s: stores) {
+        for (Store s : stores) {
             if (s.getName().equals(storeName)) {
                 FileWriter fw = null;
                 try {
                     fw = new FileWriter(fileName);
                     int index = 0;
-                    for (Product product: s.getProducts()) {
+                    for (Product product : s.getProducts()) {
                         fw.write(index + "," + product.toString() + "\n");
                         index++;
                     }
@@ -237,22 +246,24 @@ public class Seller extends User {
     public ArrayList<Store> getStores() {
         return stores;
     }
+
     public void setStores(ArrayList<Store> stores) {
         this.stores = stores;
     }
+
     /**
      * This function is used to create a new store. It makes no store with the same name exists already for that
      * seller. Then, It will call the functions to save that store in the Stores.csv and update the Sellers.csv row
      * with a reference to the new store.
      */
     public void addStore(String storeName) {
-        for (Store store: stores) {
+        for (Store store : stores) {
             if (store.getName().equals(storeName)) {
                 System.out.println("Error: You already have a store with the same name!");
                 return;
             }
         }
-        Store s = new Store(0, storeName, this.getUsername(), 0, 0, "", "0");
+        Store s = new Store(0, storeName, this.getEmail(), 0, 0, "", "0");
         //int index, String storeName, String sellerName, int sales, double revenue, String productIndices,
         //                 String productSales
         stores.add(s);
@@ -266,63 +277,77 @@ public class Seller extends User {
 
     /**
      * Prints the seller's dashboard with a sortType
-     *@param sortType if sortType == 0, then it will not sort
+     *
+     * @param sortType if sortType == 0, then it will not sort
      *                 if sortType == 1, then it will print everything ordered alphabetically
      *                 if sortType == 2, then it will print everything based on the quantity of products being dealt
      *                 wit
      */
     public void printDashboard(int sortType) {
-        for (Store s: stores) {
+        for (Store s : stores) {
             System.out.println("Store: " + s.getName());
             s.statisticsForSeller(sortType);
         }
     }
+
     /**
      * Prints the seller object in a format that matches the Seller.csv row. It does not include the index.
      */
     public String toString() {
         String storesStr = "<";
-        for (Store s: this.stores) {
+        for (Store s : this.stores) {
             storesStr += s.getIndex() + "/";
         }
         storesStr = storesStr.substring(storesStr.length() - 1) + ">";
-        return String.format("%d,%s,%s,%s", this.getIndex(), this.getUsername(), this.getPassword(), storesStr);
+        return String.format("%d,%s,%s,%s", this.getIndex(), this.getEmail(), this.getPassword(), storesStr);
 
     }
 
     public int getIndex() {
         return index;
     }
+
     /**
      * Prints all of the products in customer carts
-     * @param buyers all of the buyers in the Marketplace
-     * @param products all of the products in the Marketplace
+     *
+     * @param market   the entire marketplace that this seller is in
      */
-    public void viewProductsInCart(ArrayList<Buyer> buyers, ArrayList<Product> products) {
+    public void viewProductsInCart(Market market) {
         System.out.println("In Customer Carts: ");
-        for (Buyer b: buyers) {
+        for (Buyer b : market.getBuyers()) {
             ArrayList<String> items = b.getShoppingCart();
-            for (int i = 0; i < items.size(); i++) {
+            for (String item : items) {
                 int number = 1;
-                for (Store s: stores) {
-                    Product p = products.get(Integer.parseInt(items.get(i).split(":")[0]));
-                    if (p.getStoreName().equals(s.getName())) {
-                        System.out.println(number + ".)");
-                        number++;
-                        System.out.println("Product: " + p.getName() + "| Quantity: " + items.get(i).split(":")[1]);
-                        System.out.println("Store: " + p.getStoreName() + "| Description: " + p.getDescription());
-                    }
+                for (Store s : stores) {
+                    Product p = market.getProductByIndex(Integer.parseInt(item.split(":")[0]));
+                    System.out.println(number + ")");
+                    number++;
+                    System.out.println("Product: " + p.getName() + "| Quantity: " + item.split(":")[1]);
+                    System.out.println("Store: " + p.getStoreName() + "| Description: " + p.getDescription());
+
                 }
             }
         }
     }
+
     public void setIndex(int index) {
         this.index = index;
     }
+
+    public Store getStoreByName(String storeName) {
+        for (Store s : stores) {
+            if (s.getName().equals(storeName)) {
+                return s;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * the main method is used for testing.
      */
-    public static void main(String[] args) throws badNamingException {
+    public static void main(String[] args) throws BadNamingException {
         //Testing the creation of a seller
         Seller s1 = new Seller("0,bob@gmail.com,bob123,<1/2>");
         System.out.println(s1 + "==" + "0,bob@gmail.com,bob123,<1/2> : " + s1.toString().equals("0,bob@gmail.com," +
@@ -330,7 +355,7 @@ public class Seller extends User {
         //Testing the creation of a seller and an edge case that comes when creating a Seller with a "," in the
         try {
             Seller s2 = new Seller("bob@gmail.com", "bob,123");
-        } catch (badNamingException e) {
+        } catch (BadNamingException e) {
             System.out.println("badNamingException thrown for password: bob,123");
         }
         //Testing the addStore method updates the files appropriately
