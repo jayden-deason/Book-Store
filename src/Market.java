@@ -56,7 +56,7 @@ public class Market {
         // sellers
         ArrayList<String> lines = readFile(sellersFile);
         for (String line : lines) {
-            sellers.add(new Seller(line));
+            addSeller(new Seller(line));
         }
 
         // stores
@@ -72,8 +72,7 @@ public class Market {
         // buyers
         lines = readFile(buyersFile);
         for (String line : lines) {
-            Buyer b = new Buyer(line);
-            buyers.add(b);
+            addBuyer(new Buyer(line));
         }
     }
 
@@ -89,6 +88,28 @@ public class Market {
 
             addProduct(p);
         }
+    }
+
+    /**
+     * Add a seller to the market
+     * @param s seller
+     */
+    public void addSeller(Seller s) {
+        if (s.getIndex() == -1) {
+            s.setIndex(sellers.size());
+        }
+        sellers.add(s);
+    }
+
+    /**
+     * Add a buyer to the market
+     * @param b buyer
+     */
+    public void addBuyer(Buyer b) {
+        if (b.getIndex() == -1) {
+            b.setIndex(buyers.size());
+        }
+        buyers.add(b);
     }
 
     /**
@@ -109,6 +130,9 @@ public class Market {
      * @param s store
      */
     public void addStore(Store s) {
+        if (s.getIndex() == -1) {
+            s.setIndex(stores.size());
+        }
         Seller seller = getSellerByEmail(s.getSellerName());
         seller.addStore(s);
         stores.add(s);

@@ -445,7 +445,7 @@ public class Main {
      * @param p product
      * @return string representation of product
      */
-    private static String productString(Product p) {
+    public static String productString(Product p) {
         return String.format("%d) Name: %s | Store: %s | $%.2f",
                 p.getIndex(), p.getName(), p.getStoreName(), p.getPrice());
     }
@@ -454,7 +454,7 @@ public class Main {
      * Print the page with a product description
      * @param p product
      */
-    private static void printProductPage(Product p) {
+    public static void printProductPage(Product p) {
         System.out.println("------------------------------------------");
         System.out.println(productString(p) + " | Quantity: " + p.getQuantity());
         System.out.println(p.getDescription());
@@ -466,7 +466,7 @@ public class Main {
      * @param buyer the buyer
      * @param market the market that the buyer is in
      */
-    private static void printShoppingCart(Buyer buyer, Market market) {
+    public static void printShoppingCart(Buyer buyer, Market market) {
         ArrayList<String> shoppingCart = buyer.getShoppingCart();
 
         System.out.println("------------------------------------------");

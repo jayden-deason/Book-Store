@@ -23,6 +23,16 @@ public class Store {
     private double revenue; // Total revenue the store received
     private String productIndices; // The indices of the store's products as a string
 
+
+    /**
+     * Create a new empty Store with a name and seller
+     * @param index index of the store in the csv
+     * @param storeName name of the store
+     * @param sellerName name of the seller
+     */
+    public Store(int index, String storeName, String sellerName) {
+        this(index, storeName, sellerName, 0, 0, "", "");
+    }
     /**
      * Creates a new Store object with the given parameters
      *
