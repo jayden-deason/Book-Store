@@ -15,16 +15,17 @@ CS 18000, section 001
 ## Executing program
 
 * How to run the program
-* Compile all the files
+* From the project directory:
+* Compile the Main class
 
 ```
-javac "filenamehere"
+javac -cp src src/Main.java
 ```
 
 * Run the main method
 
 ```
-java main
+java -cp src src/Main.java
 ```
 
 ## Submissions
