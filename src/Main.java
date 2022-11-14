@@ -13,15 +13,17 @@ import java.util.ArrayList;
 public class Main {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
-        System.out.println("What is the buyer file?");
-        String buyerFile = scan.nextLine();
-        System.out.println("What is the seller file?");
-        String sellerFile = scan.nextLine();
-        System.out.println("What is the store file?");
-        String storesFile = scan.nextLine();
-        System.out.println("What is the product file?");
-        String productsFile = scan.nextLine();
-        Market market = new Market(buyerFile, sellerFile, storesFile, productsFile);
+//        System.out.println("What is the buyer file?");
+//        String buyerFile = scan.nextLine();
+//        System.out.println("What is the seller file?");
+//        String sellerFile = scan.nextLine();
+//        System.out.println("What is the store file?");
+//        String storesFile = scan.nextLine();
+//        System.out.println("What is the product file?");
+//        String productsFile = scan.nextLine();
+//        Market market = new Market(buyerFile, sellerFile, storesFile, productsFile);
+
+        Market market = new Market("Customers.csv", "Sellers.csv", "Stores.csv", "Products.csv");
         while (true) {
             System.out.println("Are you a buyer or a seller? (buyer/seller)");
             String answer = scan.nextLine();
@@ -47,7 +49,7 @@ public class Main {
                 while (true) {
                     String username = "";
                     while (true) {
-                        System.out.println("Enter your username.");
+                        System.out.println("Enter your email.");
                         username = scan.nextLine();
                         if (username.contains("@") && username.contains(".")) {
                             break;
@@ -123,11 +125,12 @@ public class Main {
         while (true) {
             System.out.println("Enter a number:");
             System.out.println("1 - Create a store.");
-            System.out.println("2 - Add, edit, or remove products in store.");
+            System.out.println("2 - Add, edit, or remove books to a store.");
             System.out.println("3 - View sales.");
             System.out.println("4 - View dashboard.");
-            System.out.println("5 - Export products.");
-            System.out.println("6 - Exit.");
+            System.out.println("5 - Export books to .csv.");
+            System.out.println("6 - View books in Customer Carts.");
+            System.out.println("7 - Exit.");
             String answer = scan.nextLine();
             if (answer.equals("1")) {
                 System.out.println("What is the store name?");
@@ -145,11 +148,11 @@ public class Main {
                 if (store == null) {
                     System.out.println("Store does not exist!");
                 } else {
-                    System.out.println("What is the product name?");
+                    System.out.println("What is the book name?");
                     String name = scan.nextLine();
-                    System.out.println("What is the product's store name?");
+                    System.out.println("What is the book's store name?");
                     String productStoreName = scan.nextLine();
-                    System.out.println("What is the product's description?");
+                    System.out.println("What is the book's description?");
                     String description = scan.nextLine();
                     int quantity = -1;
                     double price = -1.0;
@@ -162,7 +165,7 @@ public class Main {
                             quantity = Integer.parseInt(scan.nextLine());
                             System.out.println("What is the price?");
                             price = Double.parseDouble(scan.nextLine());
-                            System.out.println("What is the index of the product being added/edited/removed?");
+                            System.out.println("What is the index of the book being added/edited/removed?");
                             index = Integer.parseInt(scan.nextLine());
                             if (quantity < 0 || price < 0.0 || index < 0) {
                                 num = false;
@@ -179,10 +182,10 @@ public class Main {
                     Product product = new Product(name, productStoreName, description, quantity, price, index);
                     while (true) {
                         System.out.println("Enter a number:");
-                        System.out.println("1 - Add product.");
-                        System.out.println("2 - Delete product.");
-                        System.out.println("3 - Edit product.");
-                        System.out.println("4 - Import product.");
+                        System.out.println("1 - Add Book.");
+                        System.out.println("2 - Delete Book.");
+                        System.out.println("3 - Edit Book.");
+                        System.out.println("4 - Import books.");
                         String answerTwo = scan.nextLine();
                         if (answerTwo.equals("1")) {
                             store.addProduct(product);
@@ -234,6 +237,8 @@ public class Main {
                 seller.exportProducts(fileName, store);
                 System.out.println("Export complete!");
             } else if (answer.equals("6")) {
+                seller.viewProductsInCart(market.getBuyers(), market.getProducts());
+            } else if (answer.equals("7")) {
                 System.out.println("Have a nice day!");
                 break;
             } else {
@@ -246,7 +251,7 @@ public class Main {
             System.out.println("Enter a number:");
             System.out.println("1 - View marketplace.");
             System.out.println("2 - View dashboard.");
-            System.out.println("3 - Find product.");
+            System.out.println("3 - Find book.");
             System.out.println("4 - Export shopping history.");
             System.out.println("5 - Checkout shopping cart.");
             System.out.println("6 - Edit/remove shopping cart.");
@@ -271,7 +276,7 @@ public class Main {
                 if (store == null) {
                     System.out.println("Store does not exist.");
                 } else {
-                    System.out.println("What is the product?");
+                    System.out.println("What is the book?");
                     String productName = scan.nextLine();
                     Product product = null;
                     ArrayList<Product> products = store.getProducts();
@@ -281,7 +286,7 @@ public class Main {
                         }
                     }
                     if (product == null) {
-                        System.out.println("Product does not exist.");
+                        System.out.println("Book does not exist.");
                     } else {
                         System.out.print(product.getIndex() + ".) | Name: "
                                 + product.getName() + " | $"
@@ -332,7 +337,7 @@ public class Main {
                 int quantity = -1;
                 while (true) {
                     num = true;
-                    System.out.println("What is the index of the product being edited");
+                    System.out.println("What is the index of the book being edited");
                     try {
                         index = Integer.parseInt(scan.nextLine());
                     } catch (NumberFormatException e) {
@@ -368,7 +373,7 @@ public class Main {
                             }
                         }
                         if (!(exists)) {
-                            System.out.println("Product did not exist within cart!");
+                            System.out.println("Book did not exist within cart!");
                         }
                     } else {
                         System.out.println("Invalid index.");

@@ -204,6 +204,7 @@ public class Store {
             PrintWriter pw = new PrintWriter("Products.csv");
             for (String product : productFile) {
                 pw.write(product + "\n");
+
             }
             pw.close();
             productFile.clear();
