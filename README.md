@@ -28,6 +28,10 @@ javac -cp src src/Main.java
 java -cp src src/Main.java
 ```
 
+* The same can be repeated for any test file, just replace "Main.java" with the appropriate
+  file ([BuyerTest.java](src/BuyerTest.java), [StoreTest.java](src/StoreTest.java),
+  or [MainTestCases.java](src/MainTestCases.java))
+
 ## Submissions
 
 * Visv Shah -- Submitted report on Brightspace
