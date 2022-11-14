@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 public class StoreTest {
     public static void main(String[] args) {
-        Market market = new Market("Customers.csv", "Sellers.csv", "Stores.csv", "Products.csv");
         ArrayList<String> storeLines = new ArrayList<>();
         ArrayList<Store> stores = new ArrayList<>();
         try {
@@ -33,59 +32,53 @@ public class StoreTest {
         for (Store store : stores) {
             System.out.println(store);
             System.out.println("Products by Index: " + store.getProductsByIndex());
-            System.out.println("Products by Sales: " + store.productsBySalesToString());
+//            System.out.println("Products by Sales: " + store.productsBySalesToString());
         }
 
 
 
         System.out.println("TESTING REMOVAL OF A PRODUCT");
         storeOne.removeProduct(product);
-        market.updateAllFiles();
         System.out.println(storeOne.getProducts());
         System.out.println("Products by Index: " + storeOne.productsByIndexToString());
-        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
+//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 
 //        System.out.println("TESTING ADDING A PRODUCT");
 //        storeOne.addProduct(product);
-//        market.updateAllFiles();
-//        market.printToFile(storeOne.getProducts(), "Products.csv");
-//        System.out.println(storeOne.getProducts());
-//        System.out.println("Products by Index: " + storeOne.productsByIndexToString());
+        System.out.println(storeOne.getProducts());
+        System.out.println("Products by Index: " + storeOne.productsByIndexToString());
 //        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
-//
-//        System.out.println("TESTING MODIFYING A PRODUCT");
-//        storeOne.modifyProduct(newProduct);
-//        market.updateAllFiles();
-//        System.out.println(storeOne.getProducts());
-//        System.out.println("Products by Index: " + storeOne.productsByIndexToString());
+
+        System.out.println("TESTING MODIFYING A PRODUCT");
+        storeOne.modifyProduct(newProduct);
+        System.out.println(storeOne.getProducts());
+        System.out.println("Products by Index: " + storeOne.productsByIndexToString());
 //        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
-//
-//        System.out.println("MODIFYING THE SAME PRODUCT TO RESET THE PRODUCTS.CSV FILE");
-//        storeOne.modifyProduct(product);
-//        market.updateAllFiles();
-//        System.out.println(storeOne.getProducts());
-//        System.out.println("Products by Index: " + storeOne.productsByIndexToString());
+
+        System.out.println("MODIFYING THE SAME PRODUCT TO RESET THE PRODUCTS.CSV FILE");
+        storeOne.modifyProduct(product);
+        System.out.println(storeOne.getProducts());
+        System.out.println("Products by Index: " + storeOne.productsByIndexToString());
 //        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
-//
-//        System.out.println("TESTING PURCHASING A PRODUCT");
-//        // Need this since the product object here is not linked to the Products.csv file
-//        storeOne.makePurchase(buyer, 1, product);
-//        market.updateAllFiles();
-//        product.setQuantity(product.getQuantity() - 1);
+
+        System.out.println("TESTING PURCHASING A PRODUCT");
+        // Need this since the product object here is not linked to the Products.csv file
+        storeOne.makePurchase(buyer, 1, product);
+        product.setQuantity(product.getQuantity() - 1);
 //        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 //        System.out.println("Total Sales: " + storeOne.getSales());
-//        System.out.println("Total Revenue: " + storeOne.getRevenue());
-//        System.out.println(product);
-//
-//        System.out.println("TESTING PURCHASING A PRODUCT");
-//        storeOne.makePurchase(buyer, 1, product);
-//        // Need this since the product object here is not linked to the Products.csv file
-//        product.setQuantity(product.getQuantity() - 1);
+        System.out.println("Total Revenue: " + storeOne.getRevenue());
+        System.out.println(product);
+
+        System.out.println("TESTING PURCHASING A PRODUCT");
+        storeOne.makePurchase(buyer, 1, product);
+        // Need this since the product object here is not linked to the Products.csv file
+        product.setQuantity(product.getQuantity() - 1);
 //        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 //        System.out.println("Total Sales: " + storeOne.getSales());
-//        System.out.println("Total Revenue: " + storeOne.getRevenue());
-//        System.out.println(product);
-//
+        System.out.println("Total Revenue: " + storeOne.getRevenue());
+        System.out.println(product);
+
 //        System.out.println("TESTING PRINTING STATISTICS FOR SELLER BASED ON DIFFERENT SORTS");
 //        storeOne.statisticsForSeller(0);
 //        storeOne.statisticsForSeller(1);
