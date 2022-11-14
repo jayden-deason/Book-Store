@@ -47,9 +47,11 @@ public class Store {
         this.customerData = new HashMap<>();
         this.productsForSales = new ArrayList<>();
         this.salesForProducts = new ArrayList<>();
-        String[] splitProducts = productIndices.replace("<", "").replace(">", "").split("/");
-        for (String productIndex : splitProducts) {
-            productsByIndex.add(Integer.parseInt(productIndex));
+        if(productIndices.length() > 0) {
+            String[] splitProducts = productIndices.replace("<", "").replace(">", "").split("/");
+            for (String productIndex : splitProducts) {
+                productsByIndex.add(Integer.parseInt(productIndex));
+            }
         }
         try {
             File file = new File("Products.csv");
@@ -453,6 +455,9 @@ public class Store {
             retString = retString + product.getIndex() + ":" + salesForProducts.get(productsForSales.indexOf(product))
                     + "/";
         }
+        if (productsForSales.size() == 0) {
+            return retString + ">";
+        }
         return retString.substring(0, retString.length() - 1) + ">";
     }
 
@@ -460,6 +465,9 @@ public class Store {
         String retString = "<";
         for (Integer index : productsByIndex) {
             retString = retString + index + "/";
+        }
+        if (productsByIndex.size() == 0) {
+            return retString + ">";
         }
         return retString.substring(0, retString.length() - 1) + ">";
     }
