@@ -234,7 +234,8 @@ public class Main {
             System.out.println("4 - Export shopping history.");
             System.out.println("5 - Checkout shopping cart.");
             System.out.println("6 - Edit/remove shopping cart.");
-            System.out.println("7 - Exit.");
+            System.out.println("7 - Print dashboard.");
+            System.out.println("8 - Exit.");
             String answer = scan.nextLine();
             if (answer.equals("1")) {
                 ArrayList<Product> products = market.getAllProducts(true);
@@ -386,6 +387,8 @@ public class Main {
                     break;
                 }
             } else if (answer.equals("7")) {
+                buyer.printDashboard(scan, market);
+            } else if (answer.equals("8")) {
                 System.out.println("Have a nice day!");
                 return;
             } else {

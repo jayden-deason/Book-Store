@@ -48,7 +48,7 @@ public class Market {
             Store s = new Store(line);
             stores.add(s);
             Seller seller = getSellerByEmail(line.split(",")[2]);
-            seller.getStores().add(s);
+            seller.addStore(s);
         }
 
         // products

@@ -283,6 +283,10 @@ public class Seller extends User {
         }
     }
 
+    public void addStore(Store s) {
+        stores.add(s);
+    }
+
     /**
      * Prints the seller's dashboard with a sortType
      *

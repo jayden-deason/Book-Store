@@ -126,128 +126,73 @@ public class Buyer extends User {
         }
     }
 
-    //    /**
-//     * Prints the buyer's dashboard
-//     *
-//     * @param scan a scanner used to implement the menu for the dashboard
-//     */
-//    //@Override
-//    public void printDashboard(Scanner scan) {
-//        ArrayList<String> storeLines = new ArrayList<String>(); //arraylist storing all the lines from stores.csv
-//        ArrayList<Store> stores = new ArrayList<Store>(); //arraylist containing stores created from the stores.csv
-//        try (BufferedReader bfr = new BufferedReader(new FileReader("Stores.csv"))) {
-//            String line = bfr.readLine();
-//            while (line != null) {
-//                storeLines.add(line);
-//                stores.add(new Store(line)); //creates a store and adds it to the stores arraylist
-//                line = bfr.readLine();
-//            }
-//            printStoreInfo(stores); //runs method to print the dashboard (unsorted)
-//            int answer = -1;
-//            do { //runs until buyer chooses to exit the dashboard, manages sorting
-//                System.out.println("1. Sort by products sold");
-//                System.out.println("2. Sort by purchase history");
-//                System.out.println("3. Exit Dashboard");
-//
-//                try {
-//                    answer = scan.nextInt();
-//                    scan.nextLine();
-//                    if (answer < 1 || answer > 3) //throws exception if the answer is an invalid number
-//                        throw new NumberFormatException();
-//                    if (answer == 1) { //runs if sorting based off total sales
-//                        stores.sort((s1, s2) -> Integer.compare(s1.getSales(), s2.getSales()));
-//                        Collections.reverse(stores);
-//                        printStoreInfo(stores);
-//                    }
-//                    if (answer == 2) { //runs if sorting based of purchase history
-//                        ArrayList<Store> storesByHistory = new ArrayList<Store>(); //arraylist containing copies of stores to be sorted
-//                        for (int i = 0; i < stores.size(); i++) { //copies elements from the stores arraylist into storesByHistory
-//                            Store store = new Store(stores.get(i).getIndex(), stores.get(i).getName(),
-//                                    stores.get(i).getSellerName(), 0, 0.0, stores.get(i).getProductIndices(),
-//                                    "<0:0>");
-//                            storesByHistory.add(i, store);
-//                        }
-//                        String history;
-//                        ArrayList<String> purchaseHistory = new ArrayList<String>(); //arraylist storing purchase history
-//                        BufferedReader customerReader = new BufferedReader(new FileReader("Customers.csv"));
-//                        String customerLine = customerReader.readLine();
-//                        while (customerLine != null) {
-//                            if (Integer.parseInt(customerLine.split(",")[0]) == this.getIndex()) {
-//                                if (customerLine.split(",")[4].equals("<>")) { //runs if the purchase history is empty
-//                                    System.out.println("No history to compare to");
-//                                    break;
-//                                } else { //runs if the purchase history exists
-//                                    history = customerLine.split(",")[4].substring(1,
-//                                            customerLine.split(",")[4].length() - 1);
-//                                    if (history.length() > 3) //runs if the purchase history contains more than one product
-//                                        Collections.addAll(purchaseHistory, history.split("/"));
-//                                    else //runs if there is only one product in the purchase history
-//                                        purchaseHistory.add(history);
-//                                }
-//                            }
-//                            customerLine = customerReader.readLine();
-//                        }
-//                        ArrayList<Product> productList = new ArrayList<Product>(); //an arraylist containing the products for a store
-//                        for (String productInfo : purchaseHistory) {
-//                            BufferedReader productReader = new BufferedReader(new FileReader("Products.csv"));
-//                            String productLine = productReader.readLine();
-//                            while (productLine != null) {
-//                                if (productInfo.substring(0, 1).equals(productLine.split(",")[0])) {
-//                                    Product product = new Product(productLine);
-//                                    product.setQuantity(Integer.parseInt(productInfo.substring(2)));
-//                                    productList.add(product);
-//                                }
-//                                productLine = productReader.readLine();
-//                            }
-//                        }
-//
-//                        for (int i = 0; i < storesByHistory.size(); i++) { //updates the stores in storeByHistory with sales for one customer
-//                            for (int j = 0; j < productList.size(); j++) {
-//                                if (storesByHistory.get(i).getName().equals(productList.get(j).getStoreName())) {
-//                                    storesByHistory.get(i).setSales(storesByHistory.get(i).getSales()
-//                                            + Integer.parseInt(purchaseHistory.get(j).substring(2)));
-//                                }
-//                            }
-//                        }
-//                        storesByHistory.sort((s1, s2) -> Integer.compare(s1.getSales(), s2.getSales()));
-//                        Collections.reverse(storesByHistory);
-//                        printStoreInfo(storesByHistory);
-//                    }
-//                } catch (NumberFormatException e) { //catches exception for incorrect answer values
-//                    System.out.println("Enter a valid integer");
-//                } catch (InputMismatchException e) { //catches exception for non-integer answer values
-//                    System.out.println("Enter an integer");
-//                    scan.nextLine();
-//                }
-//            } while (answer != 3);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//    /**
-//     * Helper method for printDashboard
-//     * used to print the store and product information
-//     *
-//     * @param stores a sorted arraylist that will be printed in the dashboard format
-//     */
-//    private void printStoreInfo(ArrayList<Store> stores) throws IOException {
-//        for (Store store : stores) { //runs through all the stores in the arraylist
-//            ArrayList<Product> storeProducts = new ArrayList<Product>(); //arraylist storing the products in a store
-//            System.out.println("Store: " + store.getName()); //prints the store name
-//            ArrayList<Integer> productIndices = store.getProductsByIndex();
-//            for (int index : productIndices) { //runs through all the indices of the products
-//                BufferedReader productReader = new BufferedReader(new FileReader("Products.csv"));
-//                String productLine = productReader.readLine();
-//                while(productLine != null) {
-//                    if (Integer.parseInt(productLine.split(",")[0]) == index) {
-//                        storeProducts.add(new Product(productLine)); //stores the products for a store as a new product
-//                    }
-//                    productLine = productReader.readLine();
-//                }
-//            }
-//            for (Product product : storeProducts) { //prints all the products for the current store
-//                System.out.println("--" + product.getName() + ": " + product.getQuantity());
-//            }
-//        }
-//    }
+    /**
+     * Prints the buyer's dashboard
+     *
+     * @param scan a scanner used to implement the menu for the dashboard
+     */
+    //@Override
+    public void printDashboard(Scanner scan, Market market) {
+
+        ArrayList<Store> stores = market.getStores();
+        printStoreInfo(stores); //runs method to print the dashboard (unsorted)
+        int answer = -1;
+        do { //runs until buyer chooses to exit the dashboard, manages sorting
+            System.out.println("1. Sort by products sold");
+            System.out.println("2. Sort by purchase history");
+            System.out.println("3. Exit Dashboard");
+
+            try {
+                answer = scan.nextInt();
+                scan.nextLine();
+                if (answer < 1 || answer > 3) //throws exception if the answer is an invalid number
+                    throw new NumberFormatException();
+                if (answer == 1) { //runs if sorting based off total sales
+                    stores.sort((s1, s2) -> Integer.compare(s1.getSales(), s2.getSales()));
+                    Collections.reverse(stores);
+                    printStoreInfo(stores);
+                }
+                if (answer == 2) { //runs if sorting based of purchase history
+                    ArrayList<Store> storesByHistory = new ArrayList<Store>(); //arraylist containing copies of stores to be sorted
+                    for (int i = 0; i < stores.size(); i++) { //copies elements from the stores arraylist into storesByHistory
+                        Store store = new Store(stores.get(i).getIndex(), stores.get(i).getName(),
+                                stores.get(i).getSellerName(), 0, 0.0, stores.get(i).getProductIndices(),
+                                "<0:0>");
+                        storesByHistory.add(i, store);
+                    }
+
+                    storesByHistory.sort((s1, s2) -> s1.getSales() - s2.getSales());
+                    Collections.reverse(storesByHistory);
+                    printStoreInfo(storesByHistory);
+                }
+            } catch (NumberFormatException e) { //catches exception for incorrect answer values
+                System.out.println("Enter a valid integer");
+            } catch (InputMismatchException e) { //catches exception for non-integer answer values
+                System.out.println("Enter an integer");
+                scan.nextLine();
+            }
+        } while (answer != 3);
+
+    }
+
+    /**
+     * Helper method for printDashboard
+     * used to print the store and product information
+     *
+     * @param stores a sorted arraylist that will be printed in the dashboard format
+     */
+    private void printStoreInfo(ArrayList<Store> stores) {
+        System.out.println("------------------------------------------");
+
+        for (Store store : stores) { //runs through all the stores in the arraylist
+            ArrayList<Product> storeProducts = store.getProducts(); //arraylist storing the products in a store
+            System.out.println("Store: " + store.getName()); //prints the store name
+
+            for (Product product : storeProducts) { //prints all the products for the current store
+                System.out.println("--" + product.getName() + ": " + product.getQuantity());
+            }
+        }
+        System.out.println("------------------------------------------");
+
+    }
 }
