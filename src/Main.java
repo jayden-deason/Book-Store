@@ -255,7 +255,7 @@ public class Main {
 
                     Product p = market.getProductByIndex(idx);
                     System.out.println("------------------------------------------");
-                    System.out.println(productString(p));
+                    System.out.println(productString(p) + " | Quantity: " + p.getQuantity());
                     System.out.println(market.getProductByIndex(idx).getDescription());
                     System.out.println("------------------------------------------");
 
@@ -398,8 +398,8 @@ public class Main {
     }
 
     private static String productString(Product p) {
-        return String.format("%d) Name: %s | $%.2f | Quantity: %d | Store: %s",
-                p.getIndex(), p.getName(), p.getPrice(), p.getQuantity(), p.getStoreName());
+        return String.format("%d) Name: %s | Store: %s | $%.2f",
+                p.getIndex(), p.getName(), p.getStoreName(), p.getPrice());
     }
 
     private static void printShoppingCart(Buyer buyer, Market market) {
