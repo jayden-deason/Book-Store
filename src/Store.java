@@ -176,7 +176,7 @@ public class Store {
                     }
                 }
             }
-
+            bfr.close();
         } catch (FileNotFoundException e) {
             System.out.println("Could not find file!");
         } catch (IOException e) {
@@ -186,6 +186,7 @@ public class Store {
             PrintWriter pw = new PrintWriter("Products.csv");
             for (String product : productFile) {
                 pw.write(product);
+                pw.println();
             }
             pw.close();
         } catch (FileNotFoundException e) {
@@ -421,7 +422,7 @@ public class Store {
     }
 
     public String toString() {
-        return String.format("%d,%s,<%s>,%d,%d,%s,%s", storeName, sellerName, sales,
+        return String.format("%d,%s,%s,%d,%.2f,<%s>,%s", index, storeName, sellerName, sales,
                 revenue, productsByIndex.toString(), this.productsBySalesToString());
     }
 }
