@@ -35,6 +35,7 @@ public class Seller extends User {
             throw new BadNamingException("Please do not have a comma in your password!");
         }
         this.stores = new ArrayList<Store>();
+        this.index = -1;
     }
 
     /**

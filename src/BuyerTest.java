@@ -12,8 +12,11 @@ import java.util.Scanner;
 public class BuyerTest {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
+//        Market market = Market.getInstance();
+
         Buyer buyer = null;
         Buyer buyer1 = null;
+
         try {
             buyer = new Buyer("test@gmail.com", "password");
             buyer1 = new Buyer("admin@gmail.com", "secure");
@@ -34,8 +37,8 @@ public class BuyerTest {
         buyer.makePurchase();
         buyer.addProductToCart(product.getIndex(), 3);
         buyer.makePurchase();
-        buyer.exportToFile("purchases.csv");
-        buyer.exportToFile("purchases.csv");
+//        buyer.exportToFile("purchases.csv");
+//        buyer.exportToFile("purchases.csv");
         System.out.println(buyer);
         System.out.println(buyer1);
 //        buyer.printDashboard(scan);
