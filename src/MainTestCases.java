@@ -30,7 +30,7 @@ public class MainTestCases {
         System.out.println(p.getPrice());
 
         // print listings
-        Main.printListings(market);
+        Main.printListings(market.getAllProducts(true));
 
         Product product = market.getProductByIndex(0);
         Main.printProductPage(product);

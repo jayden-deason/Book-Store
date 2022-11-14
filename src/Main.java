@@ -13,6 +13,7 @@ public class Main {
 
     /**
      * The main method that launches the entire dashboard for users to interact with
+     *
      * @param args command-line args
      */
     public static void main(String[] args) {
@@ -39,9 +40,10 @@ public class Main {
 
     /**
      * Steps following the user signing in
+     *
      * @param action either "buyer" or "seller", for specific user types
      * @param market the market object
-     * @param scan the scanner to read terminal input
+     * @param scan   the scanner to read terminal input
      */
     public static void signUp(String action, Market market, Scanner scan) {
 //        while (true) {
@@ -116,9 +118,10 @@ public class Main {
 
     /**
      * Steps to follow for sellers
+     *
      * @param seller the seller object
      * @param market the market that the seller is in
-     * @param scan the scanner for terminal input
+     * @param scan   the scanner for terminal input
      */
     public static void sell(Seller seller, Market market, Scanner scan) {
         while (true) {
@@ -250,7 +253,7 @@ public class Main {
                 String fileName = scan.nextLine();
                 market.addProductsFromFile(fileName);
                 System.out.println("Import complete!");
-            }else if (answer.equals("7")) {
+            } else if (answer.equals("7")) {
                 System.out.println("------------------------------------------");
                 seller.viewProductsInCart(market);
                 System.out.println("------------------------------------------");
@@ -267,9 +270,10 @@ public class Main {
 
     /**
      * Steps to follow for buyers signing in
-     * @param buyer the buyer object
+     *
+     * @param buyer  the buyer object
      * @param market the market that the buyer is in
-     * @param scan the scanner used for terminal input
+     * @param scan   the scanner used for terminal input
      */
     public static void buy(Buyer buyer, Market market, Scanner scan) {
         while (true) {
@@ -284,37 +288,70 @@ public class Main {
             System.out.println("8 - Exit.");
             String answer = scan.nextLine();
             if (answer.equals("1")) {
-                printListings(market);
+                printListings(market.getAllProducts(true));
 
-                System.out.println("Would you like to select a product? (y/n)");
-                String input = scan.nextLine();
+                System.out.println("1. Select a product");
+                System.out.println("2. Search by criteria");
+                System.out.println("3. Exit");
 
-                while (input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes")) {
-                    System.out.println("Enter an item's index to learn more");
-                    int idx = scan.nextInt();
-                    scan.nextLine();
+                int choice = scan.nextInt();
+                scan.nextLine();
 
-                    Product p = market.getProductByIndex(idx);
-                    printProductPage(p);
+                while (choice != 3) {
 
-                    System.out.println("Would you like to add to cart? (y/n)");
-                    String inp = scan.nextLine();
+                    if (choice == 1) {
+                        System.out.println("Would you like to select a product? (y/n)");
+                        String input = scan.nextLine();
 
-                    if (inp.equalsIgnoreCase("y") || inp.equalsIgnoreCase("yes")) {
-                        System.out.println("What is the quantity?");
-                        int quantity = scan.nextInt(); // TODO: add checks for valid input
+                        System.out.println("Enter an item's index to learn more");
+                        int idx = scan.nextInt();
                         scan.nextLine();
 
-                        buyer.addProductToCart(idx, quantity);
-                        market.updateAllFiles();
-                        System.out.println("Added to cart!");
-                        printShoppingCart(buyer, market);
+                        Product p = market.getProductByIndex(idx);
+                        printProductPage(p);
 
+                        System.out.println("Would you like to add to cart? (y/n)");
+                        String inp = scan.nextLine();
+
+                        if (inp.equalsIgnoreCase("y") || inp.equalsIgnoreCase("yes")) {
+                            System.out.println("What is the quantity?");
+                            int quantity = scan.nextInt(); // TODO: add checks for valid input
+                            scan.nextLine();
+
+                            buyer.addProductToCart(idx, quantity);
+                            market.updateAllFiles();
+                            System.out.println("Added to cart!");
+                            printShoppingCart(buyer, market);
+
+                        }
+                    } else if (choice == 2) {
+                        System.out.println("Enter the product name. (leave empty if not searching by name)");
+                        String name = scan.nextLine();
+                        if (name.equals("")) name = null;
+
+                        System.out.println("Enter the store name. (leave empty if not searching by store)");
+                        String storeName = scan.nextLine();
+                        if (storeName.equals("")) storeName = null;
+
+                        System.out.println("Enter description terms. (leave empty if not searching by description)");
+                        String description = scan.nextLine();
+                        if (description.equals("")) description = null;
+
+                        System.out.println("Search results:");
+                        printListings(market.matchConditions(name, storeName, description));
+
+                    } else {
+                        break;
                     }
 
-                    System.out.println("Would you like to select another product? (y/n)");
-                    input = scan.nextLine();
+                    System.out.println("1. Select a product");
+                    System.out.println("2. Search by criteria");
+                    System.out.println("3. Exit");
+
+                    choice = scan.nextInt();
+                    scan.nextLine();
                 }
+
 
             } else if (answer.equals("2")) {
                 printShoppingCart(buyer, market);
@@ -434,10 +471,12 @@ public class Main {
                 System.out.println("Invalid input.");
             }
         }
+
     }
 
     /**
      * Return a nicely formatted string to print a product
+     *
      * @param p product
      * @return string representation of product
      */
@@ -448,6 +487,7 @@ public class Main {
 
     /**
      * Print the page with a product description
+     *
      * @param p product
      */
     public static void printProductPage(Product p) {
@@ -459,7 +499,8 @@ public class Main {
 
     /**
      * Print the contents of a buyer's shopping cart
-     * @param buyer the buyer
+     *
+     * @param buyer  the buyer
      * @param market the market that the buyer is in
      */
     public static void printShoppingCart(Buyer buyer, Market market) {
@@ -487,8 +528,7 @@ public class Main {
 
     }
 
-    public static void printListings(Market market) {
-        ArrayList<Product> products = market.getAllProducts(true);
+    public static void printListings(ArrayList<Product> products) {
         System.out.println("------------------------------------------");
         for (int i = 0; i < products.size(); i++) {
             System.out.println(productString(products.get(i)));

@@ -450,6 +450,7 @@ public class Market {
      * @return a list of products matching name, storename, and containing the description
      */
     public ArrayList<Product> matchConditions(String name, String storeName, String description) {
+        System.out.println(name + " " + storeName + " " + description);
         ArrayList<Product> out = new ArrayList<>();
 
         for (Product p : products) {
@@ -457,13 +458,14 @@ public class Market {
                 if (storeName == null || p.getStoreName().equalsIgnoreCase(storeName)) {
                     // decided to do .contains() for description instead of equals...
                     // doesn't really make sense to have to type the entire description?
-                    if (description != null && p.getDescription().contains(description)) {
+                    if (description == null || p.getDescription().contains(description)) {
                         out.add(p);
                     }
                 }
             }
         }
 
+        System.out.println(out);
         return out;
     }
 
