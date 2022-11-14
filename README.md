@@ -3,7 +3,16 @@
 This application can be used by buyers to search for a variety of books in an online market and make purchases from
 there. Sellers can use this application to set up stores where their books are sold on the market.
 
-### Executing program
+### Authors
+
+CS 18000, section 001
+* Visv Shah
+* Katya Teodorovich
+* Megan Long
+* Jayden Deason
+* Griffin Chittenden
+
+## Executing program
 
 * How to run the program
 * Compile all the files
@@ -18,7 +27,7 @@ javac "filenamehere"
 java main
 ```
 
-### Submissions
+## Submissions
 
 * Visv Shah -- Submitted report on Brightspace
 * Katya Teodorovich -- Submitted code on Vocareum
@@ -57,10 +66,3 @@ java main
       through to complete actions such as logging in, buying items, creating stores, editing products, etc. If the
       program is ever ended prematurely the data that was changed persists through csv files.
 
-## Authors
-
-* Visv Shah
-* Katya Teodorovich
-* Megan Long
-* Jayden Deason
-* Griffin Chittenden
