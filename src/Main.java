@@ -12,8 +12,8 @@ import java.util.ArrayList;
 public class Main {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
+        Market market = Market.getInstance();
 
-        Market market = new Market("Customers.csv", "Sellers.csv", "Stores.csv", "Products.csv");
 //        while (true) {
         System.out.println("Welcome to the book marketplace!!");
         System.out.println("Are you a buyer or a seller? (buyer/seller)");
@@ -73,7 +73,7 @@ public class Main {
             try {
                 String username = "";
                 while (true) {
-                    System.out.println("Enter your username.");
+                    System.out.println("Enter your email.");
                     username = scan.nextLine();
                     if (username.contains("@") && username.contains(".")) {
                         break;
@@ -118,9 +118,11 @@ public class Main {
             if (answer.equals("1")) {
                 System.out.println("What is the store name?");
                 String storeName = scan.nextLine();
-                seller.addStore(storeName);
+                market.addStore(storeName, seller.getEmail());
+                market.updateAllFiles();
             } else if (answer.equals("2")) {
                 System.out.println("What is the store name?");
+                System.out.println(seller.getStoreNames());
                 String storeName = scan.nextLine();
                 Store store = seller.getStoreByName(storeName);
 
@@ -129,8 +131,6 @@ public class Main {
                 } else {
                     System.out.println("What is the book name?");
                     String name = scan.nextLine();
-                    System.out.println("What is the book's store name?");
-                    String productStoreName = scan.nextLine();
                     System.out.println("What is the book's description?");
                     String description = scan.nextLine();
                     int quantity = -1;
@@ -144,9 +144,12 @@ public class Main {
                             quantity = Integer.parseInt(scan.nextLine());
                             System.out.println("What is the price?");
                             price = Double.parseDouble(scan.nextLine());
-                            System.out.println("What is the index of the book being added/edited/removed?");
-                            index = Integer.parseInt(scan.nextLine());
-                            if (quantity < 0 || price < 0.0 || index < 0) {
+
+                            if (market.getProductByName(name) != null) {
+                                System.out.println("What is the index of the book being added/edited/removed?");
+                                index = Integer.parseInt(scan.nextLine());
+                            }
+                            if (quantity < 0 || price < 0.0) {
                                 num = false;
                             }
                         } catch (NumberFormatException e) {
@@ -158,23 +161,25 @@ public class Main {
                             System.out.println("Please enter valid numbers!");
                         }
                     }
-                    Product product = new Product(name, productStoreName, description, quantity, price, index);
+                    Product product = new Product(name, storeName, description, quantity, price, index);
                     while (true) {
                         System.out.println("Enter a number:");
                         System.out.println("1 - Add Book.");
                         System.out.println("2 - Delete Book.");
                         System.out.println("3 - Edit Book.");
+                        System.out.println("4 - Exit.");
                         String answerTwo = scan.nextLine();
                         if (answerTwo.equals("1")) {
-                            store.addProduct(product, market);
+                            market.addProduct(product);
+                            market.updateAllFiles();
                         } else if (answerTwo.equals("2")) {
                             store.removeProduct(product);
+                            market.updateAllFiles();
                         } else if (answerTwo.equals("3")) {
                             store.modifyProduct(product);
+                            market.updateAllFiles();
                         } else if (answerTwo.equals("4")) {
-                            System.out.println("What is the file name to import?");
-                            String fileName = scan.nextLine();
-                            store.importProducts(fileName);
+                            break;
                         } else {
                             // if answer is not 1, 2, 3, or 4
                             System.out.println("Invalid input.");
@@ -220,6 +225,7 @@ public class Main {
                 System.out.println("What is the store name?");
                 String store = scan.nextLine();
 //                seller.exportProducts(fileName, store);
+                System.out.println(market.getStoreByName(store));
                 market.printToFile(market.getStoreByName(store).getProducts(), fileName);
                 System.out.println("Export complete!");
             } else if (answer.equals("6")) {
