@@ -1,34 +1,39 @@
-/*
-
+/**
+ * User
+ *
+ * A parent class for users in the marketplace
+ *
+ * @author Katya Teodorovich, section 001
+ * @version November 13, 2022
  */
 public class User {
-    private String username; // the user's username
+    private String email; // the user's email
     private String password; // the user's password
 
     /**
-     * Creates a new src.User object with a blank username and password
+     * Creates a new User object with a blank email and password
      */
     public User() {
-        this.username = "";
+        this.email = "";
         this.password = "";
     }
 
     /**
-     * Creates a new src.User object with a specified username and password
-     * @param username the user's username
+     * Creates a new User object with a specified email and password
+     * @param email the user's email
      * @param password the user's password
      */
-    public User(String username, String password) {
-        this.username = username;
+    public User(String email, String password) {
+        this.email = email;
         this.password = password;
     }
 
     /**
-     * Get the user's username
-     * @return username
+     * Get the user's email
+     * @return email
      */
-    public String getUsername() {
-        return this.username;
+    public String getEmail() {
+        return this.email;
     }
 
     /**
@@ -40,11 +45,11 @@ public class User {
     }
 
     /**
-     * Set the user's username
-     * @param username new username for the user
+     * Set the user's email
+     * @param email new email for the user
      */
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     /**

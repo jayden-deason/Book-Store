@@ -17,7 +17,7 @@ public class BuyerTest {
         try {
             buyer = new Buyer("test@gmail.com", "password");
             buyer1 = new Buyer("admin@gmail.com", "secure");
-        } catch (badNamingException e) {
+        } catch (BadNamingException e) {
             e.printStackTrace();
         }
 
@@ -38,6 +38,6 @@ public class BuyerTest {
         buyer.exportToFile("purchases.csv");
         System.out.println(buyer);
         System.out.println(buyer1);
-        buyer.printDashboard(scan);
+//        buyer.printDashboard(scan);
     }
 }

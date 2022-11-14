@@ -1,10 +1,7 @@
-import com.sun.jdi.ArrayReference;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 /**
  * Store
@@ -52,29 +49,33 @@ public class Store {
                 productsByIndex.add(Integer.parseInt(productIndex));
             }
         }
-        try {
-            File file = new File("Products.csv");
-            BufferedReader bfr = new BufferedReader(new FileReader(file));
-            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
-                String[] splitLine = line.split(",");
-                if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
-                    products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
-                            Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+            try {
+                File file = new File("Products.csv");
+                BufferedReader bfr = new BufferedReader(new FileReader(file));
+                for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+                    String[] splitLine = line.split(",");
+                    if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
+                        products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
+                                Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+                    }
+                }
+                bfr.close();
+            } catch (IOException e) {
+                System.out.println("File Error"); // Temporary message
+            }
+
+        if (!productSales.equals("")) {
+            String[] splitProductsBySales = productSales.replace("<", "").replace(">", "").split("/");
+            for (String productIndex : splitProductsBySales) {
+                for (Product product : products) {
+                    if (product.getIndex() == Integer.parseInt(productIndex.split(":")[0])) {
+                        productsForSales.add(product);
+                        salesForProducts.add(Integer.parseInt(productIndex.split(":")[1]));
+                    }
                 }
             }
-            bfr.close();
-        } catch (IOException e) {
-            System.out.println("File Error"); // Temporary message
         }
-        String[] splitProductsBySales = productSales.replace("<", "").replace(">", "").split("/");
-        for (String productIndex : splitProductsBySales) {
-            for (Product product : products) {
-                if (product.getIndex() == Integer.parseInt(productIndex.split(":")[0])) {
-                    productsForSales.add(product);
-                    salesForProducts.add(Integer.parseInt(productIndex.split(":")[1]));
-                }
-            }
-        }
+
         this.sales = sales;
         this.revenue = revenue;
         this.index = index;
@@ -101,30 +102,20 @@ public class Store {
         for (String productIndex : products) {
             productsByIndex.add(Integer.parseInt(productIndex));
         }
-
-        try {
-            File file = new File("Products.csv");
-            BufferedReader bfr = new BufferedReader(new FileReader(file));
-            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
-                String[] splitLine = line.split(",");
-                if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
-                    this.products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
-                            Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
-                }
-            }
-            bfr.close();
-        } catch (IOException e) {
-            System.out.println("File Error"); // Temporary message
-        }
-        String[] splitProductsBySales = split[6].replace("<", "").replace(">", "").split("/");
-        for (String productIndex : splitProductsBySales) {
-            for (Product product : this.products) {
-                if (product.getIndex() == Integer.parseInt(productIndex.split(":")[0])) {
-                    productsForSales.add(product);
-                    salesForProducts.add(Integer.parseInt(productIndex.split(":")[1]));
-                }
-            }
-        }
+//        try {
+//            File file = new File("Products.csv");
+//            BufferedReader bfr = new BufferedReader(new FileReader(file));
+//            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+//                String[] splitLine = line.split(",");
+//                if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
+//                    this.products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
+//                            Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+//                }
+//            }
+//            bfr.close();
+//        } catch (IOException e) {
+//            System.out.println("File Error"); // Temporary message
+//        }
     }
 
     public void importProducts(String fileName) {
@@ -141,7 +132,7 @@ public class Store {
                 salesForProducts.add(0);
             }
             bfr.close();
-            this.updateProducts();
+//            this.updateProducts();
         } catch (FileNotFoundException e) {
             System.out.println("File does not exist.");
         } catch (IOException e) {
@@ -149,72 +140,71 @@ public class Store {
         }
     }
 
-    public void updateStores() {
-        BufferedReader bfr;
-        ArrayList<String> storeFile = new ArrayList<>();
-        try {
-            bfr = new BufferedReader(new FileReader(new File("Stores.csv")));
-            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
-                if (Integer.parseInt(line.split(",")[0]) == this.index) {
-                    storeFile.add(this.toString());
-                } else {
-                    storeFile.add(line);
-                }
-            }
+//    public void updateStores() {
+//        BufferedReader bfr;
+//        ArrayList<String> storeFile = new ArrayList<>();
+//        try {
+//            bfr = new BufferedReader(new FileReader(new File("Stores.csv")));
+//            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+//                if (Integer.parseInt(line.split(",")[0]) == this.index) {
+//                    storeFile.add(this.toString());
+//                } else {
+//                    storeFile.add(line);
+//                }
+//            }
+//
+//        } catch (FileNotFoundException e) {
+//            System.out.println("Could not find file!");
+//        } catch (IOException e) {
+//            System.out.println("Could not read from file!");
+//        }
+//        try {
+//            PrintWriter pw = new PrintWriter("Products.csv");
+//            for (String store : storeFile) {
+//                pw.write(store);
+//            }
+//            pw.close();
+//        } catch (FileNotFoundException e) {
+//            System.out.println("Could not find file.");
+//        } catch (IOException e) {
+//            System.out.println("Could not write to file.");
+//        }
+//    }
+//
+//    public void updateProducts() {
+//        BufferedReader bfr;
+//        ArrayList<String> productFile = new ArrayList<>();
+//        try {
+//            bfr = new BufferedReader(new FileReader(new File("Products.csv")));
+//            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
+//                for (Product product : products) {
+//                    if (product.getIndex() == Integer.parseInt(line.split(",")[0])) {
+//                        productFile.add(product.toString());
+//                    } else {
+//                        productFile.add(line);
+//                    }
+//                }
+//            }
+//            bfr.close();
+//        } catch (FileNotFoundException e) {
+//            System.out.println("Could not find file!");
+//        } catch (IOException e) {
+//            System.out.println("Could not read from file!");
+//        }
+//        try {
+//            PrintWriter pw = new PrintWriter("Products.csv");
+//            for (String product : productFile) {
+//                pw.write(product);
+//                pw.println();
+//            }
+//            pw.close();
+//        } catch (FileNotFoundException e) {
+//            System.out.println("Could not find file.");
+//        } catch (IOException e) {
+//            System.out.println("Could not write to file.");
+//        }
+//    }
 
-        } catch (FileNotFoundException e) {
-            System.out.println("Could not find file!");
-        } catch (IOException e) {
-            System.out.println("Could not read from file!");
-        }
-        try {
-            PrintWriter pw = new PrintWriter("Stores.csv");
-            for (String store : storeFile) {
-                pw.write(store + "\n");
-            }
-            pw.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("Could not find file.");
-        } catch (IOException e) {
-            System.out.println("Could not write to file.");
-        }
-    }
-
-    public void updateProducts() {
-        BufferedReader bfr;
-        ArrayList<String> productFile = new ArrayList<>();
-        try {
-            bfr = new BufferedReader(new FileReader(new File("Products.csv")));
-            for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
-                for (Product product : products) {
-                    if (product.getIndex() == Integer.parseInt(line.split(",")[0])) {
-                        productFile.add(product.toString());
-                    } else {
-                        productFile.add(line);
-                    }
-                    break;
-                }
-            }
-            bfr.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("Could not find file!");
-        } catch (IOException e) {
-            System.out.println("Could not read from file!");
-        }
-        try {
-            PrintWriter pw = new PrintWriter("Products.csv");
-            for (String product : productFile) {
-                pw.write(product + "\n");
-
-            }
-            pw.close();
-            productFile.clear();
-        } catch (FileNotFoundException e) {
-            System.out.println("Could not find file.");
-        } catch (IOException e) {
-            System.out.println("Could not write to file.");
-        }
-    }
 
     public ArrayList<Integer> getProductsByIndex() {
         return productsByIndex;
@@ -242,8 +232,8 @@ public class Store {
             sales += quantity;
             revenue += quantity * product.getPrice();
             products.get(products.indexOf(product)).setQuantity(product.getQuantity() - quantity);
-            this.updateProducts();
-            this.updateStores();
+//            this.updateProducts();
+//            this.updateStores();
         }
     }
 
@@ -258,8 +248,8 @@ public class Store {
             productsByIndex.add(product.getIndex());
             productsForSales.add(product);
             salesForProducts.add(0);
-            this.updateProducts();
-            this.updateStores();
+//            this.updateProducts();
+//            this.updateStores();
 //            this.reReadProducts();
         } else {
             System.out.println("Store already sells " + product.getName());
@@ -277,8 +267,8 @@ public class Store {
             productsByIndex.remove(productsByIndex.indexOf(product.getIndex()));
             salesForProducts.remove(productsForSales.indexOf(product));
             productsForSales.remove(product);
-            this.updateProducts();
-            this.updateStores();
+//            this.updateProducts();
+//            this.updateStores();
 //            this.reReadProducts();
         } else {
             System.out.println("Store does not sell " + product.getName());
@@ -297,8 +287,8 @@ public class Store {
                 break;
             }
         }
-        this.updateProducts();
-        this.updateStores();
+//        this.updateProducts();
+//        this.updateStores();
 //        this.reReadProducts();
     }
 
@@ -433,6 +423,7 @@ public class Store {
     }
 
 
+
     public String getName() {
         return this.storeName;
     }
@@ -496,13 +487,36 @@ public class Store {
 
     public String productsByIndexToString() {
         String retString = "<";
-        for (Integer index : productsByIndex) {
-            retString = retString + index + "/";
+
+        for (int i = 0; i < productsByIndex.size(); i++) {
+            retString += productsByIndex.get(i);
+
+            if (i != productsByIndex.size() - 1) {
+                retString += "/";
+            }
         }
-        if (productsByIndex.size() == 0) {
-            return retString + ">";
+
+        return retString + ">";
+    }
+
+    public ArrayList<String> getProductNames() {
+        ArrayList<String> out = new ArrayList<>();
+
+        for (Product p : products) {
+            out.add(p.getName());
         }
-        return retString.substring(0, retString.length() - 1) + ">";
+
+        return out;
+    }
+
+    public Product getProductByName(String name) {
+        for (Product p : products) {
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+
+        return null;
     }
 
     public String toString() {
