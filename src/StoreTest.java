@@ -32,7 +32,7 @@ public class StoreTest {
         for (Store store : stores) {
             System.out.println(store);
             System.out.println("Products by Index: " + store.getProductsByIndex());
-            System.out.println("Products by Sales: " + store.productsBySalesToString());
+//            System.out.println("Products by Sales: " + store.productsBySalesToString());
         }
 
 
@@ -41,31 +41,31 @@ public class StoreTest {
         storeOne.removeProduct(product);
         System.out.println(storeOne.getProducts());
         System.out.println("Products by Index: " + storeOne.productsByIndexToString());
-        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
+//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 
 //        System.out.println("TESTING ADDING A PRODUCT");
 //        storeOne.addProduct(product);
         System.out.println(storeOne.getProducts());
         System.out.println("Products by Index: " + storeOne.productsByIndexToString());
-        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
+//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 
         System.out.println("TESTING MODIFYING A PRODUCT");
         storeOne.modifyProduct(newProduct);
         System.out.println(storeOne.getProducts());
         System.out.println("Products by Index: " + storeOne.productsByIndexToString());
-        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
+//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 
         System.out.println("MODIFYING THE SAME PRODUCT TO RESET THE PRODUCTS.CSV FILE");
         storeOne.modifyProduct(product);
         System.out.println(storeOne.getProducts());
         System.out.println("Products by Index: " + storeOne.productsByIndexToString());
-        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
+//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 
         System.out.println("TESTING PURCHASING A PRODUCT");
         // Need this since the product object here is not linked to the Products.csv file
         storeOne.makePurchase(buyer, 1, product);
         product.setQuantity(product.getQuantity() - 1);
-        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
+//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 //        System.out.println("Total Sales: " + storeOne.getSales());
         System.out.println("Total Revenue: " + storeOne.getRevenue());
         System.out.println(product);
@@ -74,7 +74,7 @@ public class StoreTest {
         storeOne.makePurchase(buyer, 1, product);
         // Need this since the product object here is not linked to the Products.csv file
         product.setQuantity(product.getQuantity() - 1);
-        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
+//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 //        System.out.println("Total Sales: " + storeOne.getSales());
         System.out.println("Total Revenue: " + storeOne.getRevenue());
         System.out.println(product);

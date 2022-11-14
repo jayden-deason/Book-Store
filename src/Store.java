@@ -99,6 +99,9 @@ public class Store {
         this.sales = Integer.parseInt(split[3]);
         this.revenue = Double.parseDouble(split[4]);
         String[] products = split[5].replace("<", "").replace(">", "").split("/");
+        if (products.length == 1 && products[0].length() == 0) {
+            products = new String[0];
+        }
         for (String productIndex : products) {
             productsByIndex.add(Integer.parseInt(productIndex));
         }
@@ -482,10 +485,10 @@ public class Store {
      *
      * @return productsForSales and salesForProduct in the format of the csv file
      */
-    public String productsBySalesToString() {
+    public String productsBySalesToString(Market market) {
         String retString = "<";
         for (Product product : productsForSales) {
-            retString = retString + product.getIndex() + ":" + salesForProducts.get(productsForSales.indexOf(product))
+            retString = retString + product.getIndex() + ":" + market.getSalesForProduct(product)
                     + "/";
         }
         if (productsForSales.size() == 0) {
@@ -536,6 +539,6 @@ public class Store {
 
     public String toString() {
         return String.format("%d,%s,%s,%d,%.2f,%s,%s", index, storeName, sellerName, sales,
-                revenue, this.productsByIndexToString(), this.productsBySalesToString());
+                revenue, this.productsByIndexToString(), this.productsBySalesToString(Market.getInstance()));
     }
 }
