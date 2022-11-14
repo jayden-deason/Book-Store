@@ -20,6 +20,16 @@ public class Market {
     private final String storesFile; // the filename for store info
     private final String productsFile; // the filename for product info
 
+    private static Market INSTANCE; // singleton pattern
+
+    public static Market getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new Market("Customers.csv", "Sellers.csv", "Stores.csv", "Products.csv");
+        }
+
+        return INSTANCE;
+    }
+
     /**
      * Create a new Market object by reading from 4 files
      *
@@ -28,7 +38,7 @@ public class Market {
      * @param storesFile   file with store info
      * @param productsFile file with product info
      */
-    public Market(String buyersFile, String sellersFile, String storesFile, String productsFile) {
+    private Market(String buyersFile, String sellersFile, String storesFile, String productsFile) {
         this.buyersFile = buyersFile;
         this.sellersFile = sellersFile;
         this.storesFile = storesFile;
@@ -49,9 +59,7 @@ public class Market {
         lines = readFile(storesFile);
         for (String line : lines) {
             Store s = new Store(line);
-            stores.add(s);
-            Seller seller = getSellerByEmail(line.split(",")[2]);
-            seller.addStore(s);
+            addStore(s);
         }
 
         // products
@@ -69,11 +77,31 @@ public class Market {
         ArrayList<String> lines = readFile(fileName);
         for (String line : lines) {
             Product p = new Product(line);
-            Store s = getStoreByName(line.split(",")[2]);
-            s.addProduct(p, this);
-            p.setStoreName(s.getName());
-            products.add(p);
+            p.setStoreName(line.split(",")[2]);
+
+            addProduct(p);
         }
+    }
+
+    public void addProduct(Product p) {
+        if (p.getIndex() == -1) {
+            p.setIndex(products.size());
+        }
+        Store s = getStoreByName(p.getStoreName());
+        s.addProduct(p, this);
+        products.add(p);
+    }
+
+    public void addStore(Store s) {
+        Seller seller = getSellerByEmail(s.getSellerName());
+        seller.addStore(s);
+        stores.add(s);
+    }
+
+    public void addStore(String storeName, String sellerName) {
+        int idx = stores.size();
+        Store s = new Store(idx, storeName, sellerName, 0, 0, "", "");
+        addStore(s);
     }
 
     /**
@@ -119,6 +147,16 @@ public class Market {
                 return p;
             }
         }
+        return null;
+    }
+
+    public Product getProductByName(String name) {
+        for (Product p : products) {
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+
         return null;
     }
 
@@ -277,6 +315,9 @@ public class Market {
         try {
             PrintWriter pw = new PrintWriter(new FileWriter(filename, false));
 
+            if (list.size() == 0) {
+                pw.println("Empty list!");
+            }
             for (Object o : list) {
                 pw.println(o.toString());
             }

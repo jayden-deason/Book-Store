@@ -261,7 +261,7 @@ public class Seller extends User {
      * seller. Then, It will call the functions to save that store in the Stores.csv and update the Sellers.csv row
      * with a reference to the new store.
      */
-    public int addStore(String storeName) {
+    public int addStore(String storeName, Market market) {
         for (Store store : stores) {
             if (store.getName().equals(storeName)) {
                 System.out.println("Error: You already have a store with the same name!");
@@ -279,6 +279,7 @@ public class Seller extends User {
         } else {
             s.setIndex(index);
         }
+
         return 0;
     }
 
@@ -317,6 +318,10 @@ public class Seller extends User {
             }
         }
         storesStr += ">";
+        // hacky solution if there's a slash at the beginning for some reason
+        if (storesStr.charAt(1) == '/') {
+            storesStr = storesStr.substring(0, 2) + storesStr.substring(2);
+        }
         return String.format("%d,%s,%s,%s", this.getIndex(), this.getEmail(), this.getPassword(), storesStr);
 
     }
@@ -363,6 +368,15 @@ public class Seller extends User {
         return null;
     }
 
+    public ArrayList<String> getStoreNames() {
+        ArrayList<String> out = new ArrayList<>();
+        for (Store s : stores) {
+            out.add(s.getName());
+        }
+
+        return out;
+    }
+
     /**
      * the main method is used for testing.
      */
@@ -385,7 +399,7 @@ public class Seller extends User {
         }
         //Testing the addStore method updates the files appropriately
         System.out.print("Test 3 - Testing that Stores.csv is updated with creation of new store: ");
-        s1.addStore("testStore");
+//        s1.addStore("testStore");
         BufferedReader br1 = null;
         int newStoreIndex = 0;
         try {
@@ -446,7 +460,7 @@ public class Seller extends User {
         }
         System.out.println("Test 5 - Testing edge case of creating a store with the same name as an existing store: " +
                 "true");
-        s1.addStore("testStore");
+//        s1.addStore("testStore");
         System.out.println("Actual: \"" + "Error: You already have a store with the same name!" + "\"" + " == Expected: \"Error: You already have a store with the same name!\"");
     }
 
