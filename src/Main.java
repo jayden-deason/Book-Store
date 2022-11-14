@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 /**
  * Main
- * <p>
+ *
  * The main class used to launch a dashboard for a user to log in and perform actions in the marketplace
  *
  * @author Megan Long, 001
@@ -146,7 +146,7 @@ public class Main {
                             price = Double.parseDouble(scan.nextLine());
                             System.out.println("What is the index of the book being added/edited/removed?");
                             index = Integer.parseInt(scan.nextLine());
-                            if (quantity < 0 || price < 0.0 || index < 0) {
+                            if (quantity < 1 || price < 0.0 || index < 0) {
                                 num = false;
                             }
                         } catch (NumberFormatException e) {
@@ -280,10 +280,25 @@ public class Main {
                     String inp = scan.nextLine();
 
                     if (inp.equalsIgnoreCase("y") || inp.equalsIgnoreCase("yes")) {
-                        System.out.println("What is the quantity?");
-                        int quantity = scan.nextInt(); // TODO: add checks for valid input
-                        scan.nextLine();
-
+                        boolean num;
+                        int quantity = -1;
+                        while (true) {
+                            num = true;
+                            try {
+                                System.out.println("What is the quantity?");
+                                quantity = Integer.parseInt(scan.nextLine());
+                                if (quantity < 1) {
+                                    num = false;
+                                }
+                            } catch (NumberFormatException e) {
+                                num = false;
+                            }
+                            if (num) {
+                                break;
+                            } else {
+                                System.out.println("Please enter valid numbers!");
+                            }
+                        }
                         buyer.addProductToCart(idx, quantity);
                         market.updateAllFiles();
                         System.out.println("Added to cart!");
@@ -413,13 +428,11 @@ public class Main {
             }
         }
     }
-
-    private static String productString(Product p) {
+    public static String productString(Product p) {
         return String.format("%d) Name: %s | Store: %s | $%.2f",
                 p.getIndex(), p.getName(), p.getStoreName(), p.getPrice());
     }
-
-    private static void printShoppingCart(Buyer buyer, Market market) {
+    public static void printShoppingCart(Buyer buyer, Market market) {
         ArrayList<String> shoppingCart = buyer.getShoppingCart();
 
         System.out.println("------------------------------------------");
@@ -443,5 +456,4 @@ public class Main {
         System.out.println("------------------------------------------");
 
     }
-
 }
