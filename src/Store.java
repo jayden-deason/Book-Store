@@ -12,16 +12,16 @@ import java.util.HashMap;
  * @version 11-09-2022
  */
 public class Store {
-    private int index;
-    private String storeName;
-    private String sellerName;
-    private ArrayList<Product> products;
-    private ArrayList<Integer> productsByIndex;
-    private ArrayList<Product> productsForSales;
-    private ArrayList<Integer> salesForProducts;
-    private int sales;
-    private double revenue;
-    private String productIndices;
+    private int index; // Index of the store in the csv file
+    private String storeName; // Name of the store
+    private String sellerName; // Name of the seller who owns the store
+    private ArrayList<Product> products; // Products that the store sells in Product form
+    private ArrayList<Integer> productsByIndex; // The indices of the products the store sells
+    private ArrayList<Product> productsForSales; // Sister list of salesForProducts to track by number of sales
+    private ArrayList<Integer> salesForProducts; // Sister list of productsForSales to track by number of sales
+    private int sales; // Total sales the store has done
+    private double revenue; // Total revenue the store received
+    private String productIndices; // The indices of the store's products as a string
 
     /**
      * Creates a new Store object with the given parameters
@@ -118,6 +118,11 @@ public class Store {
 //        }
     }
 
+    /**
+     * Imports a product file and adds its contents to the products sold by this store
+     *
+     * @param fileName the name of the file to import from
+     */
     public void importProducts(String fileName) {
         try {
             File file = new File(fileName);
@@ -292,6 +297,9 @@ public class Store {
 //        this.reReadProducts();
     }
 
+    /**
+     * Updates the products arraylist of this store to reflect changes made to the products.csv file
+     */
     public void reReadProducts() {
         products.clear();
         try {
@@ -310,10 +318,16 @@ public class Store {
         }
     }
 
+    /**
+     * Generates a string that contains the name of each buyer that has purchased a product from
+     * this store and the quantity of products purchased.
+     *
+     * @return a string containing buyer sales information
+     */
     public String generateCustomerData() {
         String retString = "";
         ArrayList<String> customerDataList = new ArrayList<>();
-        try {
+        try { // Reading in buyer information
             BufferedReader bfr = new BufferedReader(new FileReader("Customers.csv"));
             for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
                 customerDataList.add(line.split(",")[1] + "=" + line.split(",")[4].replace("<", "").replace(">", "").trim());
@@ -324,19 +338,19 @@ public class Store {
         } catch (IOException e) {
             System.out.println("IO error");
         }
-        for (int i = 0; i < customerDataList.size(); i++) {
+        for (int i = 0; i < customerDataList.size(); i++) { // Loop over the buyer data
             String[] firstSplit = customerDataList.get(i).split("=");
             if (firstSplit.length > 1) {
                 int purchases = 0;
-                String buyerName = firstSplit[0];
+                String buyerName = firstSplit[0]; // The name of a buyer
                 String[] secondSplit = firstSplit[1].split("/");
                 for (String split : secondSplit) {
                     String[] thirdSplit = split.split(":");
                     if (!(split.isEmpty()) && productsByIndex.contains(Integer.parseInt(thirdSplit[0]))) {
-                        purchases += Integer.parseInt(thirdSplit[1]);
+                        purchases += Integer.parseInt(thirdSplit[1]); // Updating the purchase if the product is sold
                     }
                 }
-                if (purchases > 0) {
+                if (purchases > 0) { // Checking if the buyer purchased anything from this store
                     retString += buyerName + ":" + purchases + "/";
                 }
             }
@@ -358,10 +372,11 @@ public class Store {
             System.out.println("Sort type is invalid, pick a number from 0-2");
             return;
         }
+        // General statistics
         System.out.println(this.storeName + " Statistics:");
         System.out.println("Total Sales: " + sales);
         System.out.println("Total Revenue: " + revenue);
-        if (sortType == 0) {
+        if (sortType == 0) { // No sort condition
             System.out.println("Products by sales: ");
             for (Product product : productsForSales) {
                 System.out.println(product.getName() + ": " + salesForProducts.get(productsForSales.indexOf(product)));
@@ -375,10 +390,10 @@ public class Store {
             for (Product product : products) {
                 sortedProducts.add(product);
             }
-            if (sortType == 1) {
+            if (sortType == 1) { // Sorting alphabetically
                 sortedProducts.sort((p1, p2) -> p1.getName().compareTo(p2.getName()));
             }
-            if (sortType == 2) {
+            if (sortType == 2) { // Sorting by number of sales
                 sortedProducts.sort((p1, p2) -> Integer.compare(salesForProducts.get(productsForSales.indexOf(p1)),
                         salesForProducts.get(productsForSales.indexOf(p2))));
             }
@@ -473,6 +488,11 @@ public class Store {
         return productIndices;
     }
 
+    /**
+     * Used by the toString method to output in the format of the csv file
+     *
+     * @return productsForSales and salesForProduct in the format of the csv file
+     */
     public String productsBySalesToString() {
         String retString = "<";
         for (Product product : productsForSales) {
@@ -485,6 +505,11 @@ public class Store {
         return retString.substring(0, retString.length() - 1) + ">";
     }
 
+    /**
+     * Used by the ToString method to return a string in the format of the csv file
+     *
+     * @return productsByIndex as a string in the format of the csv file
+     */
     public String productsByIndexToString() {
         String retString = "<";
 
@@ -518,6 +543,7 @@ public class Store {
 
         return null;
     }
+
 
     public String toString() {
         return String.format("%d,%s,%s,%d,%.2f,%s,%s", index, storeName, sellerName, sales,
