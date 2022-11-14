@@ -8,21 +8,22 @@ import java.io.FileWriter;
 /**
  * Seller
  *
- * An object representing a seller user in the marketplace
+ * A class that representing a seller user in the marketplace, has functionality for creating and storing stores,
+ * displaying content for sellers, and exporting a csv of products from a store
  *
  * @author Visv Shah
- * @version 11/9/22
+ * @version 11/13/22
  */
 public class Seller extends User {
     private ArrayList<Store> stores; // the seller's products
     private int index; // the index of the Seller in the Seller.csv file
 
     /**
-     * Create  a new seller with a given username, password, and list of products
+     * Create  a new seller with a given username and password
      * When a seller gets created using this constructor, it gets added to the Sellers.csv file
      * @param username the seller's username
      * @param password the seller's password
-     * 
+     * throws badNaming Exception when a username of password contains a comma, as this would mess up the csv file
      */
     public Seller(String username, String password) throws badNamingException {
         super(username, password);
@@ -35,8 +36,8 @@ public class Seller extends User {
         this.stores = new ArrayList<Store>();
     }
     /**
-     * Create a new seller using the line store in the Seller.csv file, this does not add a new line to the Seller
-     * .csv file because it is only used to create a new Marketplace after relaunching the application.
+     * Create a new seller using the line stored in the Seller.csv file, when this is called, it does not add a new line
+     * to the Seller .csv file because it is only used to create a new Marketplace after relaunching the application.
      * @param line the line taken from the Seller.csv file
      */
     public Seller(String line) {
@@ -74,13 +75,13 @@ public class Seller extends User {
         }
     }
     /**
-     * Writes over stores.csv to add a new store to it
+     * Adds a new store to Stores.csv. First reads Stores.csv and stores the lines and then writes Stores.csv including
+     * the new store
      * @return the index of the store
      */
     public int writeStoresFile(String fileName, Store s) {
-
-        ArrayList < String > lines = new ArrayList<String>();
-
+        ArrayList<String> lines = new ArrayList<String>();
+        //Reading Stores.csv
         File f = new File(fileName);
         if (f.exists()) {
             BufferedReader br = null;
@@ -117,6 +118,7 @@ public class Seller extends User {
                 Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]);
             }
             s.setIndex(lastIndex);
+            //Calls the updateSellerFile() with the index of the new store to add a reference to the Seller.csv file
             int updateSellerFile = updateSellerFile(lastIndex);
             if (updateSellerFile == -1) {
                 System.out.println("Something went wrong with updating your profile!");
@@ -151,7 +153,7 @@ public class Seller extends User {
         ArrayList<String> lines = new ArrayList<String>();
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader("Seller.csv"));
+            br = new BufferedReader(new FileReader("Sellers.csv"));
             String line = br.readLine();
             while (line != null) {
                 if (line.split(",")[1].equals(this.getUsername())) {
@@ -180,7 +182,7 @@ public class Seller extends User {
         }
         FileWriter fw = null;
         try {
-            fw = new FileWriter("Seller.csv");
+            fw = new FileWriter("Sellers.csv");
             for (String str: lines) {
                 fw.write(str + "\n");
             }
@@ -201,6 +203,8 @@ public class Seller extends User {
     }
     /**
      * Exports a csv of all the products in a store that a seller has.
+     * @param fileName the fileName that the user wants to write a new file to
+     * @param storeName the store that the user wants to export products from
      * @return the index of the store
      */
     public void exportProducts(String fileName, String storeName) {
@@ -238,7 +242,7 @@ public class Seller extends User {
     }
     /**
      * This function is used to create a new store. It makes no store with the same name exists already for that
-     * seller. Then, It will call the functions to save that store in the stores.csv and update the seller.csv row
+     * seller. Then, It will call the functions to save that store in the Stores.csv and update the Sellers.csv row
      * with a reference to the new store.
      */
     public void addStore(String storeName) {
@@ -285,29 +289,16 @@ public class Seller extends User {
         return String.format("%d,%s,%s,%s", this.getIndex(), this.getUsername(), this.getPassword(), storesStr);
 
     }
-    public static void main(String[] args) throws badNamingException {
-        //Testing the creation of a seller
-        Seller s1 = new Seller("0,bob@gmail.com,bob123,<1/2>");
-        System.out.println(s1 + "==" + "0,bob@gmail.com,bob123,<1/2> : " + s1.toString().equals("0,bob@gmail.com," +
-                "bob123,<1/2>"));
-        //Testing the creation of a seller and an edge case that comes when creating a Seller with a "," in the
-        try {
-            Seller s2 = new Seller("bob@gmail.com", "bob,123");
-        } catch (badNamingException e) {
-            System.out.println("badNamingException thrown for password: bob,123");
-        }
-        //Testing the printDashBoard without a sort
-
-        //Testing the printDashBoard with sorting based on products
-        //Testing the printDashBoard with the edge-case of a non-supported parameter
-        //Testing the addStore method updates the files appropriately
-        //Testing the addSTore method with the edge case of a already existing store
-    }
 
     public int getIndex() {
         return index;
     }
-    public void viewProductsInCart(ArrayList < Buyer > buyers, ArrayList < Product > products) {
+    /**
+     * Prints all of the products in customer carts
+     * @param buyers all of the buyers in the Marketplace
+     * @param products all of the products in the Marketplace
+     */
+    public void viewProductsInCart(ArrayList<Buyer> buyers, ArrayList<Product> products) {
         System.out.println("In Customer Carts: ");
         for (Buyer b: buyers) {
             ArrayList<String> items = b.getShoppingCart();
@@ -328,4 +319,22 @@ public class Seller extends User {
     public void setIndex(int index) {
         this.index = index;
     }
+    /**
+     * the main method is used for testing.
+     */
+    public static void main(String[] args) throws badNamingException {
+        //Testing the creation of a seller
+        Seller s1 = new Seller("0,bob@gmail.com,bob123,<1/2>");
+        System.out.println(s1 + "==" + "0,bob@gmail.com,bob123,<1/2> : " + s1.toString().equals("0,bob@gmail.com," +
+                "bob123,<1/2>"));
+        //Testing the creation of a seller and an edge case that comes when creating a Seller with a "," in the
+        try {
+            Seller s2 = new Seller("bob@gmail.com", "bob,123");
+        } catch (badNamingException e) {
+            System.out.println("badNamingException thrown for password: bob,123");
+        }
+        //Testing the addStore method updates the files appropriately
+        //Testing the addSTore method with the edge case of a already existing store
+    }
+
 }
