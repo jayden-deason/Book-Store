@@ -53,8 +53,10 @@ public class Seller extends User {
             String l = br.readLine();
             while (l != null) {
                 for (String n: storesIndex) {
-                    if (Integer.parseInt(n) == i) {
+
+                    if (Integer.parseInt(n) == Integer.parseInt(l.split(",")[0])) {
                         Store s = new Store(l);
+                        s.setIndex(Integer.parseInt(l.split(",")[0]));
                         this.stores.add(s);
                         break;
                     }
@@ -261,6 +263,7 @@ public class Seller extends User {
             System.out.println("Something went wrong with adding your store!");
         } else {
             s.setIndex(index);
+            System.out.println(s);
         }
     }
 
@@ -285,7 +288,7 @@ public class Seller extends User {
         for (Store s: this.stores) {
             storesStr += s.getIndex() + "/";
         }
-        storesStr = storesStr.substring(storesStr.length() - 1) + ">";
+        storesStr = storesStr.substring(0, storesStr.length() - 1) + ">";
         return String.format("%d,%s,%s,%s", this.getIndex(), this.getUsername(), this.getPassword(), storesStr);
 
     }
@@ -325,15 +328,42 @@ public class Seller extends User {
     public static void main(String[] args) throws badNamingException {
         //Testing the creation of a seller
         Seller s1 = new Seller("0,bob@gmail.com,bob123,<1/2>");
-        System.out.println(s1 + "==" + "0,bob@gmail.com,bob123,<1/2> : " + s1.toString().equals("0,bob@gmail.com," +
+        System.out.println("Test 1 - Checking creation of Seller: " + s1.toString().equals("0,bob@gmail.com," +
                 "bob123,<1/2>"));
+        System.out.println("Object toString: " + s1 + "  ==  " + "Expected: 0,bob@gmail.com,bob123,<1/2>");
         //Testing the creation of a seller and an edge case that comes when creating a Seller with a "," in the
+        System.out.print("Test 2 - Checking edge case of creating a Seller: ");
         try {
             Seller s2 = new Seller("bob@gmail.com", "bob,123");
+            System.out.println("false");
         } catch (badNamingException e) {
-            System.out.println("badNamingException thrown for password: bob,123");
+            System.out.println("true");
+            System.out.println("badNamingException thrown for password: \"bob,123\"");
         }
         //Testing the addStore method updates the files appropriately
+        System.out.print("Test 3 - Testing that Stores.csv is updated with creation of new store");
+        s1.addStore("testStore");
+        /*
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader("Sellers.csv"));
+            String line = br.readLine();
+            while (line != null) {
+                line = br.readLine();
+            }
+        } catch (Exception e) {
+            System.out.println("false");
+
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        */
         //Testing the addSTore method with the edge case of a already existing store
     }
 
