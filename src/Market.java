@@ -269,7 +269,7 @@ public class Market {
      * @param list     a list of objects
      * @param filename the file to write to
      */
-    private void printToFile(ArrayList list, String filename) {
+    public void printToFile(ArrayList list, String filename) {
         try {
             PrintWriter pw = new PrintWriter(new FileWriter(filename, false));
 

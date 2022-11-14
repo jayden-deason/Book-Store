@@ -1,6 +1,6 @@
-0,Charlie's Books,charlie@gmail.com,5,20,<5/2>,<5:2/2:2>
-1,Vons,bob@gmail.com,5,20,<0/1/4>,<0:3/1:2>
-2,Barnes and Noble,bob@gmail.com,5,20,<6>,<6:5>
-3,Jess Books,jessica@gmail.com,5,20,<7>,<7:5>
-4,JBooks,jessica@gmail.com,5,20,<3>,<3:5>
-5,Books for Jess,jessica@gmail.com,5,20,<8>,<8:5>
+0,Charlie's Books,charlie@gmail.com,5,20.00,<5/2>,<2:0/5:0>
+1,Vons,bob@gmail.com,5,20.00,<0/1/4/0/1/4>,<0:0/1:0/4:0>
+2,Barnes and Noble,bob@gmail.com,5,20.00,<6/6>,<6:0>
+3,Jess Books,jessica@gmail.com,5,20.00,<7/7>,<7:0>
+4,JBooks,jessica@gmail.com,5,20.00,<3/3>,<3:0>
+5,Books for Jess,jessica@gmail.com,5,20.00,<8/8>,<8:0>
