@@ -143,12 +143,12 @@ public class Market {
      *
      * @param buyer the buyer making the purchase
      */
-    private void makePurchase(Buyer buyer) {
+    public void makePurchase(Buyer buyer) {
         ArrayList<Product> products = new ArrayList<>();
         ArrayList<Integer> quantities = new ArrayList<>();
 
         for (String line : buyer.getShoppingCart()) {
-            int productIndex = Integer.parseInt(line.split(",")[0]);
+            int productIndex = Integer.parseInt(line.split(":")[0]);
 
             Product p = getProductByIndex(productIndex);
 
@@ -157,7 +157,7 @@ public class Market {
             }
 
             products.add(p);
-            quantities.add(Integer.parseInt(line.split(",")[4])); // TODO: double check quantity position in csv
+            quantities.add(Integer.parseInt(line.split(":")[1]));
         }
 
         for (int i = 0; i < products.size(); i++) {
@@ -170,6 +170,7 @@ public class Market {
 
 
         buyer.makePurchase();
+        updateAllFiles();
     }
 
     public ArrayList<String> getStoreNames() {

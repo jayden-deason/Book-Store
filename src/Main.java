@@ -238,11 +238,11 @@ public class Main {
             String answer = scan.nextLine();
             if (answer.equals("1")) {
                 ArrayList<Product> products = market.getAllProducts(true);
-                System.out.println("-----");
+                System.out.println("------------------------------------------");
                 for (int i = 0; i < products.size(); i++) {
                     System.out.println(productString(products.get(i)));
                 }
-                System.out.println("-----");
+                System.out.println("------------------------------------------");
 
             } else if (answer.equals("2")) {
                 printShoppingCart(buyer, market);
@@ -258,13 +258,8 @@ public class Main {
                     System.out.println("What is the book?");
                     System.out.println(store.getProductNames());
                     String productName = scan.nextLine();
-                    Product product = null;
-                    ArrayList<Product> products = store.getProducts();
-                    for (int i = 0; i < products.size(); i++) {
-                        if (productName.equals(products.get(i).getName())) {
-                            product = products.get(i);
-                        }
-                    }
+                    Product product = store.getProductByName(productName);
+
                     if (product == null) {
                         System.out.println("Book does not exist.");
                     } else {
@@ -293,7 +288,9 @@ public class Main {
                                 }
                             }
                             buyer.addProductToCart(product.getIndex(), quantity);
+                            market.updateAllFiles();
                             System.out.println("Added to cart!");
+                            printShoppingCart(buyer, market);
                         }
                     }
                 }
@@ -302,10 +299,10 @@ public class Main {
                 String fileName = scan.nextLine();
                 buyer.exportToFile(fileName);
             } else if (answer.equals("5")) {
-                //TODO: checkout
-                buyer.makePurchase();
+                market.makePurchase(buyer);
                 System.out.println("Checked out!");
             } else if (answer.equals("6")) {
+                printShoppingCart(buyer, market);
                 boolean num;
                 int index = -1;
                 int quantity = -1;

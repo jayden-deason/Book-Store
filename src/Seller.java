@@ -44,39 +44,47 @@ public class Seller extends User {
      * @param line the line taken from the Seller.csv file
      */
     public Seller(String line) {
-        super(line.split(",")[1], line.split(",")[2]);
-        String[] parts = line.split(",");
-        this.index = Integer.parseInt(parts[0]);
-        String[] storesIndex = parts[3].substring(1, parts[3].length() - 1).split("/");
-        this.stores = new ArrayList<Store>();
-        int i = 0;
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader("Stores.csv"));
-            String l = br.readLine();
-            while (l != null) {
-                for (String n : storesIndex) {
-                    if (Integer.parseInt(n) == i) {
-                        Store s = new Store(l);
-                        this.stores.add(s);
-                        break;
-                    }
-                }
-                l = br.readLine();
-                i++;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        String[] info = line.split(",");
+        this.index = Integer.parseInt(info[0]);
+        this.setEmail(info[1]);
+        this.setPassword(info[2]);
+        this.stores = new ArrayList<>();
     }
+
+//    public Seller(String line) {
+//        super(line.split(",")[1], line.split(",")[2]);
+//        String[] parts = line.split(",");
+//        this.index = Integer.parseInt(parts[0]);
+//        String[] storesIndex = parts[3].substring(1, parts[3].length() - 1).split("/");
+//        this.stores = new ArrayList<Store>();
+//        int i = 0;
+//        BufferedReader br = null;
+//        try {
+//            br = new BufferedReader(new FileReader("Stores.csv"));
+//            String l = br.readLine();
+//            while (l != null) {
+//                for (String n : storesIndex) {
+//                    if (Integer.parseInt(n) == i) {
+//                        Store s = new Store(l);
+//                        this.stores.add(s);
+//                        break;
+//                    }
+//                }
+//                l = br.readLine();
+//                i++;
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (br != null) {
+//                try {
+//                    br.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Adds a new store to Stores.csv. First reads Stores.csv and stores the lines and then writes Stores.csv including

@@ -449,6 +449,16 @@ public class Store {
 
         return out;
     }
+
+    public Product getProductByName(String name) {
+        for (Product p : products) {
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+
+        return null;
+    }
     public String toString() {
         return String.format("%d,%s,%s,%d,%.2f,%s,%s", index, storeName, sellerName, sales,
                 revenue, this.productsByIndexToString(), this.productsBySalesToString());
