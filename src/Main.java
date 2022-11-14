@@ -300,9 +300,6 @@ public class Main {
                 while (choice != 3) {
 
                     if (choice == 1) {
-                        System.out.println("Would you like to select a product? (y/n)");
-                        String input = scan.nextLine();
-
                         System.out.println("Enter an item's index to learn more");
                         int idx = scan.nextInt();
                         scan.nextLine();

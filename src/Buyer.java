@@ -16,7 +16,8 @@ public class Buyer extends User {
 
     /**
      * Make a new buyer with a given email and password
-     * @param email buyer's email
+     *
+     * @param email    buyer's email
      * @param password buyer's password
      * @throws BadNamingException if email or password contain invalid characters
      */
@@ -36,6 +37,7 @@ public class Buyer extends User {
 
     /**
      * Create a new buyer from a line in a csv, from the toString format
+     *
      * @param buyerLine line describing a buyer
      */
     public Buyer(String buyerLine) {
@@ -58,6 +60,7 @@ public class Buyer extends User {
 
     /**
      * Get the user's index in the csv
+     *
      * @return
      */
     public int getIndex() {
@@ -66,6 +69,7 @@ public class Buyer extends User {
 
     /**
      * Update the user's csv index
+     *
      * @param index new index
      */
     public void setIndex(int index) {
@@ -74,6 +78,7 @@ public class Buyer extends User {
 
     /**
      * Get the user's shopping cart contents in the format [index:quantity, index_quantity]
+     *
      * @return shopping cart
      */
     public ArrayList<String> getShoppingCart() {
@@ -82,6 +87,7 @@ public class Buyer extends User {
 
     /**
      * Set the user's shopping cart list
+     *
      * @param shoppingCart a shopping cart in the format [index:quantity, index_quantity]
      */
     public void setShoppingCart(ArrayList<String> shoppingCart) {
@@ -90,6 +96,7 @@ public class Buyer extends User {
 
     /**
      * Get the user's purchase history in the format [index:quantity, index_quantity]
+     *
      * @return purchase history
      */
     public ArrayList<String> getPurchaseHistory() {
@@ -98,6 +105,7 @@ public class Buyer extends User {
 
     /**
      * Set the user's purchase history list
+     *
      * @param purchaseHistory purchase history in the format [index:quantity, index_quantity]
      */
     public void setPurchaseHistory(ArrayList<String> purchaseHistory) {
@@ -106,8 +114,9 @@ public class Buyer extends User {
 
     /**
      * Add a product to the user's cart
+     *
      * @param productIndex index of the product in the csv file
-     * @param quantity quantity to add to cart
+     * @param quantity     quantity to add to cart
      */
     public void addProductToCart(int productIndex, int quantity) {
         shoppingCart.add(productIndex + ":" + quantity);
@@ -115,8 +124,9 @@ public class Buyer extends User {
 
     /**
      * Edit an existing product's quantity in the cart
+     *
      * @param productIndex index of the product in the csv
-     * @param newQuantity new quantity in the shopping cart
+     * @param newQuantity  new quantity in the shopping cart
      */
     public void editProductQuantity(int productIndex, int newQuantity) {
         for (int i = 0; i < shoppingCart.size(); i++) {
@@ -137,6 +147,7 @@ public class Buyer extends User {
 
     /**
      * Helper method to get a list as a string in the format <item/item/item>
+     *
      * @param list an arraylist of strings
      * @return the list represented as one string
      */
@@ -155,6 +166,7 @@ public class Buyer extends User {
 
     /**
      * Get a string representation of the buyer
+     *
      * @return a description of the buyer to use in a csv file
      */
     @Override
@@ -166,8 +178,9 @@ public class Buyer extends User {
 
     /**
      * Export buyer history to a file
+     *
      * @param filename path to the file
-     * @param market the market that the buyer is in
+     * @param market   the market that the buyer is in
      */
     public void exportToFile(String filename, Market market) {
         try {
