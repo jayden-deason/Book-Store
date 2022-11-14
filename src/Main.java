@@ -259,14 +259,12 @@ public class Main {
             String answer = scan.nextLine();
             if (answer.equals("1")) {
                 ArrayList<Product> products = market.getAllProducts(true);
+                System.out.println("-----");
                 for (int i = 0; i < products.size(); i++) {
-                    System.out.print(products.get(i).getIndex() + ".) | Name: "
-                            + products.get(i).getName() + " | $"
-                            + String.format("%.2f", products.get(i).getPrice()) + " | Quantity: "
-                            + products.get(i).getQuantity() + "/n");
-                    System.out.println("Store: " + products.get(i).getStoreName());
-                    System.out.println("-----");
+                    System.out.println(productString(products.get(i)));
                 }
+                System.out.println("-----");
+
             } else if (answer.equals("2")) {
                 buyer.printDashboard(scan);
             } else if (answer.equals("3")) {
@@ -288,13 +286,7 @@ public class Main {
                     if (product == null) {
                         System.out.println("Book does not exist.");
                     } else {
-                        System.out.print(product.getIndex() + ".) | Name: "
-                                + product.getName() + " | $"
-                                + String.format("%.2f", product.getPrice()) + " | Quantity: "
-                                + product.getQuantity() + "/n");
-                        System.out.println("Store: " + product.getStoreName());
-                        System.out.println("Description: " + product.getDescription());
-                        System.out.println();
+                        System.out.println(productString(product));
                         System.out.println("Would you like to add to cart? (y/n)");
                         String answerTwo = scan.nextLine();
                         answerTwo = answerTwo.toLowerCase();
@@ -387,5 +379,10 @@ public class Main {
                 System.out.println("Invalid input.");
             }
         }
+    }
+
+    private static String productString(Product p) {
+        return String.format("%d) Name: %s | $%.2f | Quantity: %d | Store %s",
+                p.getIndex(), p.getName(), p.getPrice(), p.getQuantity(), p.getStoreName());
     }
 }

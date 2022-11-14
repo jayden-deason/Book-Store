@@ -58,12 +58,6 @@ public class Market {
         this.products = new ArrayList<>();
         for (String line : lines) {
             Product p = new Product(line);
-            System.out.println("**********");
-            for (Store s : stores) {
-                System.out.println(s);
-            }
-            System.out.println(line.split(",")[2]);
-            System.out.println("**********");
 
             Store s = getStoreByName(line.split(",")[2]);
             s.addProduct(p);

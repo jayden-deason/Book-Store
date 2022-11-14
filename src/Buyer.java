@@ -289,7 +289,7 @@ public class Buyer extends User {
      * @param scan a scanner used to implement the menu for the dashboard
      */
     //@Override
-    public void printDashboard(Scanner scan) {
+    public void printDashboard(Scanner scan, Market market) {
         ArrayList<String> storeLines = new ArrayList<String>(); //arraylist storing all the lines from stores.csv
         ArrayList<Store> stores = new ArrayList<Store>(); //arraylist containing stores created from the stores.csv
         try (BufferedReader bfr = new BufferedReader(new FileReader("Stores.csv"))) {
