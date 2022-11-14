@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * An object representing a marketplace consisting of buyers and sellers
  *
  * @author Katya Teodorovich, section 001
- * @version November 9, 2022
+ * @version November 14, 2022
  */
 public class Market {
     private ArrayList<Buyer> buyers; // the list of buyers in the marketplace
@@ -22,6 +22,10 @@ public class Market {
 
     private static Market INSTANCE; // singleton pattern
 
+    /**
+     * Get the only existing instance of the market
+     * @return market instance
+     */
     public static Market getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new Market("Customers.csv", "Sellers.csv", "Stores.csv", "Products.csv");
@@ -73,6 +77,10 @@ public class Market {
         }
     }
 
+    /**
+     * Add all products from a given file
+     * @param fileName path to product file
+     */
     public void addProductsFromFile(String fileName) {
         ArrayList<String> lines = readFile(fileName);
         for (String line : lines) {
@@ -83,6 +91,10 @@ public class Market {
         }
     }
 
+    /**
+     * Add a product to the market and to its respective store
+     * @param p product
+     */
     public void addProduct(Product p) {
         if (p.getIndex() == -1) {
             p.setIndex(products.size());
@@ -92,12 +104,21 @@ public class Market {
         products.add(p);
     }
 
+    /**
+     * Add a store to the market and its respective seller
+     * @param s store
+     */
     public void addStore(Store s) {
         Seller seller = getSellerByEmail(s.getSellerName());
         seller.addStore(s);
         stores.add(s);
     }
 
+    /**
+     * Create a new, empty store with a name & seller. Add it to the market and to the respective seller
+     * @param storeName new store name
+     * @param sellerName new store seller
+     */
     public void addStore(String storeName, String sellerName) {
         int idx = stores.size();
         Store s = new Store(idx, storeName, sellerName, 0, 0, "", "");
@@ -150,6 +171,11 @@ public class Market {
         return null;
     }
 
+    /**
+     * Get a product object from the masterlist given its name
+     * @param name the name of the product
+     * @return a product object, or null if not found
+     */
     public Product getProductByName(String name) {
         for (Product p : products) {
             if (p.getName().equals(name)) {
@@ -160,6 +186,11 @@ public class Market {
         return null;
     }
 
+    /**
+     * Get a user that matches the given email
+     * @param email target email
+     * @return user with that email, null if none found
+     */
     public User getUserByEmail(String email) {
         for (User user : getAllUsers()) {
             if (user.getEmail().equals(email)) {
@@ -208,6 +239,10 @@ public class Market {
         updateAllFiles();
     }
 
+    /**
+     * Get a list of all store names in the marketplace
+     * @return store names
+     */
     public ArrayList<String> getStoreNames() {
         ArrayList<String> out = new ArrayList<>();
 
@@ -327,12 +362,22 @@ public class Market {
         }
     }
 
+    /**
+     * Get the total number of sales in purchase history for a product
+     * @param p product
+     * @return quantity of that product sold
+     */
     public int getSalesForProduct(Product p) {
         int idx = products.indexOf(p);
         return getSalesForProduct(idx);
 
     }
 
+    /**
+     * Get the number of sales for a product by its index
+     * @param index index of a product
+     * @return quantity of that product sold
+     */
     public int getSalesForProduct(int index) {
         int sales = 0;
 
@@ -348,6 +393,10 @@ public class Market {
 
     }
 
+    /**
+     * Sort the list of products by price
+     * @return the list of products, sorted
+     */
     public ArrayList<Product> sortByPrice() {
         products.sort((s1, s2) -> {
             return (int) (100 * (s1.getPrice() - s2.getPrice()));
@@ -357,6 +406,10 @@ public class Market {
         return products;
     }
 
+    /**
+     * Sort the list of products by quantity
+     * @return the list of products, sorted
+     */
     public ArrayList<Product> sortByQuantity() {
         products.sort((s1, s2) -> s1.getQuantity() - s2.getQuantity());
 
@@ -408,18 +461,34 @@ public class Market {
         updateAllFiles();
     }
 
+    /**
+     * Get the list of buyers in the market
+     * @return list of buyers
+     */
     public ArrayList<Buyer> getBuyers() {
         return buyers;
     }
 
+    /**
+     * Get the list of sellers in the market
+     * @return list of sellers
+     */
     public ArrayList<Seller> getSellers() {
         return sellers;
     }
 
+    /**
+     * Get the list of stores in the market
+     * @return list of stores
+     */
     public ArrayList<Store> getStores() {
         return stores;
     }
 
+    /**
+     * Get the list of products in the market
+     * @return list of products
+     */
     public ArrayList<Product> getProducts() {
         return products;
     }

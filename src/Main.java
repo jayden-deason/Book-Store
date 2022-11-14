@@ -10,6 +10,11 @@ import java.util.ArrayList;
  * @version 11/12/2022
  */
 public class Main {
+
+    /**
+     * The main method that launches the entire dashboard for users to interact with
+     * @param args command-line args
+     */
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         Market market = Market.getInstance();
@@ -32,6 +37,12 @@ public class Main {
 //        }
     }
 
+    /**
+     * Steps following the user signing in
+     * @param action either "buyer" or "seller", for specific user types
+     * @param market the market object
+     * @param scan the scanner to read terminal input
+     */
     public static void signUp(String action, Market market, Scanner scan) {
 //        while (true) {
         System.out.println("Do you have an account? (y/n)");
@@ -103,6 +114,12 @@ public class Main {
 //        }
     }
 
+    /**
+     * Steps to follow for sellers
+     * @param seller the seller object
+     * @param market the market that the seller is in
+     * @param scan the scanner for terminal input
+     */
     public static void sell(Seller seller, Market market, Scanner scan) {
         while (true) {
             System.out.println("Enter a number:");
@@ -248,6 +265,12 @@ public class Main {
         }
     }
 
+    /**
+     * Steps to follow for buyers signing in
+     * @param buyer the buyer object
+     * @param market the market that the buyer is in
+     * @param scan the scanner used for terminal input
+     */
     public static void buy(Buyer buyer, Market market, Scanner scan) {
         while (true) {
             System.out.println("Enter a number:");
@@ -277,10 +300,7 @@ public class Main {
                     scan.nextLine();
 
                     Product p = market.getProductByIndex(idx);
-                    System.out.println("------------------------------------------");
-                    System.out.println(productString(p) + " | Quantity: " + p.getQuantity());
-                    System.out.println(market.getProductByIndex(idx).getDescription());
-                    System.out.println("------------------------------------------");
+                    printProductPage(p);
 
                     System.out.println("Would you like to add to cart? (y/n)");
                     String inp = scan.nextLine();
@@ -297,7 +317,7 @@ public class Main {
 
                     }
 
-                    System.out.println("Would you like to select another product?");
+                    System.out.println("Would you like to select another product? (y/n)");
                     input = scan.nextLine();
                 }
 
@@ -320,7 +340,7 @@ public class Main {
                     if (product == null) {
                         System.out.println("Book does not exist.");
                     } else {
-                        System.out.println(productString(product));
+                        printProductPage(product);
                         System.out.println("Would you like to add to cart? (y/n)");
                         String answerTwo = scan.nextLine();
                         answerTwo = answerTwo.toLowerCase();
@@ -420,11 +440,32 @@ public class Main {
         }
     }
 
+    /**
+     * Return a nicely formatted string to print a product
+     * @param p product
+     * @return string representation of product
+     */
     private static String productString(Product p) {
         return String.format("%d) Name: %s | Store: %s | $%.2f",
                 p.getIndex(), p.getName(), p.getStoreName(), p.getPrice());
     }
 
+    /**
+     * Print the page with a product description
+     * @param p product
+     */
+    private static void printProductPage(Product p) {
+        System.out.println("------------------------------------------");
+        System.out.println(productString(p) + " | Quantity: " + p.getQuantity());
+        System.out.println(p.getDescription());
+        System.out.println("------------------------------------------");
+    }
+
+    /**
+     * Print the contents of a buyer's shopping cart
+     * @param buyer the buyer
+     * @param market the market that the buyer is in
+     */
     private static void printShoppingCart(Buyer buyer, Market market) {
         ArrayList<String> shoppingCart = buyer.getShoppingCart();
 

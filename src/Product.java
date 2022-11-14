@@ -184,6 +184,11 @@ public class Product {
                     && obj.getStoreName().equals(this.getStoreName()));
         }
     }
+
+    /**
+     * Return a string representation of the product, to be used in csvs
+     * @return the string for the product
+     */
     @Override
     public String toString() {
         return String.format("%d,%s,%s,%s,%d,%.2f",

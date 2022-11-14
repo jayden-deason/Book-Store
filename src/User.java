@@ -60,20 +60,4 @@ public class User {
         this.password = password;
     }
 
-    /**
-     * Export the user info to a file
-     * @param filename path to export file
-     */
-    public void exportToFile(String filename) {
-        // TODO: determine file formatting
-    }
-
-    /**
-     * Prints a dashboard for the user
-     *
-     * Each specific type of user (buyer/seller) should implement their own version
-     */
-    public void printDashboard() {
-        // TODO: determine dashboard appearance
-    }
 }
