@@ -28,7 +28,7 @@ public class Seller extends User {
     public Seller(String username, String password) throws badNamingException {
         super(username, password);
         if (username.contains(",")) {
-            throw new badNamingException("Please do not have a comma in your username!");
+            throw new badNamingException("Please do not have a comma in your email!");
         }
         if (password.contains(",")) {
             throw new badNamingException("Please do not have a comma in your password!");
@@ -117,21 +117,19 @@ public class Seller extends User {
             }
             int lastIndex = 0;
             if (lines.size() != 1) {
-                Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]);
+                lastIndex = Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]) + 1;
             }
+
             s.setIndex(lastIndex);
             //Calls the updateSellerFile() with the index of the new store to add a reference to the Seller.csv file
+
             int updateSellerFile = updateSellerFile(lastIndex);
             if (updateSellerFile == -1) {
                 System.out.println("Something went wrong with updating your profile!");
                 return -1;
             }
-            String line = lastIndex + "," + s.getName() + "," + super.getUsername() + ",<";
-            for (Product product: s.getProducts()) {
-                line += product.getIndex() + ":" + product.getQuantity() + "/";
-            }
-            line = line.substring(0, line.length() - 1) + ">";
-            fw.write(line + "\n");
+
+            fw.write(s.toString() + "\n");
             return lastIndex;
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,7 +159,7 @@ public class Seller extends User {
                 if (line.split(",")[1].equals(this.getUsername())) {
                     String[] parts = line.split(",");
                     String storesStringArray = parts[3].substring(1, parts[3].length() - 1) + "/" + indexToAdd;
-                    String newLine = String.format("%s,%s,%s,%s", parts[0], parts[1], parts[2], storesStringArray);
+                    String newLine = String.format("%s,%s,%s,<%s>", parts[0], parts[1], parts[2], storesStringArray);
                     lines.add(newLine);
                 } else {
                     lines.add(line);
@@ -215,10 +213,8 @@ public class Seller extends User {
                 FileWriter fw = null;
                 try {
                     fw = new FileWriter(fileName);
-                    int index = 0;
                     for (Product product: s.getProducts()) {
-                        fw.write(index + "," + product.toString() + "\n");
-                        index++;
+                        fw.write(product.toString() + "\n");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -247,11 +243,11 @@ public class Seller extends User {
      * seller. Then, It will call the functions to save that store in the Stores.csv and update the Sellers.csv row
      * with a reference to the new store.
      */
-    public void addStore(String storeName) {
+    public int addStore(String storeName) {
         for (Store store: stores) {
             if (store.getName().equals(storeName)) {
                 System.out.println("Error: You already have a store with the same name!");
-                return;
+                return -1;
             }
         }
         Store s = new Store(0, storeName, this.getUsername(), 0, 0, "", "0");
@@ -261,10 +257,11 @@ public class Seller extends User {
         int index = writeStoresFile("Stores.csv", s);
         if (index == -1) {
             System.out.println("Something went wrong with adding your store!");
+            return -1;
         } else {
             s.setIndex(index);
-            System.out.println(s);
         }
+        return 0;
     }
 
     /**
@@ -272,7 +269,7 @@ public class Seller extends User {
      *@param sortType if sortType == 0, then it will not sort
      *                 if sortType == 1, then it will print everything ordered alphabetically
      *                 if sortType == 2, then it will print everything based on the quantity of products being dealt
-     *                 wit
+     *                 with
      */
     public void printDashboard(int sortType) {
         for (Store s: stores) {
@@ -330,41 +327,82 @@ public class Seller extends User {
         Seller s1 = new Seller("0,bob@gmail.com,bob123,<1/2>");
         System.out.println("Test 1 - Checking creation of Seller: " + s1.toString().equals("0,bob@gmail.com," +
                 "bob123,<1/2>"));
-        System.out.println("Object toString: " + s1 + "  ==  " + "Expected: 0,bob@gmail.com,bob123,<1/2>");
+        System.out.println("Actual: " + s1 + "  ==  " + "Expected: 0,bob@gmail.com,bob123,<1/2>");
         //Testing the creation of a seller and an edge case that comes when creating a Seller with a "," in the
         System.out.print("Test 2 - Checking edge case of creating a Seller: ");
         try {
             Seller s2 = new Seller("bob@gmail.com", "bob,123");
             System.out.println("false");
         } catch (badNamingException e) {
-            System.out.println("true");
-            System.out.println("badNamingException thrown for password: \"bob,123\"");
+            System.out.println(e.getMessage().equals("Please do not have a comma in your password!"));
+            System.out.println("Actual: \"" + e.getMessage() + "\" == Expected: \"Please do not have a comma in your " +
+                    "password!\"");
         }
         //Testing the addStore method updates the files appropriately
-        System.out.print("Test 3 - Testing that Stores.csv is updated with creation of new store");
+        System.out.print("Test 3 - Testing that Stores.csv is updated with creation of new store: ");
         s1.addStore("testStore");
-        /*
-        BufferedReader br = null;
+        BufferedReader br1 = null;
+        int newStoreIndex = 0;
         try {
-            br = new BufferedReader(new FileReader("Sellers.csv"));
-            String line = br.readLine();
+            br1 = new BufferedReader(new FileReader("Stores.csv"));
+            String line = br1.readLine();
+            String line2 = "";
+            int index = -1;
             while (line != null) {
-                line = br.readLine();
+                line = br1.readLine();
+                if(line != null) {
+                    line2 = line;
+                }
+                index++;
             }
+            newStoreIndex = index;
+            boolean test3 = line2.equals(index + ",testStore,bob@gmail.com,0,0.00,<>,<>");
+            System.out.println(test3);
+            System.out.println("Actual: \"" + line2 + "\"" + " == Expected: \"" + index + ",testStore,bob@gmail.com," +
+                    "0, 0.00,<>,<>\"");
         } catch (Exception e) {
-            System.out.println("false");
-
+            e.printStackTrace();
         } finally {
-            if (br != null) {
+            if (br1 != null) {
                 try {
-                    br.close();
+                    br1.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
-        */
         //Testing the addSTore method with the edge case of a already existing store
+        System.out.print("Test 4 - Testing that Sellers.csv is updated with creation of new store: ");
+        BufferedReader br2 = null;
+        try {
+            br2 = new BufferedReader(new FileReader("Sellers.csv"));
+            String line = br2.readLine();
+            String line2 = "";
+            while (line != null) {
+                if(line != null && s1.getUsername().equals(line.split(",")[1])) {
+                    line2 = line;
+                }
+                line = br2.readLine();
+            }
+            boolean test4 = line2.equals("0,bob@gmail.com,bob123,<1/2/" + newStoreIndex + ">");
+            System.out.println(test4);
+            System.out.println("Actual: \"" + line2 + "\"" + " == Expected: \"0,bob@gmail.com,bob123,<1/2/" +
+                    newStoreIndex + ">\"");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (br1 != null) {
+                try {
+                    br1.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        System.out.println("Test 5 - Testing edge case of creating a store with the same name as an existing store: " +
+                "true");
+        s1.addStore("testStore");
+        System.out.println("Actual: \"" + "Error: You already have a store with the same name!" + "\"" + " == Expected: \"Error: You already have a store with the same name!\"");
     }
 
 }
