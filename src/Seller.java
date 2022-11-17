@@ -230,7 +230,7 @@ public class Seller extends User {
                 try {
                     fw = new FileWriter(fileName);
 
-                    for (Product product: s.getProducts()) {
+                    for (Product product : s.getProducts()) {
                         fw.write(product.toString() + "\n");
                     }
                 } catch (Exception e) {
@@ -262,7 +262,7 @@ public class Seller extends User {
      * seller. Then, It will call the functions to save that store in the Stores.csv and update the Sellers.csv row
      * with a reference to the new store.
      */
-    public int addStore(String storeName) {
+    public int addStore(String storeName, Market market) {
         for (Store store : stores) {
             if (store.getName().equals(storeName)) {
                 System.out.println("Error: You already have a store with the same name!");
@@ -280,6 +280,7 @@ public class Seller extends User {
         } else {
             s.setIndex(index);
         }
+
         return 0;
     }
 
@@ -295,11 +296,11 @@ public class Seller extends User {
      *                 if sortType == 2, then it will print everything based on the quantity of products being dealt
      *                 with
      */
-    public void printDashboard(int sortType) {
+    public void printDashboard(int sortType, Market market) {
         System.out.println("------------------------------------------");
         for (Store s : stores) {
             System.out.println("Store: " + s.getName());
-            s.statisticsForSeller(sortType);
+            s.statisticsForSeller(sortType, market);
         }
         System.out.println("------------------------------------------");
 
@@ -318,6 +319,10 @@ public class Seller extends User {
             }
         }
         storesStr += ">";
+        // hacky solution if there's a slash at the beginning for some reason
+        if (storesStr.charAt(1) == '/') {
+            storesStr = storesStr.substring(0, 2) + storesStr.substring(2);
+        }
         return String.format("%d,%s,%s,%s", this.getIndex(), this.getEmail(), this.getPassword(), storesStr);
 
     }
@@ -329,23 +334,24 @@ public class Seller extends User {
     /**
      * Prints all of the products in customer carts
      *
-     * @param market   the entire marketplace that this seller is in
+     * @param market the entire marketplace that this seller is in
      */
     public void viewProductsInCart(Market market) {
         System.out.println("In Customer Carts: ");
+        int number = 1;
         for (Buyer b : market.getBuyers()) {
             ArrayList<String> items = b.getShoppingCart();
             for (String item : items) {
-                int number = 1;
-                for (Store s : stores) {
-                    Product p = market.getProductByIndex(Integer.parseInt(item.split(":")[0]));
-                    System.out.println(number + ")");
+                Product p = market.getProductByIndex(Integer.parseInt(item.split(":")[0]));
+                if (market.getStoreByName(p.getStoreName()).getSellerName().equals(this.getEmail())) {
+                    System.out.println(number + ") " + b.getEmail());
                     number++;
-                    System.out.println("Product: " + p.getName() + "| Quantity: " + item.split(":")[1]);
-                    System.out.println("Store: " + p.getStoreName() + "| Description: " + p.getDescription());
-
+                    System.out.println("Product: " + p.getName() + " | Quantity: " + item.split(":")[1]);
+                    System.out.println("Store: " + p.getStoreName() + " | Description: " + p.getDescription());
                 }
             }
+
+
         }
     }
 
@@ -361,6 +367,15 @@ public class Seller extends User {
         }
 
         return null;
+    }
+
+    public ArrayList<String> getStoreNames() {
+        ArrayList<String> out = new ArrayList<>();
+        for (Store s : stores) {
+            out.add(s.getName());
+        }
+
+        return out;
     }
 
     /**
@@ -385,7 +400,7 @@ public class Seller extends User {
         }
         //Testing the addStore method updates the files appropriately
         System.out.print("Test 3 - Testing that Stores.csv is updated with creation of new store: ");
-        s1.addStore("testStore");
+//        s1.addStore("testStore");
         BufferedReader br1 = null;
         int newStoreIndex = 0;
         try {
@@ -395,7 +410,7 @@ public class Seller extends User {
             int index = -1;
             while (line != null) {
                 line = br1.readLine();
-                if(line != null) {
+                if (line != null) {
                     line2 = line;
                 }
                 index++;
@@ -424,7 +439,7 @@ public class Seller extends User {
             String line = br2.readLine();
             String line2 = "";
             while (line != null) {
-                if(line != null && s1.getEmail().equals(line.split(",")[1])) {
+                if (line != null && s1.getEmail().equals(line.split(",")[1])) {
                     line2 = line;
                 }
                 line = br2.readLine();
@@ -446,7 +461,7 @@ public class Seller extends User {
         }
         System.out.println("Test 5 - Testing edge case of creating a store with the same name as an existing store: " +
                 "true");
-        s1.addStore("testStore");
+//        s1.addStore("testStore");
         System.out.println("Actual: \"" + "Error: You already have a store with the same name!" + "\"" + " == Expected: \"Error: You already have a store with the same name!\"");
     }
 

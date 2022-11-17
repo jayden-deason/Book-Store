@@ -222,7 +222,7 @@ public class Buyer extends User {
                 if (answer < 1 || answer > 3) //throws exception if the answer is an invalid number
                     throw new NumberFormatException();
                 if (answer == 1) { //runs if sorting based off total sales
-                    stores.sort((s1, s2) -> Integer.compare(s1.getSales(), s2.getSales()));
+                    stores.sort((s1, s2) -> Integer.compare(s1.getSales(market), s2.getSales(market)));
                     Collections.reverse(stores);
                     printStoreInfo(stores);
                 }
@@ -230,7 +230,7 @@ public class Buyer extends User {
                     //arraylist containing copies of stores to be sorted
                     ArrayList<Store> storesByHistory = new ArrayList<Store>(stores);
 
-                    storesByHistory.sort((s1, s2) -> s1.getSales() - s2.getSales());
+                    storesByHistory.sort((s1, s2) -> s1.getSales(market) - s2.getSales(market));
                     Collections.reverse(storesByHistory);
                     printStoreInfo(storesByHistory);
                 }
