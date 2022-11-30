@@ -13,25 +13,28 @@ public class Product {
     private String storeName; // the store associated with the product
     private String description; // a text description of the product
     private int quantity; // the quantity available of the product
-    private double price; // the price of the product
+    private double salePrice; // the price of the product
+    private double originalPrice; // the original price of the product
     private int index; // the index of the product in the csv
 
     /**
      * Creates a new product object with the specified parameters
      *
-     * @param name        the name of the product
-     * @param storeName   the store associated with the product
-     * @param description the text description of the product
-     * @param quantity    the quantity available of the product
-     * @param price       the price of the product
-     * @param index       the index of the product in the csv
+     * @param name          the name of the product
+     * @param storeName     the store associated with the product
+     * @param description   the text description of the product
+     * @param quantity      the quantity available of the product
+     * @param salePrice     the price of the product
+     * @param originalPrice the price of the product
+     * @param index         the index of the product in the csv
      */
-    public Product(String name, String storeName, String description, int quantity, double price, int index) {
+    public Product(String name, String storeName, String description, int quantity, double salePrice, double originalPrice, int index) {
         this.name = name;
         this.storeName = storeName;
         this.description = description;
         this.quantity = quantity;
-        this.price = price;
+        this.salePrice = salePrice;
+        this.originalPrice = originalPrice;
         this.index = index;
     }
 
@@ -47,7 +50,8 @@ public class Product {
         this.storeName = info[2];
         this.description = info[3];
         this.quantity = Integer.parseInt(info[4]);
-        this.price = Double.parseDouble(info[5]);
+        this.salePrice = Double.parseDouble(info[5]);
+        this.originalPrice = Double.parseDouble(info[6]);
     }
 
     /**
@@ -92,8 +96,8 @@ public class Product {
      *
      * @return
      */
-    public double getPrice() {
-        return price;
+    public double getSalePrice() {
+        return salePrice;
     }
 
     /**
@@ -135,10 +139,10 @@ public class Product {
     /**
      * Set the product price
      *
-     * @param price the new price
+     * @param salePrice the new price
      */
-    public void setPrice(double price) {
-        this.price = price;
+    public void setSalePrice(double salePrice) {
+        this.salePrice = salePrice;
     }
 
     /**
@@ -161,7 +165,34 @@ public class Product {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, storeName, price, quantity, description, storeName);
+        return Objects.hash(name, storeName, salePrice, quantity, description, storeName);
+    }
+
+    /**
+     * Get the original price of the product
+     *
+     * @return original price
+     */
+    public double getOriginalPrice() {
+        return originalPrice;
+    }
+
+    /**
+     * Set the original price of the product
+     *
+     * @param originalPrice original price
+     */
+    public void setOriginalPrice(double originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    /**
+     * Return whether the product is on sale or not
+     *
+     * @return if the product is on sale
+     */
+    public boolean isOnSale() {
+        return originalPrice != salePrice;
     }
 
     /**
@@ -180,19 +211,20 @@ public class Product {
                     && obj.getName().equals(this.getName())
                     && obj.getQuantity() == this.getQuantity()
                     && obj.getDescription().equals(this.getDescription())
-                    && obj.getPrice() == this.getPrice()
+                    && obj.getSalePrice() == this.getSalePrice()
                     && obj.getStoreName().equals(this.getStoreName()));
         }
     }
 
     /**
      * Return a string representation of the product, to be used in csvs
+     *
      * @return the string for the product
      */
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%d,%.2f",
-                getIndex(), getName(), getStoreName(), getDescription(), getQuantity(), getPrice());
+        return String.format("%d,%s,%s,%s,%d,%.2f, %.2f",
+                getIndex(), getName(), getStoreName(), getDescription(), getQuantity(), getSalePrice(), getOriginalPrice());
     }
 
 }

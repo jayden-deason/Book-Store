@@ -92,6 +92,17 @@ public class Market {
         }
     }
 
+    private int getNextIndex() {
+        int maxIdx = -1;
+        for (Product p : products) {
+            if (p.getIndex() > maxIdx) {
+                maxIdx = p.getIndex();
+            }
+        }
+
+        return maxIdx + 1;
+    }
+
     /**
      * Add a seller to the market
      *
@@ -123,7 +134,7 @@ public class Market {
      */
     public void addProduct(Product p) {
         if (p.getIndex() == -1) {
-            p.setIndex(products.size());
+            p.setIndex(getNextIndex());
         }
         Store s = getStoreByName(p.getStoreName());
         s.addProduct(p, this);
@@ -288,6 +299,17 @@ public class Market {
         return out;
     }
 
+    /**
+     * Remove a product from the market
+     * @param p product to remove
+     */
+    public void removeProduct(Product p) {
+        Store s = getStoreByName(p.getStoreName());
+        s.removeProduct(p);
+        products.remove(p);
+
+    }
+
 
     /**
      * Find a seller by their email
@@ -437,7 +459,7 @@ public class Market {
      */
     public ArrayList<Product> sortByPrice() {
         products.sort((s1, s2) -> {
-            return (int) (100 * (s1.getPrice() - s2.getPrice()));
+            return (int) (100 * (s1.getSalePrice() - s2.getSalePrice()));
             // multiply by 100 so integer cast doesn't truncate down to 0 if < 1
         });
 

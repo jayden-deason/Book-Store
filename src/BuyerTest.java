@@ -24,7 +24,7 @@ public class BuyerTest {
             e.printStackTrace();
         }
 
-        Product product = new Product("testProd", "test", "Test", 5, 40.0, 5);
+        Product product = new Product("testProd", "test", "Test", 5, 40.0, 40.0, 5);
         buyer.addProductToCart(product.getIndex(), 2);
 
         ArrayList<String> test = buyer.getShoppingCart();

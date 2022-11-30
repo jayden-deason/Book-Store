@@ -27,7 +27,7 @@ public class MainTestCases {
         System.out.println(p.getStoreName());
         System.out.println(p.getDescription());
         System.out.println(p.getQuantity());
-        System.out.println(p.getPrice());
+        System.out.println(p.getSalePrice());
 
         // print listings
         Main.printListings(market.getAllProducts(true));
@@ -115,7 +115,7 @@ public class MainTestCases {
         printFileContents("Stores.csv");
 
         Product p = new Product("test product", "test store",
-                "blah blah blah", 100, 10, -1);
+                "blah blah blah", 100, 10, 10, -1);
         market.addProduct(p);
         market.updateAllFiles();
 

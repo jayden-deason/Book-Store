@@ -1,7 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 
 /**
  * Store
@@ -144,8 +143,7 @@ public class Store {
             BufferedReader bfr = new BufferedReader(new FileReader(file));
             for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
                 String[] splitLine = line.split(",");
-                Product product = new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
-                        Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0]));
+                Product product = new Product(line);
                 products.add(product);
                 productsByIndex.add(Integer.parseInt(splitLine[0]));
                 productsForSales.add(product);
@@ -261,7 +259,7 @@ public class Store {
                         salesForProducts.get(productsForSales.indexOf(product)) + quantity);
             }
             sales += quantity;
-            revenue += quantity * product.getPrice();
+            revenue += quantity * product.getSalePrice();
             product.setQuantity(product.getQuantity() - quantity);
 //            this.updateProducts();
 //            this.updateStores();
@@ -354,8 +352,7 @@ public class Store {
             for (String line = bfr.readLine(); line != null; line = bfr.readLine()) {
                 String[] splitLine = line.split(",");
                 if (productsByIndex.contains(Integer.parseInt(splitLine[0]))) {
-                    products.add(new Product(splitLine[1], splitLine[2], splitLine[3], Integer.parseInt(splitLine[4]),
-                            Double.parseDouble(splitLine[5]), Integer.parseInt(splitLine[0])));
+                    products.add(new Product(line));
                 }
             }
             bfr.close();

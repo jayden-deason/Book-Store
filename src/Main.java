@@ -148,61 +148,106 @@ public class Main {
                 if (store == null) {
                     System.out.println("Store does not exist!");
                 } else {
-                    System.out.println("What is the book name?");
-                    String name = scan.nextLine();
-                    System.out.println("What is the book's description?");
-                    String description = scan.nextLine();
-                    int quantity = -1;
-                    double price = -1.0;
-                    int index = -1;
-                    boolean num;
-                    while (true) {
-                        try {
-                            num = true;
-                            System.out.println("What is the quantity?");
-                            quantity = Integer.parseInt(scan.nextLine());
-                            System.out.println("What is the price?");
-                            price = Double.parseDouble(scan.nextLine());
+                    System.out.println("1. Select existing book\n2. Create new book");
+                    int response = scan.nextInt();
+                    scan.nextLine();
+                    if (response == 1) { //todo: check invalid inputs
+                        System.out.println("What is the book's index");
+                        for (Product p : store.getProducts()) {
+                            System.out.println(productString(p));
+                        }
 
-                            if (market.getProductByName(name) != null) {
-                                System.out.println("What is the index of the book being added/edited/removed?");
-                                index = Integer.parseInt(scan.nextLine());
+                        int index = scan.nextInt(); //todo: invalid input
+                        scan.nextLine();
+                        Product product = market.getProductByIndex(index);
+                        System.out.println("1. Edit (modify/put on sale)\n2. Remove");
+                        int choice = scan.nextInt(); //todo: invalid input
+                        scan.nextLine();
+                        if (choice == 1) {
+                            System.out.println("For the following fields, leave blank if you want to keep them the same");
+                            System.out.printf("New name (Current name: '%s'):\n", product.getName());
+                            String newName = scan.nextLine();
+
+                            if (!newName.equals("")) {
+                                product.setName(newName);
                             }
-                            if (quantity < 0 || price < 0.0) {
-                                num = false;
+
+                            System.out.printf("New description (Current description: '%s'):\n", product.getDescription());
+                            String newDescription = scan.nextLine();
+
+                            if (!newDescription.equals("")) {
+                                product.setDescription(newDescription);
                             }
-                        } catch (NumberFormatException e) {
-                            num = false;
-                        }
-                        if (num) {
-                            break;
+
+                            System.out.printf("New sale price (Current price: $%.2f):\n", product.getSalePrice());
+                            String newSalePrice = scan.nextLine();
+
+                            if (!newSalePrice.equals("")) {
+                                product.setSalePrice(Double.parseDouble(newSalePrice));
+                            }
+
+                            System.out.printf("New original price (Current price: $%.2f):\n", product.getOriginalPrice());
+                            String newOriginalPrice = scan.nextLine();
+
+                            if (!newOriginalPrice.equals("")) {
+                                product.setOriginalPrice(Double.parseDouble(newOriginalPrice));
+                            }
+
+                            System.out.printf("New quantity (Current quantity: %d):\n", product.getQuantity());
+                            String newQuantity = scan.nextLine();
+
+                            if (!newQuantity.equals("")) {
+                                product.setQuantity(Integer.parseInt(newQuantity));
+                            }
+
+                            System.out.println("Product modified!");
+                            System.out.println(productString(product));
+
+                            market.updateAllFiles();
+
+                        } else if (choice == 2) {
+                            // remove
+                            market.removeProduct(product);
+                            market.updateAllFiles();
+                            System.out.println("Removed book!");
                         } else {
-                            System.out.println("Please enter valid numbers!");
+                            System.out.println("Invalid input!");
                         }
-                    }
-                    Product product = new Product(name, storeName, description, quantity, price, index);
-                    while (true) {
-                        System.out.println("Enter a number:");
-                        System.out.println("1 - Add Book.");
-                        System.out.println("2 - Delete Book.");
-                        System.out.println("3 - Edit Book.");
-                        System.out.println("4 - Exit.");
-                        String answerTwo = scan.nextLine();
-                        if (answerTwo.equals("1")) {
-                            market.addProduct(product);
-                            market.updateAllFiles();
-                        } else if (answerTwo.equals("2")) {
-                            store.removeProduct(product);
-                            market.updateAllFiles();
-                        } else if (answerTwo.equals("3")) {
-                            store.modifyProduct(product);
-                            market.updateAllFiles();
-                        } else if (answerTwo.equals("4")) {
-                            break;
-                        } else {
-                            // if answer is not 1, 2, 3, or 4
-                            System.out.println("Invalid input.");
+
+                    } else if (response == 2) {
+                        // add new book
+                        System.out.println("The book's name:");
+                        String name = scan.nextLine();
+
+                        System.out.println("The book's description:");
+                        String description = scan.nextLine();
+
+                        System.out.println("The book's original price:");
+                        double originalPrice = scan.nextDouble();
+                        scan.nextLine();
+
+                        System.out.println("The book's sale price:");
+                        double salePrice = scan.nextDouble();
+                        scan.nextLine();
+
+                        System.out.println("The book's quantity:");
+                        int quantity = scan.nextInt();
+                        scan.nextLine();
+
+                        Product p = new Product(name, storeName, description, quantity, salePrice, originalPrice, -1);
+
+                        printProductPage(p);
+
+                        System.out.println("Add this book? (y/n)");
+                        if (scan.nextLine().equals("y")) { //todo: check invalid input
+                            market.addProduct(p);
                         }
+
+                        System.out.println("Product added!");
+
+                        market.updateAllFiles();
+                    } else {
+                        System.out.println("Invalid input!");
                     }
                 }
             } else if (answer.equals("3")) {
@@ -480,8 +525,12 @@ public class Main {
      * @return string representation of product
      */
     public static String productString(Product p) {
+        if (p.isOnSale()) {
+            return String.format("%d) Sale! Name: %s | Store: %s | Sale Price: $%.2f | Original Price: $%.2f",
+                    p.getIndex(), p.getName(), p.getStoreName(), p.getSalePrice(), p.getOriginalPrice());
+        }
         return String.format("%d) Name: %s | Store: %s | $%.2f",
-                p.getIndex(), p.getName(), p.getStoreName(), p.getPrice());
+                p.getIndex(), p.getName(), p.getStoreName(), p.getSalePrice());
     }
 
     /**
@@ -517,10 +566,15 @@ public class Main {
         for (int i = 0; i < shoppingCart.size(); i++) {
             Product p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
             int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
-            System.out.printf("%d) Name: %s | Quantity: %d | Price: $%.2f\n",
-                    p.getIndex(), p.getName(), quantity, p.getPrice() * quantity);
+            if (p.isOnSale()) {
+                System.out.printf("%d) Sale! Name: %s | Quantity: %d | Sale Price: $%.2f | Original Price $%.2f\n",
+                        p.getIndex(), p.getName(), quantity, p.getSalePrice() * quantity, p.getOriginalPrice() * quantity);
+            } else {
+                System.out.printf("%d) Name: %s | Quantity: %d | Price: $%.2f\n",
+                        p.getIndex(), p.getName(), quantity, p.getSalePrice() * quantity);
+            }
 
-            price += p.getPrice() * quantity;
+            price += p.getSalePrice() * quantity;
         }
         System.out.printf("Your total price is: $%.2f\n", price);
         System.out.println("------------------------------------------");

@@ -192,7 +192,7 @@ public class Buyer extends User {
                 Product p = market.getProductByIndex(idx);
 
                 pw.printf("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
-                        p.getName(), p.getStoreName(), quantity, p.getPrice() * quantity);
+                        p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
             }
             pw.close();
         } catch (Exception e) {
@@ -276,7 +276,7 @@ public class Buyer extends User {
             Product p = Market.getInstance().getProductByIndex(idx);
 
             System.out.printf("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
-                    p.getName(), p.getStoreName(), quantity, p.getPrice() * quantity);
+                    p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
         }
         System.out.println("------------------------------------------");
 
