@@ -89,6 +89,13 @@ public class Main {
                 while (true) {
                     System.out.println("Enter your email.");
                     username = scan.nextLine();
+
+                    if (market.getAllEmails().contains(username)) {
+                        System.out.println("Account already exists with that email!");
+                        continue;
+                    }
+
+
                     if (username.contains("@") && username.contains(".")) {
                         break;
                     } else {
@@ -460,7 +467,7 @@ public class Main {
             } else if (answer.equals("6")) {
                 System.out.println("What is the file name to import from?");
                 String fileName = scan.nextLine();
-                market.addProductsFromFile(fileName);
+                market.addSellerProductsFromFile(fileName, seller);
                 System.out.println("Import complete!");
             } else if (answer.equals("7")) {
                 System.out.println("------------------------------------------");

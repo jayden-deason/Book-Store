@@ -78,6 +78,27 @@ public class Market {
     }
 
     /**
+     * Add all products from a given file for a specific seller
+     *
+     * @param fileName path to product file
+     * @param seller   seller importing the books
+     */
+    public void addSellerProductsFromFile(String fileName, Seller seller) {
+        ArrayList<String> lines = readFile(fileName);
+        for (String line : lines) {
+            Product p = new Product(line);
+            p.setStoreName(line.split(",")[2]);
+
+            if (seller.getStoreNames().contains(p.getStoreName())) {
+                addProduct(p);
+            } else {
+                System.out.printf("Skipping '%s,' store does not belong to %s!\n", p.getName(), seller.getEmail());
+            }
+
+        }
+    }
+
+    /**
      * Add all products from a given file
      *
      * @param fileName path to product file
@@ -87,10 +108,10 @@ public class Market {
         for (String line : lines) {
             Product p = new Product(line);
             p.setStoreName(line.split(",")[2]);
-
             addProduct(p);
         }
     }
+
 
     private int getNextIndex() {
         int maxIdx = -1;
@@ -214,6 +235,22 @@ public class Market {
     }
 
     /**
+     * Get all emails for existing accounts
+     *
+     * @return list of emails
+     */
+    public ArrayList<String> getAllEmails() {
+        ArrayList<User> users = getAllUsers();
+        ArrayList<String> out = new ArrayList<>();
+
+        for (User user : users) {
+            out.add(user.getEmail());
+        }
+
+        return out;
+    }
+
+    /**
      * Get a product object from the masterlist given its name
      *
      * @param name the name of the product
@@ -301,6 +338,7 @@ public class Market {
 
     /**
      * Remove a product from the market
+     *
      * @param p product to remove
      */
     public void removeProduct(Product p) {
