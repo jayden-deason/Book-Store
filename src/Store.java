@@ -384,7 +384,10 @@ public class Store {
             }
 
         }
-        return retString.substring(0, retString.length() - 1);
+        if (!retString.equals("")) {
+            retString = retString.substring(0, retString.length() - 1);
+        }
+        return retString;
     }
 
     /**
