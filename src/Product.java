@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -16,6 +17,7 @@ public class Product {
     private double salePrice; // the price of the product
     private double originalPrice; // the original price of the product
     private int index; // the index of the product in the csv
+    private ArrayList<Review> reviews; // the list of product reviews
 
     /**
      * Creates a new product object with the specified parameters
@@ -36,6 +38,7 @@ public class Product {
         this.salePrice = salePrice;
         this.originalPrice = originalPrice;
         this.index = index;
+        this.reviews = new ArrayList<>();
     }
 
     /**
@@ -52,6 +55,14 @@ public class Product {
         this.quantity = Integer.parseInt(info[4]);
         this.salePrice = Double.parseDouble(info[5]);
         this.originalPrice = Double.parseDouble(info[6]);
+        this.reviews = new ArrayList<>();
+
+        String[] revs = info[7].substring(1, info[7].length() - 1).split("/");
+        for (String review : revs) {
+            if (!review.equals("")) {
+                addReview(new Review(review));
+            }
+        }
     }
 
     /**
@@ -217,14 +228,44 @@ public class Product {
     }
 
     /**
+     * Add a review to the product's reviews
+     *
+     * @param r new review
+     */
+    public void addReview(Review r) {
+        reviews.add(r);
+    }
+
+    /**
+     * Return the list of reviews
+     * @return list of product reviews
+     */
+    public ArrayList<Review> getReviews() {
+        return reviews;
+    }
+
+    public String getReviewString() {
+        String out = "<";
+        for (int i = 0; i < reviews.size(); i++) {
+            out += reviews.get(i).toString();
+            if (i < reviews.size() - 1) {
+                out += "/";
+            }
+        }
+
+        return out + ">";
+    }
+
+    /**
      * Return a string representation of the product, to be used in csvs
      *
      * @return the string for the product
      */
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%d,%.2f, %.2f",
-                getIndex(), getName(), getStoreName(), getDescription(), getQuantity(), getSalePrice(), getOriginalPrice());
+        return String.format("%d,%s,%s,%s,%d,%.2f, %.2f,%s",
+                getIndex(), getName(), getStoreName(), getDescription(), getQuantity(), getSalePrice(),
+                getOriginalPrice(), getReviewString());
     }
 
 }
