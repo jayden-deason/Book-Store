@@ -61,6 +61,8 @@ public class Main {
                     user = market.getUserByEmail(email);
                     if (user != null) {
                         break;
+                    } else {
+                        System.out.println("No account with that email! Try again.");
                     }
                 } else {
                     System.out.println("Please enter a valid email.");
@@ -157,6 +159,11 @@ public class Main {
                 market.addStore(storeName, seller.getEmail());
                 market.updateAllFiles();
             } else if (answer.equals("2")) {
+                if (seller.getStores().size() == 0) {
+                    System.out.println("Create a store before adding books!");
+                    continue;
+                }
+
                 String storeName;
                 while (true) {
                     System.out.println("What is the store name?");
