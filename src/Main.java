@@ -184,257 +184,260 @@ public class Main {
                     System.out.println("1. Select existing book\n2. Create new book");
                     try {
                         response = Integer.parseInt(scan.nextLine());
-                        break;
+
+
+                        if (response == 1) {
+                            if (store.getProducts().size() == 0) {
+                                System.out.println("No existing books! Try making a new book first.");
+                                continue;
+                            }
+                            System.out.println("What is the book's index");
+                            for (Product p : store.getProducts()) {
+                                System.out.println(productString(p));
+                            }
+
+                            int index;
+                            Product product;
+                            while (true) {
+                                try {
+                                    index = Integer.parseInt(scan.nextLine());
+                                    product = market.getProductByIndex(index);
+
+                                    if (product == null) {
+                                        System.out.println("Invalid index! Try again.");
+                                        continue;
+                                    }
+                                    break;
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid input! Try again.");
+                                }
+                            }
+                            System.out.println("1. Edit (modify/put on sale)\n2. Remove");
+
+                            int choice;
+                            while (true) {
+                                try {
+                                    choice = Integer.parseInt(scan.nextLine());
+                                    break;
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid input! Try again.");
+                                }
+                            }
+
+                            if (choice == 1) {
+                                System.out.println("For the following fields, leave blank if you want to keep them the same");
+                                System.out.printf("New name (Current name: '%s'):\n", product.getName());
+
+                                String newName;
+                                while (true) {
+                                    newName = scan.nextLine();
+                                    if (!newName.equals("")) {
+                                        if (!newName.contains(",")) {
+                                            product.setName(newName);
+                                            System.out.println("Updated name!");
+                                            break;
+                                        } else {
+                                            System.out.println("Invalid name! Try again.");
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+
+                                System.out.printf("New description (Current description: '%s'):\n", product.getDescription());
+                                String newDescription;
+                                while (true) {
+                                    newDescription = scan.nextLine();
+                                    if (!newDescription.equals("")) {
+                                        if (!newName.contains(",")) {
+                                            product.setDescription(newDescription);
+                                            System.out.println("Updated description!");
+                                            break;
+                                        } else {
+                                            System.out.println("Invalid description! Try again.");
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+                                System.out.printf("New sale price (Current price: $%.2f):\n", product.getSalePrice());
+                                String newSalePrice;
+                                double newPrice;
+                                while (true) {
+                                    newSalePrice = scan.nextLine();
+
+                                    if (!newSalePrice.equals("")) {
+                                        try {
+                                            newPrice = Double.parseDouble(newSalePrice);
+                                            product.setSalePrice(newPrice);
+                                            System.out.println("Updated sale price!");
+                                            break;
+                                        } catch (NumberFormatException e) {
+                                            System.out.println("Invalid input! Try again.");
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+                                System.out.printf("New original price (Current price: $%.2f):\n", product.getOriginalPrice());
+                                String newOriginalPrice;
+                                while (true) {
+                                    newOriginalPrice = scan.nextLine();
+
+                                    if (!newOriginalPrice.equals("")) {
+                                        try {
+                                            newPrice = Double.parseDouble(newOriginalPrice);
+                                            product.setOriginalPrice(newPrice);
+                                            System.out.println("Updated original price!");
+                                            break;
+                                        } catch (NumberFormatException e) {
+                                            System.out.println("Invalid input! Try again.");
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+                                System.out.printf("New quantity (Current quantity: %d):\n", product.getQuantity());
+                                String newQuantity;
+                                int quantity;
+                                while (true) {
+                                    newQuantity = scan.nextLine();
+
+                                    if (!newQuantity.equals("")) {
+                                        try {
+                                            quantity = Integer.parseInt(newQuantity);
+                                            product.setQuantity(quantity);
+                                            System.out.println("Updated quantity!");
+                                            break;
+                                        } catch (NumberFormatException e) {
+                                            System.out.println("Invalid input! Try again.");
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+                                System.out.println("Product modified!");
+                                System.out.println(productString(product));
+
+                                market.updateAllFiles();
+
+                            } else if (choice == 2) {
+                                // remove
+                                market.removeProduct(product);
+                                market.updateAllFiles();
+                                System.out.println("Removed book!");
+                            } else {
+                                System.out.println("Invalid input!");
+                            }
+
+
+                        } else if (response == 2) {
+                            // add new book
+
+                            System.out.println("The book's name:");
+                            String name;
+                            while (true) {
+                                name = scan.nextLine();
+                                if (name.contains(",")) {
+                                    System.out.println("Invalid input! Try again.");
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            System.out.println("The book's description:");
+                            String description;
+                            while (true) {
+                                description = scan.nextLine();
+                                if (description.contains(",")) {
+                                    System.out.println("Invalid input! Try again.");
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            System.out.println("The book's original price:");
+                            String ogPriceString;
+                            double originalPrice;
+                            while (true) {
+                                ogPriceString = scan.nextLine();
+                                if (ogPriceString.contains(",")) {
+                                    System.out.println("Invalid input! Try again.");
+                                } else {
+                                    try {
+                                        originalPrice = Double.parseDouble(ogPriceString);
+                                        break;
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("Invalid input! Try again.");
+                                    }
+                                }
+                            }
+
+                            System.out.println("The book's sale price:");
+                            String salePriceString;
+                            double salePrice;
+                            while (true) {
+                                salePriceString = scan.nextLine();
+                                if (salePriceString.contains(",")) {
+                                    System.out.println("Invalid input! Try again.");
+                                } else {
+                                    try {
+                                        salePrice = Double.parseDouble(salePriceString);
+                                        break;
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("Invalid input! Try again.");
+                                    }
+                                }
+                            }
+
+                            System.out.println("The book's quantity:");
+                            String quantityString;
+                            int quantity;
+                            while (true) {
+                                quantityString = scan.nextLine();
+                                if (quantityString.contains(",")) {
+                                    System.out.println("Invalid input! Try again.");
+                                } else {
+                                    try {
+                                        quantity = Integer.parseInt(quantityString);
+                                        break;
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("Invalid input! Try again.");
+                                    }
+                                }
+                            }
+
+                            Product p = new Product(name, storeName, description, quantity, salePrice, originalPrice, -1);
+
+                            printProductPage(p);
+
+                            System.out.println("Add this book? (y/n)");
+                            while (true) {
+                                String temp = scan.nextLine();
+                                if (temp.equalsIgnoreCase("y")) { //todo: check invalid input
+                                    market.addProduct(p);
+                                    System.out.println("Product added!");
+                                    market.updateAllFiles();
+                                    break;
+                                } else if (temp.equalsIgnoreCase("n")) {
+                                    break;
+                                } else {
+                                    System.out.println("Invalid input! Try again.");
+                                }
+                            }
+                            break;
+
+                        } else {
+                            System.out.println("Invalid input!");
+                        }
                     } catch (NumberFormatException e) {
                         System.out.println("Invalid input! Try again.");
                     }
-                }
-                if (response == 1) {
-                    if (store.getProducts().size() == 0) {
-                        System.out.println("No existing books! Try making a new book first.");
-                        continue;
-                    }
-                    System.out.println("What is the book's index");
-                    for (Product p : store.getProducts()) {
-                        System.out.println(productString(p));
-                    }
-
-                    int index;
-                    Product product;
-                    while (true) {
-                        try {
-                            index = Integer.parseInt(scan.nextLine());
-                            product = market.getProductByIndex(index);
-
-                            if (product == null) {
-                                System.out.println("Invalid index! Try again.");
-                                continue;
-                            }
-                            break;
-                        } catch (NumberFormatException e) {
-                            System.out.println("Invalid input! Try again.");
-                        }
-                    }
-                    System.out.println("1. Edit (modify/put on sale)\n2. Remove");
-
-                    int choice;
-                    while (true) {
-                        try {
-                            choice = Integer.parseInt(scan.nextLine());
-                            break;
-                        } catch (NumberFormatException e) {
-                            System.out.println("Invalid input! Try again.");
-                        }
-                    }
-
-                    if (choice == 1) {
-                        System.out.println("For the following fields, leave blank if you want to keep them the same");
-                        System.out.printf("New name (Current name: '%s'):\n", product.getName());
-
-                        String newName;
-                        while (true) {
-                            newName = scan.nextLine();
-                            if (!newName.equals("")) {
-                                if (!newName.contains(",")) {
-                                    product.setName(newName);
-                                    System.out.println("Updated name!");
-                                    break;
-                                } else {
-                                    System.out.println("Invalid name! Try again.");
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-
-
-                        System.out.printf("New description (Current description: '%s'):\n", product.getDescription());
-                        String newDescription;
-                        while (true) {
-                            newDescription = scan.nextLine();
-                            if (!newDescription.equals("")) {
-                                if (!newName.contains(",")) {
-                                    product.setDescription(newDescription);
-                                    System.out.println("Updated description!");
-                                    break;
-                                } else {
-                                    System.out.println("Invalid description! Try again.");
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-
-                        System.out.printf("New sale price (Current price: $%.2f):\n", product.getSalePrice());
-                        String newSalePrice;
-                        double newPrice;
-                        while (true) {
-                            newSalePrice = scan.nextLine();
-
-                            if (!newSalePrice.equals("")) {
-                                try {
-                                    newPrice = Double.parseDouble(newSalePrice);
-                                    product.setSalePrice(newPrice);
-                                    System.out.println("Updated sale price!");
-                                    break;
-                                } catch (NumberFormatException e) {
-                                    System.out.println("Invalid input! Try again.");
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-
-                        System.out.printf("New original price (Current price: $%.2f):\n", product.getOriginalPrice());
-                        String newOriginalPrice;
-                        while (true) {
-                            newOriginalPrice = scan.nextLine();
-
-                            if (!newOriginalPrice.equals("")) {
-                                try {
-                                    newPrice = Double.parseDouble(newOriginalPrice);
-                                    product.setOriginalPrice(newPrice);
-                                    System.out.println("Updated original price!");
-                                    break;
-                                } catch (NumberFormatException e) {
-                                    System.out.println("Invalid input! Try again.");
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-
-                        System.out.printf("New quantity (Current quantity: %d):\n", product.getQuantity());
-                        String newQuantity;
-                        int quantity;
-                        while (true) {
-                            newQuantity = scan.nextLine();
-
-                            if (!newQuantity.equals("")) {
-                                try {
-                                    quantity = Integer.parseInt(newQuantity);
-                                    product.setQuantity(quantity);
-                                    System.out.println("Updated quantity!");
-                                    break;
-                                } catch (NumberFormatException e) {
-                                    System.out.println("Invalid input! Try again.");
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-
-                        System.out.println("Product modified!");
-                        System.out.println(productString(product));
-
-                        market.updateAllFiles();
-
-                    } else if (choice == 2) {
-                        // remove
-                        market.removeProduct(product);
-                        market.updateAllFiles();
-                        System.out.println("Removed book!");
-                    } else {
-                        System.out.println("Invalid input!");
-                    }
-
-                } else if (response == 2) {
-                    // add new book
-
-                    System.out.println("The book's name:");
-                    String name;
-                    while (true) {
-                        name = scan.nextLine();
-                        if (name.contains(",")) {
-                            System.out.println("Invalid input! Try again.");
-                        } else {
-                            break;
-                        }
-                    }
-
-                    System.out.println("The book's description:");
-                    String description;
-                    while (true) {
-                        description = scan.nextLine();
-                        if (description.contains(",")) {
-                            System.out.println("Invalid input! Try again.");
-                        } else {
-                            break;
-                        }
-                    }
-
-                    System.out.println("The book's original price:");
-                    String ogPriceString;
-                    double originalPrice;
-                    while (true) {
-                        ogPriceString = scan.nextLine();
-                        if (ogPriceString.contains(",")) {
-                            System.out.println("Invalid input! Try again.");
-                        } else {
-                            try {
-                                originalPrice = Double.parseDouble(ogPriceString);
-                                break;
-                            } catch (NumberFormatException e) {
-                                System.out.println("Invalid input! Try again.");
-                            }
-                        }
-                    }
-
-                    System.out.println("The book's sale price:");
-                    String salePriceString;
-                    double salePrice;
-                    while (true) {
-                        salePriceString = scan.nextLine();
-                        if (salePriceString.contains(",")) {
-                            System.out.println("Invalid input! Try again.");
-                        } else {
-                            try {
-                                salePrice = Double.parseDouble(salePriceString);
-                                break;
-                            } catch (NumberFormatException e) {
-                                System.out.println("Invalid input! Try again.");
-                            }
-                        }
-                    }
-
-                    System.out.println("The book's quantity:");
-                    String quantityString;
-                    int quantity;
-                    while (true) {
-                        quantityString = scan.nextLine();
-                        if (quantityString.contains(",")) {
-                            System.out.println("Invalid input! Try again.");
-                        } else {
-                            try {
-                                quantity = Integer.parseInt(quantityString);
-                                break;
-                            } catch (NumberFormatException e) {
-                                System.out.println("Invalid input! Try again.");
-                            }
-                        }
-                    }
-
-                    Product p = new Product(name, storeName, description, quantity, salePrice, originalPrice, -1);
-
-                    printProductPage(p);
-
-                    System.out.println("Add this book? (y/n)");
-                    while (true) {
-                        String temp = scan.nextLine();
-                        if (temp.equalsIgnoreCase("y")) { //todo: check invalid input
-                            market.addProduct(p);
-                            System.out.println("Product added!");
-                            market.updateAllFiles();
-                            break;
-                        } else if (temp.equalsIgnoreCase("n")) {
-                            break;
-                        } else {
-                            System.out.println("Invalid input! Try again.");
-                        }
-                    }
-
-                } else {
-                    System.out.println("Invalid input!");
                 }
 
             } else if (answer.equals("3")) {
