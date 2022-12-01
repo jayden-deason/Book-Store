@@ -275,10 +275,30 @@ public class Buyer extends User {
             int quantity = Integer.parseInt(item.split(":")[1]);
             Product p = Market.getInstance().getProductByIndex(idx);
 
-            System.out.printf("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
-                    p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
+            System.out.printf("%d) Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
+                    p.getIndex(), p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
         }
         System.out.println("------------------------------------------");
 
+    }
+
+    /**
+     * Return true if a buyer has purchased the item with this index
+     * @param productIndex the product's index
+     * @return if the index is in the buyer's purchase history
+     */
+    public boolean previouslyPurchasedItem(int productIndex) {
+        for (String item : purchaseHistory) {
+            int idx = Integer.parseInt(item.split(":")[0]);
+            if (idx == productIndex) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean previouslyPurchasedItem(Product product) {
+        return previouslyPurchasedItem(product.getIndex());
     }
 }

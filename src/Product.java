@@ -268,4 +268,22 @@ public class Product {
                 getOriginalPrice(), getReviewString());
     }
 
+    /**
+     * Get the average customer rating for the product
+     * @return average rating, -1 if no reviews
+     */
+    public double getAverageRating() {
+        if (reviews.size() == 0) return -1;
+
+        double out = 0;
+        for (Review r : reviews) {
+            out += r.getRating();
+        }
+
+        out /= reviews.size();
+
+        return out;
+
+    }
+
 }

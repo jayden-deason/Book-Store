@@ -158,8 +158,12 @@ public class Market {
             p.setIndex(getNextIndex());
         }
         Store s = getStoreByName(p.getStoreName());
-        s.addProduct(p, this);
-        products.add(p);
+        if (s == null) {
+            System.out.printf("No store with name '%s', skipping book '%s'\n", p.getStoreName(), p.getName());
+        } else {
+            s.addProduct(p, this);
+            products.add(p);
+        }
     }
 
     /**
@@ -224,6 +228,7 @@ public class Market {
      * @return product at that index, null if no matches
      */
     public Product getProductByIndex(int idx) {
+        if (idx < 0 || idx >= products.size()) return null;
         if (products.get(idx).getIndex() == idx) return products.get(idx);
 
         for (Product p : products) {
