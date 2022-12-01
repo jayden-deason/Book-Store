@@ -190,6 +190,10 @@ public class Main {
                     }
                 }
                 if (response == 1) {
+                    if (store.getProducts().size() == 0) {
+                        System.out.println("No existing books! Try making a new book first.");
+                        continue;
+                    }
                     System.out.println("What is the book's index");
                     for (Product p : store.getProducts()) {
                         System.out.println(productString(p));
@@ -277,7 +281,7 @@ public class Main {
                                     System.out.println("Invalid input! Try again.");
                                 }
                             } else {
-                                System.out.println("Invalid price! Try again.");
+                                break;
                             }
                         }
 
@@ -296,7 +300,7 @@ public class Main {
                                     System.out.println("Invalid input! Try again.");
                                 }
                             } else {
-                                System.out.println("Invalid price! Try again.");
+                                break;
                             }
                         }
 
@@ -316,7 +320,7 @@ public class Main {
                                     System.out.println("Invalid input! Try again.");
                                 }
                             } else {
-                                System.out.println("Invalid quantity! Try again.");
+                                break;
                             }
                         }
 
@@ -416,10 +420,13 @@ public class Main {
 
                     System.out.println("Add this book? (y/n)");
                     while (true) {
-                        if (scan.nextLine().equalsIgnoreCase("y")) { //todo: check invalid input
+                        String temp = scan.nextLine();
+                        if (temp.equalsIgnoreCase("y")) { //todo: check invalid input
                             market.addProduct(p);
                             System.out.println("Product added!");
                             market.updateAllFiles();
+                            break;
+                        } else if (temp.equalsIgnoreCase("n")) {
                             break;
                         } else {
                             System.out.println("Invalid input! Try again.");
@@ -467,11 +474,22 @@ public class Main {
                 System.out.println("What is the file name to export to?");
                 String fileName = scan.nextLine();
                 System.out.println("What is the store name?");
-                String store = scan.nextLine();
+                String storeName;
+                while (true) {
+                    storeName = scan.nextLine();
 //                seller.exportProducts(fileName, store);
-                System.out.println(market.getStoreByName(store));
-                market.printToFile(market.getStoreByName(store).getProducts(), fileName);
-                System.out.println("Export complete!");
+                    Store store = market.getStoreByName(storeName);
+                    if (store == null) {
+                        System.out.println("Invalid store name! Try again.");
+                    } else if (!store.getSellerName().equals(seller.getEmail())) {
+                        System.out.println("This store does not belong to you! Enter another name");
+                    } else {
+
+                        market.printToFile(store.getProducts(), fileName);
+                        System.out.println("Export complete!");
+                        break;
+                    }
+                }
             } else if (answer.equals("6")) {
                 System.out.println("What is the file name to import from?");
                 String fileName = scan.nextLine();
@@ -813,7 +831,7 @@ public class Main {
         System.out.printf("\nReviews (Average rating: %s stars)\n- - - - - - - - - - - - - - - - - - - - -\n", rating);
 
         if (p.getReviews().size() == 0) {
-            System.out.println("********************\nNo reviews yet!\n***********************");
+            System.out.println("No reviews yet!\n- - - - - - - - - - - - - - - - - - - - -");
         }
         for (Review r : p.getReviews()) {
             r.printString();
