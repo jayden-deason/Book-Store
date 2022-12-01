@@ -608,10 +608,9 @@ public class Store {
     public String productsByIndexToString() {
         String retString = "<";
 
-        for (int i = 0; i < productsByIndex.size(); i++) {
-            retString += productsByIndex.get(i);
-
-            if (i != productsByIndex.size() - 1) {
+        for (int i = 0; i < products.size(); i++) {
+            retString += products.get(i).getIndex();
+            if (i < products.size() - 1) {
                 retString += "/";
             }
         }

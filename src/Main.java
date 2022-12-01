@@ -775,6 +775,7 @@ public class Main {
 
             } else if (answer.equals("9")) {
                 System.out.println("Have a nice day!");
+                market.updateAllFiles(); // rewrite all files just in case
                 return;
             } else {
                 System.out.println("Invalid input.");
