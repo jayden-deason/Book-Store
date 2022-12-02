@@ -1,10 +1,9 @@
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 
 public class Client extends JComponent implements Runnable{
@@ -91,6 +90,74 @@ public class Client extends JComponent implements Runnable{
 
                 viewShoppingCart.setVisible(false);
                 viewPurchaseHistory.setVisible(false);
+            } else if (e.getSource() == viewDashboard) {
+                JFrame dashFrame = new JFrame("Dashboard");
+                dashFrame.setSize(500, 500);
+                dashFrame.setVisible(true);
+                Container content = dashFrame.getContentPane();
+                JPanel panel = new JPanel();
+                JScrollPane scrollPanel = new JScrollPane(panel);
+
+                JRootPane root = dashFrame.getRootPane();
+                JMenuBar bar = new JMenuBar();
+                JMenu menu = new JMenu("Stats");
+                bar.add(menu);
+                JMenuItem products = new JMenuItem("By Products Sold");
+                JMenuItem purchases = new JMenuItem("By Purchase History");
+                menu.add(products);
+                menu.add(purchases);
+                root.setJMenuBar(bar);
+
+                panel.setLayout(new GridBagLayout());
+                scrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+                products.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println("By products sold");
+                        int item = 0;
+                        panel.removeAll();
+                        for (int i = 0; i < 5; i++) {
+                            for (int j = 0; j < 5; j++) {
+                                JButton product = new JButton("Product" + item++);
+                                product.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        JOptionPane.showMessageDialog(null, product.getText() + " Information", "Info",
+                                                JOptionPane.INFORMATION_MESSAGE);
+                                    }
+                                });
+                                panel.add(product, new GridBagConstraints(j, i, 1, 1, 1.0, 1.0,
+                                        GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, new Insets(20, 20, 20, 20), 0, 40));
+                            }
+                        }
+                        panel.updateUI();
+                    }
+                });
+
+                purchases.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println("By purchase history");
+                        int item = 0;
+                        panel.removeAll();
+                        for (int i = 0; i < 5; i++) {
+                            for (int j = 0; j < 5; j++) {
+                                JButton product = new JButton("Purchased" + item++);
+                                product.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        JOptionPane.showMessageDialog(null, product.getText() + " Information", "Info",
+                                                JOptionPane.INFORMATION_MESSAGE);
+                                    }
+                                });
+                                panel.add(product, new GridBagConstraints(j, i, 1, 1, 1.0, 1.0,
+                                        GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, new Insets(20, 20, 20, 20), 0, 40));
+                            }
+                        }
+                        panel.updateUI();
+                    }
+                });
+                content.add(scrollPanel);
             }
         }
     };
@@ -182,6 +249,7 @@ public class Client extends JComponent implements Runnable{
 
 //        viewMarket = new JButton("Market");
         viewDashboard = new JButton("Dashboard");
+        viewDashboard.addActionListener(actionListener);
         topBar.add(username);
         topBar.add(password);
         topBar.add(login);
@@ -245,6 +313,11 @@ public class Client extends JComponent implements Runnable{
         frame.pack();
     }
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (Exception e) {
+            return;
+        }
         SwingUtilities.invokeLater(new Client());
     }
 }
