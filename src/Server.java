@@ -69,5 +69,14 @@ public class Server extends Thread{
     public Server(Socket socket) {
         this.socket = socket;
     }
-    
+    public static void runBuyer(BufferedReader reader, PrintWriter writer) {
+        while(true) {
+            
+        }
+    }
+    public static void runSeller(BufferedReader reader, PrintWriter writer) {
+        while(true) {
+
+        }
+    }
 }
