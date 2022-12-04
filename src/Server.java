@@ -179,10 +179,9 @@ public class Server extends Thread {
                     this.editSellerProduct(seller,
                             Integer.parseInt(answer[1]), // product index
                             answer[2], // product name
-                            answer[3], // store name
-                            answer[4], // description
-                            Double.parseDouble(answer[5]), // price
-                            Integer.parseInt(answer[6]) // quantity
+                            answer[3], // description
+                            Double.parseDouble(answer[4]), // price
+                            Integer.parseInt(answer[5]) // quantity
                     );
                 }
                 if (answer[0].equals("5")) {
@@ -224,18 +223,43 @@ public class Server extends Thread {
 
         if (seller.getStoreNames().contains(storeName)) {
             market.addProduct(product);
+            market.updateAllFiles();
             this.writer.writeObject("Y");
         } else {
             this.writer.writeObject("N");
         }
     }
 
-    private void editSellerProduct(Seller seller, int productIndex, String productName, String storeName, String description, double price, int quantity) {
-        // TODO: implement
+    private void editSellerProduct(Seller seller, int productIndex, String productName,
+                                   String description, double price, int quantity) throws IOException {
+
+        try {
+            Product product = market.getProductByIndex(productIndex);
+
+            product.setName(productName);
+            product.setDescription(description);
+            product.setSalePrice(price);
+            product.setOriginalPrice(price);
+            product.setQuantity(quantity);
+
+            market.updateAllFiles();
+
+        } catch (Exception e) {
+            this.writer.writeObject("N");
+            return;
+        }
+        this.writer.writeObject("Y");
     }
 
-    private void addSellerStore(Seller seller, String storeName) {
-        // TODO: implement
+    private void addSellerStore(Seller seller, String storeName) throws IOException{
+        if (market.getStoreByName(storeName) == null) {
+            market.addStore(new Store(-1, storeName, seller.getEmail()));
+            market.updateAllFiles();
+
+            this.writer.writeObject("Y");
+        } else {
+            this.writer.writeObject("N");
+        }
     }
 
     private void getSellerDashboard(Seller seller) {
