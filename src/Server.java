@@ -4,13 +4,14 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Server extends Thread{
+public class Server extends Thread {
     private final Socket socket;
     private ObjectOutputStream writer;
     private ObjectInputStream reader;
 
     public static ArrayList<Socket> sockets = new ArrayList<Socket>();
     public static Market market;
+
     public void run() {
         try {
             writer = new ObjectOutputStream(this.socket.getOutputStream());
@@ -20,65 +21,59 @@ public class Server extends Thread{
             String loginString = (String) reader.readObject();
             String[] userDetails = loginString.split(",");
             //Seller
-            if(userDetails[0].equals("0")) {
-                if(userDetails[1].equals("0")) {
+            if (userDetails[0].equals("0")) {
+                if (userDetails[1].equals("0")) {
                     Buyer b = market.getBuyerByEmail(userDetails[2]);
-                    if(b == null) {
+                    if (b == null) {
                         //Sends Client "N" to signify an error (Username is wrong)
                         writer.writeObject("N");
-                    }
-                    else if(b.getPassword().equals(userDetails[3])) {
+                    } else if (b.getPassword().equals(userDetails[3])) {
                         //Sends Client "Y" to signify logged in correctly
                         writer.writeObject("Y");
                         runBuyer(b);
-                    }
-                    else{
+                    } else {
                         //Sends Client "N" to signify an error (Password is wrong)
                         writer.writeObject("N");
                     }
                 }
-                if(userDetails[1].equals("1")) {
+                if (userDetails[1].equals("1")) {
                     //checks if email already exists in marketplace
                     Buyer b = market.getBuyerByEmail(userDetails[2]);
-                    if(b == null) {
+                    if (b == null) {
                         Buyer buyer = new Buyer(userDetails[2], userDetails[3]);
                         market.addBuyer(buyer);
                         writer.writeObject("Y");
                         runBuyer(buyer);
-                    }
-                    else {
+                    } else {
                         //Sends Client "N" to signify an error (Username already exists)
                         writer.writeObject("N");
                     }
                 }
             }
             //Buyer
-            else if(userDetails[0].equals("1")) {
-                if(userDetails[1].equals("0")) {
+            else if (userDetails[0].equals("1")) {
+                if (userDetails[1].equals("0")) {
                     Seller s = market.getSellerByEmail(userDetails[2]);
-                    if(s == null) {
+                    if (s == null) {
                         //Sends Client "N" to signify an error (Username is wrong)
                         writer.writeObject("N");
-                    }
-                    else if(s.getPassword().equals(userDetails[3])) {
+                    } else if (s.getPassword().equals(userDetails[3])) {
                         //Sends Client "Y" to signify logged in correctly
                         writer.writeObject("Y");
-                    }
-                    else{
+                    } else {
                         //Sends Client "N" to signify an error
                         writer.writeObject("N");
                     }
                 }
-                if(userDetails[1].equals("1")) {
+                if (userDetails[1].equals("1")) {
                     //checks if email already exists in marketplace
                     Seller s = market.getSellerByEmail(userDetails[2]);
-                    if(s == null) {
+                    if (s == null) {
                         Seller seller = new Seller(userDetails[2], userDetails[3]);
                         market.addSeller(seller);
                         writer.writeObject("Y");
                         runSeller(seller);
-                    }
-                    else {
+                    } else {
                         //Sends Client "N" to signify an error (Username already exists)
                         writer.writeObject("N");
                     }
@@ -88,10 +83,11 @@ public class Server extends Thread{
             System.out.println(e.getStackTrace());
         }
     }
-    public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException{
+
+    public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
         //Port Number is 1001 and host is "localhost"
         ServerSocket serverSocket = new ServerSocket(1001);
-        while(true) {
+        while (true) {
             //infinite loop to create a new thread for each connection
             //creates a new socket for each connection
             final Socket socket = serverSocket.accept();
@@ -100,12 +96,14 @@ public class Server extends Thread{
             user.start();
         }
     }
+
     public Server(Socket socket) {
         this.socket = socket;
         sockets.add(this.socket);
     }
+
     public void runBuyer(Buyer buyer) {
-        while(true) {
+        while (true) {
             try {
                 String userChoice = (String) reader.readObject();
                 String[] answer = userChoice.split(",");
@@ -139,37 +137,45 @@ public class Server extends Thread{
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 //Sends Client "!" to signify special error (Invalid choice at high level of program)
                 try {
                     this.writer.writeObject((String) "!");
-                }
-                catch (Exception ex){
-                    System.out.println(ex.getStackTrace());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
 
         }
     }
-    public static void runSeller(Seller seller) {
-        while(true) {
 
+    public void runSeller(Seller seller) {
+        while (true) {
+            try {
+                String userChoice = (String) reader.readObject();
+                String[] answer = userChoice.split(",");
+            } catch (Exception e) {
+                try {
+                    this.writer.writeObject((String) "!");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
     }
+
     private void sendAllProducts() {
         try {
             this.writer.writeObject(market.getAllProducts(true));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<Product>) null);
-            }
-            catch (Exception ex){
+            } catch (Exception ex) {
                 System.out.println(ex.getStackTrace());
             }
         }
     }
+
     private void sendSearch(String search) {
         try {
             //Format for search should be productName,storeName,Description
@@ -179,33 +185,31 @@ public class Server extends Thread{
             if (searchContents[2].equals("")) searchContents[2] = null;
             this.writer.writeObject(market.matchConditions(searchContents[0], searchContents[1],
                     searchContents[2]));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<Product>) null);
-            }
-            catch (Exception ex){
+            } catch (Exception ex) {
                 System.out.println(ex.getStackTrace());
             }
         }
     }
+
     private void viewProduct(int indexOfProduct) {
         try {
             this.writer.writeObject(this.market.getAllProducts(true).get(indexOfProduct));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             try {
                 this.writer.writeObject((Product) null);
-            }
-            catch (Exception ex){
+            } catch (Exception ex) {
                 System.out.println(ex.getStackTrace());
             }
         }
     }
+
     private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
         try {
             Product p = this.market.getAllProducts(true).get(indexOfProduct);
-            if(p.getQuantity() > quantity) {
+            if (p.getQuantity() > quantity) {
                 //Error: quantity trying to add to cart is more than there are of that product
                 this.writer.writeObject((String) "N");
                 return;
@@ -214,34 +218,34 @@ public class Server extends Thread{
             market.updateAllFiles();
             this.writer.writeObject((String) "Y");
             //Sends new shopping cart
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             try {
                 this.writer.writeObject((String) "N");
-            }
-            catch (Exception ex){
+            } catch (Exception ex) {
                 System.out.println(ex.getStackTrace());
             }
         }
     }
+
     private void exportToFile(String fileName, Buyer buyer) {
         //TODO: change so client can export the file themselves by sending different info to client
         buyer.exportToFile(fileName, this.market);
     }
+
     private void makePurchase(Buyer buyer) {
         try {
             market.makePurchase(buyer);
-            this.writer.writeObject((String) "Y");;
-        }
-        catch (Exception e) {
+            this.writer.writeObject((String) "Y");
+            ;
+        } catch (Exception e) {
             try {
                 this.writer.writeObject((String) "N");
-            }
-            catch (Exception ex){
+            } catch (Exception ex) {
                 System.out.println(ex.getStackTrace());
             }
         }
     }
+
     private void sendShoppingCart(Buyer buyer) {
         try {
             ArrayList<String> shoppingCart = buyer.getShoppingCart();
@@ -251,17 +255,17 @@ public class Server extends Thread{
                 int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
                 shoppingCartProducts.put(p, quantity);
             }
-            this.writer.writeObject((HashMap<Product, Integer>) shoppingCartProducts);;
-        }
-        catch (Exception e) {
+            this.writer.writeObject((HashMap<Product, Integer>) shoppingCartProducts);
+            ;
+        } catch (Exception e) {
             try {
                 this.writer.writeObject((HashMap<Product, Integer>) null);
-            }
-            catch (Exception ex){
+            } catch (Exception ex) {
                 System.out.println(ex.getStackTrace());
             }
         }
     }
+
     private void changeShoppingCartQuantity(int indexOfProduct, int newQuantity, Buyer buyer) {
         try {
             ArrayList<String> products = buyer.getShoppingCart();
@@ -271,7 +275,7 @@ public class Server extends Thread{
                     exists = true;
                     Product p = market.getProductByIndex(Integer.parseInt(products.get(i).split(":")[0]));
                     //Sends Client "N" to signify an error (Invalid Quantity)
-                    if(p.getQuantity() < newQuantity) {
+                    if (p.getQuantity() < newQuantity) {
                         writer.writeObject((String) "N");
                         return;
                     }
@@ -285,16 +289,15 @@ public class Server extends Thread{
                 //Sends Client "N" to signify an error (Book did not exist within cart)
                 writer.writeObject((String) "N");
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             try {
                 this.writer.writeObject((String) "N");
-            }
-            catch (Exception ex){
+            } catch (Exception ex) {
                 System.out.println(ex.getStackTrace());
             }
         }
     }
+
     private void sendPurchaseHistory(Buyer buyer) {
         //TODO: Change so it returns the previous purchases and does not use a scanner
         buyer.printPreviousPurchases();
