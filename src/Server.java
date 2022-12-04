@@ -3,15 +3,18 @@ import java.net.*;
 import java.util.ArrayList;
 public class Server extends Thread{
     private final Socket socket;
+    private ObjectOutputStream writer;
+    private ObjectInputStream reader;
+
     public static ArrayList<Socket> sockets = new ArrayList<Socket>();
     public static Market market;
     public void run() {
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-            PrintWriter writer = new PrintWriter(this.socket.getOutputStream());
+            writer = new ObjectOutputStream(this.socket.getOutputStream());
+            reader = new ObjectInputStream(this.socket.getInputStream());
             //loginString format: (0 for seller or 1 for buyer),(0 for sign in or 1 for sign up),email,password
             //Example: "0,1,test123@t.com,123" should be sign up for seller with email:test123@t.com and password 123
-            String loginString = reader.readLine();
+            String loginString = (String) reader.readObject();
             String[] userDetails = loginString.split(",");
             //Seller
             if(userDetails[0].equals("0")) {
@@ -19,16 +22,16 @@ public class Server extends Thread{
                     Buyer b = market.getBuyerByEmail(userDetails[2]);
                     if(b == null) {
                         //Sends Client "N" to signify an error (Username is wrong)
-                        writer.println("N");
+                        writer.writeObject("N");
                     }
                     else if(b.getPassword().equals(userDetails[3])) {
                         //Sends Client "Y" to signify logged in correctly
-                        writer.println("Y");
-                        runBuyer(reader, writer, b);
+                        writer.writeObject("Y");
+                        runBuyer(b);
                     }
                     else{
                         //Sends Client "N" to signify an error (Password is wrong)
-                        writer.println("N");
+                        writer.writeObject("N");
                     }
                 }
                 if(userDetails[1].equals("1")) {
@@ -37,12 +40,12 @@ public class Server extends Thread{
                     if(b == null) {
                         Buyer buyer = new Buyer(userDetails[2], userDetails[3]);
                         market.addBuyer(buyer);
-                        writer.println("Y");
-                        runBuyer(reader, writer, buyer);
+                        writer.writeObject("Y");
+                        runBuyer(buyer);
                     }
                     else {
                         //Sends Client "N" to signify an error (Username already exists)
-                        writer.println("N");
+                        writer.writeObject("N");
                     }
                 }
             }
@@ -52,15 +55,15 @@ public class Server extends Thread{
                     Seller s = market.getSellerByEmail(userDetails[2]);
                     if(s == null) {
                         //Sends Client "N" to signify an error (Username is wrong)
-                        writer.println("N");
+                        writer.writeObject("N");
                     }
                     else if(s.getPassword().equals(userDetails[3])) {
                         //Sends Client "Y" to signify logged in correctly
-                        writer.println("Y");
+                        writer.writeObject("Y");
                     }
                     else{
                         //Sends Client "N" to signify an error
-                        writer.println("N");
+                        writer.writeObject("N");
                     }
                 }
                 if(userDetails[1].equals("1")) {
@@ -69,12 +72,12 @@ public class Server extends Thread{
                     if(s == null) {
                         Seller seller = new Seller(userDetails[2], userDetails[3]);
                         market.addBuyer(seller);
-                        writer.println("Y");
-                        runSeller(reader, writer);
+                        writer.writeObject("Y");
+                        runSeller(seller);
                     }
                     else {
                         //Sends Client "N" to signify an error (Username already exists)
-                        writer.println("N");
+                        writer.writeObject("N");
                     }
                 }
             }
@@ -102,13 +105,14 @@ public class Server extends Thread{
         this.socket = socket;
         sockets.add(this.socket);
     }
-    public static void runBuyer(BufferedReader reader, PrintWriter writer, Buyer buyer) {
+    public void runBuyer(BufferedReader reader, PrintWriter writer, Buyer buyer) {
         while(true) {
             try {
                 String userChoice = reader.readLine();
                 String answer = (userChoice.substring(0, 1);
                 userChoice = userChoice.substring(1);
                 if (answer.equals("1")) {
+                    this.sendAllProducts();
                     writer.println(market.getAllProducts(true));
                     int nextChoice = reader.readLine();
                     while (nextChoice != 3) {
@@ -291,6 +295,29 @@ public class Server extends Thread{
     }
     public static void runSeller(BufferedReader reader, PrintWriter writer) {
         while(true) {
+
+        }
+    }
+    private void sendAllProducts() {
+        writer.println(market.getAllProducts(true));
+    }
+    private void sendSearch() {
+        try {
+            //Format for search should be productName,storeName,Description
+            String search = reader.readLine();
+            String[] searchContents = search.split(",");
+            if (searchContents[0].equals("")) searchContents[0] = null;
+
+            if (searchContents[1].equals("")) searchContents[1] = null;
+
+            if (searchContents[2].equals("")) searchContents[2] = null;
+
+            //TODO: Change so it returns the matched listings
+            writer.println(market.matchConditions(searchContents[0], searchContents[1],
+                    searchContents[2]));
+        }
+        catch(Exception e) {
+            writer.println((ArrayList<Product>) null);
 
         }
     }
