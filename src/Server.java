@@ -1,6 +1,9 @@
+import javax.print.attribute.HashPrintJobAttributeSet;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Server extends Thread{
     private final Socket socket;
     private ObjectOutputStream writer;
@@ -105,7 +108,7 @@ public class Server extends Thread{
         this.socket = socket;
         sockets.add(this.socket);
     }
-    public void runBuyer(BufferedReader reader, PrintWriter writer, Buyer buyer) {
+    public void runBuyer(Buyer buyer) {
         while(true) {
             try {
                 String userChoice = reader.readLine();
@@ -208,12 +211,9 @@ public class Server extends Thread{
                         }
                     }
                 } else if (answer.equals("4")) {
-                    String fileName = reader.readLine();
-                    buyer.exportToFile(fileName, market);
-                    writer.println("Y");
+                    this.exportToFile(userChoice, buyer);
                 } else if (answer.equals("5")) {
-                    market.makePurchase(buyer);
-                    writer.println("Y");
+                    this.makePurchase(buyer);
                 } else if (answer.equals("6")) {
                     //TODO: Change so it returns the shopping cart of products (get this method from main)
                     printShoppingCart(buyer, market);
@@ -293,32 +293,114 @@ public class Server extends Thread{
 
         }
     }
-    public static void runSeller(BufferedReader reader, PrintWriter writer) {
+    public static void runSeller(Seller seller) {
         while(true) {
 
         }
     }
     private void sendAllProducts() {
-        writer.println(market.getAllProducts(true));
+        try {
+            this.writer.writeObject(market.getAllProducts(true));
+        }
+        catch (Exception e) {
+            try {
+                this.writer.writeObject((ArrayList<Product>) null);
+            }
+            catch (Exception ex){
+                System.out.println(ex.getStackTrace());
+            }
+        }
     }
-    private void sendSearch() {
+    private void sendSearch(String search) {
         try {
             //Format for search should be productName,storeName,Description
-            String search = reader.readLine();
             String[] searchContents = search.split(",");
             if (searchContents[0].equals("")) searchContents[0] = null;
-
             if (searchContents[1].equals("")) searchContents[1] = null;
-
             if (searchContents[2].equals("")) searchContents[2] = null;
-
-            //TODO: Change so it returns the matched listings
-            writer.println(market.matchConditions(searchContents[0], searchContents[1],
+            this.writer.writeObject(market.matchConditions(searchContents[0], searchContents[1],
                     searchContents[2]));
         }
         catch(Exception e) {
-            writer.println((ArrayList<Product>) null);
-
+            try {
+                this.writer.writeObject((ArrayList<Product>) null);
+            }
+            catch (Exception ex){
+                System.out.println(ex.getStackTrace());
+            }
         }
     }
+    private void viewProduct(int indexOfProduct) {
+        try {
+            this.writer.writeObject(this.market.getAllProducts(true).get(indexOfProduct));
+        }
+        catch(Exception e) {
+            try {
+                this.writer.writeObject((Product) null);
+            }
+            catch (Exception ex){
+                System.out.println(ex.getStackTrace());
+            }
+        }
+    }
+    private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
+        try {
+            Product p = this.market.getAllProducts(true).get(indexOfProduct);
+            if(p.getQuantity() > quantity) {
+                //Error: quantity trying to add to cart is more than there are of that product
+                this.writer.writeObject((String) "N");
+            }
+            buyer.addProductToCart(p.getIndex(), quantity);
+            market.updateAllFiles();
+            this.writer.writeObject((String) "Y");
+            //Sends new shopping cart
+        }
+        catch(Exception e) {
+            try {
+                this.writer.writeObject((String) "N");
+            }
+            catch (Exception ex){
+                System.out.println(ex.getStackTrace());
+            }
+        }
+    }
+    private void exportToFile(String fileName, Buyer buyer) {
+        //TODO: change so client can export the file themselves by sending different info to client
+        buyer.exportToFile(fileName, this.market);
+    }
+    private void makePurchase(Buyer buyer) {
+        try {
+            market.makePurchase(buyer);
+            this.writer.writeObject((String) "Y");;
+        }
+        catch (Exception e) {
+            try {
+                this.writer.writeObject((String) "N");
+            }
+            catch (Exception ex){
+                System.out.println(ex.getStackTrace());
+            }
+        }
+    }
+    private void sendShoppingCart(Buyer buyer) {
+        try {
+            ArrayList<String> shoppingCart = buyer.getShoppingCart();
+            HashMap<Product, Integer> shoppingCartProducts = new HashMap<Product, Integer>();
+            for (int i = 0; i < shoppingCart.size(); i++) {
+                Product p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
+                int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
+                shoppingCartProducts.put(p, quantity);
+            }
+            this.writer.writeObject((HashMap<Product, Integer>) shoppingCartProducts);;
+        }
+        catch (Exception e) {
+            try {
+                this.writer.writeObject((HashMap<Product, Integer>) null);
+            }
+            catch (Exception ex){
+                System.out.println(ex.getStackTrace());
+            }
+        }
+    }
+
 }
