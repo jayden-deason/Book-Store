@@ -11,14 +11,14 @@ public class Client extends JComponent implements Runnable{
     private Client client;
     private boolean loggedIn;
     private boolean status = true;
-    private JPanel topBar, userBar;
+    private JPanel topBar, userBar, productPage;
     private JScrollPane scrollPane;
 
     private ButtonGroup buttonGroup;
     private JRadioButton isBuyer, isSeller;
 
     private JButton login, signup, logout;
-    private JButton viewMarket, viewDashboard;
+    private JButton viewDashboard, search;
     private JButton viewShoppingCart, viewPurchaseHistory, checkout, purchase;
     private JButton viewStores, viewProducts, addStore, removeStore, editStore, addProduct, removeProduct, editProduct;
     private JButton confirmAddProduct;
@@ -27,6 +27,9 @@ public class Client extends JComponent implements Runnable{
     private JTextField username;
     private JTextField password;
     private JTextField productToAdd;
+    private JTextField searchText;
+
+    private JComboBox<String> searchOptions, sortMarket;
 
     ActionListener actionListener = new ActionListener() {
         @Override
@@ -36,12 +39,12 @@ public class Client extends JComponent implements Runnable{
                 loggedIn = true;
                 isBuyer.setVisible(false);
                 isSeller.setVisible(false);
-                scrollPane.setVisible(true);
                 login.setVisible(false);
                 signup.setVisible(false);
                 logout.setVisible(true);
                 userBar.setVisible(true);
                 viewDashboard.setVisible(true);
+                displayMarket(null, "login");
                 if (status) {
                     viewShoppingCart.setVisible(true);
                     viewPurchaseHistory.setVisible(true);
@@ -67,6 +70,7 @@ public class Client extends JComponent implements Runnable{
                 logout.setVisible(true);
                 userBar.setVisible(true);
                 viewDashboard.setVisible(true);
+                displayMarket(null, "signup");
                 if (status) {
                     viewShoppingCart.setVisible(true);
                     viewPurchaseHistory.setVisible(true);
@@ -203,7 +207,29 @@ public class Client extends JComponent implements Runnable{
 
                 content.add(scrollPanel);
             } else if (e.getSource() == viewShoppingCart) {
-                JOptionPane.showMessageDialog(null, "Shopping cart items", "Shopping Cart", JOptionPane.INFORMATION_MESSAGE);
+                JFrame shoppingCartFrame = new JFrame("Shopping Cart");
+                shoppingCartFrame.setVisible(true);
+                Container content = shoppingCartFrame.getContentPane();
+                content.setLayout(new GridLayout(4, 3));
+
+                for (int i = 0; i < 4; i++) {
+                    JTextField name = new JTextField("Product");
+                    name.setEditable(false);
+                    JTextField quantity = new JTextField("1");
+                    quantity.setToolTipText("Set to 0 and confirm to remove item");
+                    JButton confirm = new JButton("\u2713");
+                    confirm.setPreferredSize(new Dimension(20, 35));
+                    confirm.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            //TODO: code to update shopping cart quantity
+                        }
+                    });
+                    content.add(name);
+                    content.add(quantity);
+                    content.add(confirm);
+                }
+                shoppingCartFrame.pack();
             } else if (e.getSource() == viewPurchaseHistory) {
                 JOptionPane.showMessageDialog(null, "Purchase History", "Purchase History", JOptionPane.INFORMATION_MESSAGE);
             } else if (e.getSource() == viewStores) {
@@ -335,6 +361,9 @@ public class Client extends JComponent implements Runnable{
                 content.add(panel, BorderLayout.WEST);
                 content.add(panel2, BorderLayout.CENTER);
                 editProductFrame.pack();
+            } else if (e.getSource() == search) {
+                JFrame searchFrame = new JFrame("Search");
+                searchFrame.setVisible(true);
             }
         }
     };
@@ -363,7 +392,6 @@ public class Client extends JComponent implements Runnable{
                     username.setText("");
                 }
             }
-
             @Override
             public void focusLost(FocusEvent e) {
                 if (username.getText().equals("")) {
@@ -410,11 +438,22 @@ public class Client extends JComponent implements Runnable{
         userBar.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
         userBar.setVisible(false);
         login = new JButton("Login");
-        login.addActionListener(actionListener);
+//        login.addActionListener(actionListener);
         signup = new JButton("Sign Up");
-        signup.addActionListener(actionListener);
+//        signup.addActionListener(actionListener);
         logout = new JButton("Logout");
-        logout.addActionListener(actionListener);
+//        logout.addActionListener(actionListener);
+        search = new JButton("Search");
+        search.addActionListener(actionListener);
+        searchText = new JTextField(40);
+        searchOptions = new JComboBox<>();
+        searchOptions.addItem("Name");
+        searchOptions.addItem("Store");
+        searchOptions.addItem("Description");
+        sortMarket = new JComboBox<>();
+        sortMarket.addItem("Sort By: Alphabetically");
+        sortMarket.addItem("Sort By: Price");
+        sortMarket.addItem("Sort By: Quantity");
 
         viewStores = new JButton("View Stores");
         viewStores.addActionListener(actionListener);
@@ -452,6 +491,10 @@ public class Client extends JComponent implements Runnable{
         topBar.add(isSeller);
         topBar.add(logout);
         topBar.add(viewDashboard);
+        topBar.add(searchOptions);
+        topBar.add(searchText);
+        topBar.add(search);
+        topBar.add(sortMarket);
 
         userBar.add(viewStores);
         userBar.add(addStore);
@@ -485,22 +528,196 @@ public class Client extends JComponent implements Runnable{
         viewPurchaseHistory.setVisible(false);
         checkout.setVisible(false);
 
-        JPanel productPage = new JPanel();
+        productPage = new JPanel();
         scrollPane = new JScrollPane(productPage);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         productPage.setBackground(Color.lightGray);
         productPage.setLayout(new GridBagLayout());
+        scrollPane.setVisible(true);
+        productPage.setVisible(true);
+        login.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                isBuyer.setVisible(false);
+                isSeller.setVisible(false);
+                login.setVisible(false);
+                signup.setVisible(false);
+                logout.setVisible(true);
+                userBar.setVisible(true);
+                viewDashboard.setVisible(true);
+                scrollPane.setVisible(true);
+                if (status) {
+                    viewShoppingCart.setVisible(true);
+                    viewPurchaseHistory.setVisible(true);
+                    checkout.setVisible(true);
+                } else if (!status) {
+                    viewStores.setVisible(true);
+                    viewProducts.setVisible(true);
+                    addStore.setVisible(true);
+                    removeStore.setVisible(true);
+                    editStore.setVisible(true);
+                    addProduct.setVisible(true);
+                    removeProduct.setVisible(true);
+                    editProduct.setVisible(true);
+                }
+
+                System.out.println("Updated");
+
+                int item = 0;
+                for (int i = 0; i < 20; i++) {
+                    for (int j = 0; j < 8; j++) {
+                        JButton product = new JButton("Product" + item++);
+                        product.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                JFrame productFrame = new JFrame("Product");
+                                productFrame.setVisible(true);
+                                JPanel productPanel = new JPanel();
+                                Container content = productFrame.getContentPane();
+                                JTextField quantity = new JTextField();
+                                quantity.setPreferredSize(new Dimension(20, 25));
+                                JTextArea info = new JTextArea("Product Information\nInfo\nInfo");
+                                info.setEditable(false);
+                                productPanel.add(info);
+                                productPanel.add(purchase);
+                                productPanel.add(quantity);
+                                content.add(productPanel);
+                                productFrame.pack();
+                            }
+                        });
+                        productButtons.add(product);
+                        productPage.add(product, new GridBagConstraints(j, i, 1, 1, 1.0, 1.0,
+                                GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, new Insets(20, 20, 20, 20), 0, 40));
+                    }
+                }
+            }
+        });
+        signup.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                isBuyer.setVisible(false);
+                isSeller.setVisible(false);
+                login.setVisible(false);
+                signup.setVisible(false);
+                logout.setVisible(true);
+                userBar.setVisible(true);
+                viewDashboard.setVisible(true);
+                scrollPane.setVisible(true);
+                if (status) {
+                    viewShoppingCart.setVisible(true);
+                    viewPurchaseHistory.setVisible(true);
+                    checkout.setVisible(true);
+                } else if (!status) {
+                    viewStores.setVisible(true);
+                    viewProducts.setVisible(true);
+                    addStore.setVisible(true);
+                    removeStore.setVisible(true);
+                    editStore.setVisible(true);
+                    addProduct.setVisible(true);
+                    removeProduct.setVisible(true);
+                    editProduct.setVisible(true);
+                }
+
+                System.out.println("Updated");
+
+                int item = 0;
+                for (int i = 0; i < 20; i++) {
+                    for (int j = 0; j < 8; j++) {
+                        JButton product = new JButton("Product" + item++);
+                        product.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                JFrame productFrame = new JFrame("Product");
+                                productFrame.setVisible(true);
+                                JPanel productPanel = new JPanel();
+                                Container content = productFrame.getContentPane();
+                                JTextField quantity = new JTextField();
+                                quantity.setPreferredSize(new Dimension(20, 25));
+                                JTextArea info = new JTextArea("Product Information\nInfo\nInfo");
+                                info.setEditable(false);
+                                productPanel.add(info);
+                                productPanel.add(purchase);
+                                productPanel.add(quantity);
+                                content.add(productPanel);
+                                productFrame.pack();
+                            }
+                        });
+                        productButtons.add(product);
+                        productPage.add(product, new GridBagConstraints(j, i, 1, 1, 1.0, 1.0,
+                                GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, new Insets(20, 20, 20, 20), 0, 40));
+                    }
+                }
+            }
+        });
+        logout.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loggedIn = false;
+                isBuyer.setVisible(true);
+                isSeller.setVisible(true);
+                scrollPane.setVisible(false);
+                login.setVisible(true);
+                signup.setVisible(true);
+                logout.setVisible(false);
+                userBar.setVisible(false);
+                viewDashboard.setVisible(false);
+
+                viewStores.setVisible(false);
+                viewProducts.setVisible(false);
+                addStore.setVisible(false);
+                removeStore.setVisible(false);
+                editStore.setVisible(false);
+                addProduct.setVisible(false);
+                removeProduct.setVisible(false);
+                editProduct.setVisible(false);
+
+                viewShoppingCart.setVisible(false);
+                viewPurchaseHistory.setVisible(false);
+                System.out.println("Updated");
+                scrollPane.updateUI();
+            }
+        });
+
+
+        container.add(topBar, BorderLayout.PAGE_START);
+        container.add(userBar, BorderLayout.PAGE_END);
+        container.add(scrollPane, BorderLayout.CENTER);
+        frame.pack();
+    }
+
+    //TODO: make this actually use the arraylist
+    public void displayMarket(ArrayList<Product> products, String flag) {
+        System.out.println("Updated");
+        productPage = new JPanel();
+        scrollPane = new JScrollPane(productPage);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        productPage.setBackground(Color.lightGray);
+        productPage.setLayout(new GridBagLayout());
+        scrollPane.setVisible(true);
+        productPage.setVisible(true);
 
         int item = 0;
         for (int i = 0; i < 20; i++) {
             for (int j = 0; j < 8; j++) {
-                JButton product = new JButton("Product" + item++);
-                productButtons.add(product);
+                JButton product = new JButton("Product" + item++ + flag);
                 product.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(null, product.getText() + " Information", "Info",
-                                JOptionPane.INFORMATION_MESSAGE);
+                        JFrame productFrame = new JFrame("Product");
+                        productFrame.setVisible(true);
+                        JPanel productPanel = new JPanel();
+                        Container content = productFrame.getContentPane();
+                        JTextField quantity = new JTextField();
+                        quantity.setPreferredSize(new Dimension(20, 25));
+                        JTextArea info = new JTextArea("Product Information\nInfo\nInfo");
+                        info.setEditable(false);
+                        productPanel.add(info);
+                        productPanel.add(purchase);
+                        productPanel.add(quantity);
+                        content.add(productPanel);
+                        productFrame.pack();
                     }
                 });
                 productButtons.add(product);
@@ -508,11 +725,7 @@ public class Client extends JComponent implements Runnable{
                         GridBagConstraints.PAGE_START, GridBagConstraints.BOTH, new Insets(20, 20, 20, 20), 0, 40));
             }
         }
-        scrollPane.setVisible(false);
-        container.add(topBar, BorderLayout.PAGE_START);
-        container.add(userBar, BorderLayout.PAGE_END);
-        container.add(scrollPane, BorderLayout.CENTER);
-        frame.pack();
+        scrollPane.updateUI();
     }
     public static void main(String[] args) {
         try {
