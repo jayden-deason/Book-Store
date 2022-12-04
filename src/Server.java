@@ -108,7 +108,7 @@ public class Server extends Thread {
                 String userChoice = (String) reader.readObject();
                 String[] answer = userChoice.split(",");
                 if (answer[0].equals("1")) {
-                    this.sendAllProducts();
+                    this.sendAllProducts(answer[1]);
 
                 } else if (answer[0].equals("2")) {
                     this.sendSearch(userChoice.substring(1));
@@ -154,6 +154,47 @@ public class Server extends Thread {
             try {
                 String userChoice = (String) reader.readObject();
                 String[] answer = userChoice.split(",");
+
+                if (answer[0].equals("1")) {
+                    // send all products
+                    this.sendAllProducts(answer[1]);
+                }
+                if (answer[0].equals("2")) {
+                    // send this seller's products
+                    this.sendSellerProducts(seller, answer[1]);
+                }
+                if (answer[0].equals("3")) {
+                    // add product
+                    this.addSellerProduct(seller,
+                            answer[1], // product name
+                            answer[2], // store name
+                            answer[3], // description
+                            Double.parseDouble(answer[4]), // price
+                            Integer.parseInt(answer[5]) // quantity
+                    );
+                }
+                if (answer[0].equals("4")) {
+                    // edit product
+                    this.editSellerProduct(seller,
+                            Integer.parseInt(answer[1]), // product index
+                            answer[2], // product name
+                            answer[3], // store name
+                            answer[4], // description
+                            Double.parseDouble(answer[5]), // price
+                            Integer.parseInt(answer[6]) // quantity
+                    );
+                }
+                if (answer[0].equals("5")) {
+                    // add store
+                    this.addSellerStore(seller, answer[1]);
+                }
+                if (answer[0].equals("6")) {
+                    // view dashboard
+                    this.getSellerDashboard(seller); // TODO: params for seller dashboard?
+                } else {
+                    //Sends Client "!" to signify a special error (Invalid choice at high level of program)
+                    writer.writeObject((String) "!");
+                }
             } catch (Exception e) {
                 try {
                     this.writer.writeObject((String) "!");
@@ -164,7 +205,27 @@ public class Server extends Thread {
         }
     }
 
-    private void sendAllProducts() {
+    private void sendSellerProducts(Seller seller, String sortType) {
+        // TODO: implement
+    }
+
+    private void addSellerProduct(Seller seller, String productName, String storeName, String description, double price, int quantity) {
+        // TODO: implement
+    }
+
+    private void editSellerProduct(Seller seller, int productIndex, String productName, String storeName, String description, double price, int quantity) {
+        // TODO: implement
+    }
+
+    private void addSellerStore(Seller seller, String storeName) {
+        // TODO: implement
+    }
+
+    private void getSellerDashboard(Seller seller) {
+        // TODO: implement
+    }
+
+    private void sendAllProducts(String sortType) {
         try {
             this.writer.writeObject(market.getAllProducts(true));
         } catch (Exception e) {
