@@ -84,12 +84,8 @@ public class Server extends Thread{
                     }
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        //log in or sign up
-        while(true){
-            //infinitely waits for user to make requests to access data and sends data back to user
+        } catch (Exception e) {
+            System.out.println(e.getStackTrace());
         }
     }
     public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException{
@@ -140,13 +136,18 @@ public class Server extends Thread{
                 } else if (answer.equals("9")) {
                     this.sendPurchaseHistory(buyer);
                 } else {
-                    //Sends Client "!" to signify a special error (Invalid choice)
+                    //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
             }
             catch (Exception e) {
-                //Sends Client "N" to signify an error
-                writer.println("N");
+                //Sends Client "!" to signify special error (Invalid choice at high level of program)
+                try {
+                    this.writer.writeObject((String) "!");
+                }
+                catch (Exception ex){
+                    System.out.println(ex.getStackTrace());
+                }
             }
 
         }
