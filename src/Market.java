@@ -159,7 +159,7 @@ public class Market {
         }
         Store s = getStoreByName(p.getStoreName());
         if (s == null) {
-            System.out.printf("No store with name '%s', skipping book '%s'\n", p.getStoreName(), p.getName());
+            throw new RuntimeException(String.format("No store with name '%s'", p.getStoreName()));
         } else {
             s.addProduct(p, this);
             products.add(p);
@@ -469,6 +469,21 @@ public class Market {
         int idx = products.indexOf(p);
         return getSalesForProduct(idx);
 
+    }
+
+    public int getCustomersForProduct(Product p) {
+        int customers = 0;
+
+        for (Buyer buyer : buyers) {
+            for (String purchase : buyer.getPurchaseHistory()) {
+                if (Integer.parseInt(purchase.split(":")[0]) == p.getIndex()) {
+                    customers += 1;
+                    break; // break inner loop if customer purchased at least 1 item
+                }
+            }
+        }
+
+        return customers;
     }
 
     /**

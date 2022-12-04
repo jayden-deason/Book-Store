@@ -2,6 +2,7 @@ import javax.print.attribute.HashPrintJobAttributeSet;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class Server extends Thread {
@@ -205,12 +206,28 @@ public class Server extends Thread {
         }
     }
 
-    private void sendSellerProducts(Seller seller, String sortType) {
-        // TODO: implement
+    private void sendSellerProducts(Seller seller, String sortType) throws IOException {
+        ArrayList<Product> products = seller.getProducts();
+
+        if (sortType.equals("sales")) {
+            products.sort(Comparator.comparingInt(s -> market.getSalesForProduct(s)));
+        } else if (sortType.equals("customers")) {
+            products.sort(Comparator.comparingInt(s -> market.getCustomersForProduct(s)));
+        }
+
+        this.writer.writeObject(products);
     }
 
-    private void addSellerProduct(Seller seller, String productName, String storeName, String description, double price, int quantity) {
-        // TODO: implement
+    private void addSellerProduct(Seller seller, String productName, String storeName, String description,
+                                  double price, int quantity) throws IOException {
+        Product product = new Product(productName, storeName, description, quantity, price, price, -1);
+
+        if (seller.getStoreNames().contains(storeName)) {
+            market.addProduct(product);
+            this.writer.writeObject("Y");
+        } else {
+            this.writer.writeObject("N");
+        }
     }
 
     private void editSellerProduct(Seller seller, int productIndex, String productName, String storeName, String description, double price, int quantity) {

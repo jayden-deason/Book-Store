@@ -253,6 +253,16 @@ public class Seller extends User {
         return stores;
     }
 
+    public ArrayList<Product> getProducts() {
+        ArrayList<Product> out = new ArrayList<>();
+
+        for (Store s : stores) {
+            out.addAll(s.getProducts());
+        }
+
+        return out;
+    }
+
     public void setStores(ArrayList<Store> stores) {
         this.stores = stores;
     }
