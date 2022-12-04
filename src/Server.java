@@ -112,178 +112,36 @@ public class Server extends Thread{
         while(true) {
             try {
                 String userChoice = (String) reader.readObject();
-                String answer = userChoice.substring(0, 1);
-                userChoice = userChoice.substring(1);
-                if (answer.equals("1")) {
+                String[] answer = userChoice.split(",");
+                if (answer[0].equals("1")) {
                     this.sendAllProducts();
-                    writer.println(market.getAllProducts(true));
-                    int nextChoice = reader.readLine();
-                    while (nextChoice != 3) {
-                        if (nextChoice == 1) {
-                            //Pick a product
-                            int productIndex = reader.readLine();
-                            Product p = market.getProductByIndex(productIndex);
-                            writer.println(p);
-                            //Add to Cart?
-                            String atc = reader.readLine();
 
-                            if (atc.equalsIgnoreCase("y") || atc.equalsIgnoreCase("yes")) {
-                                //Quantity
-                                int quantity = reader.readLine();
-                                buyer.addProductToCart(productIndex, quantity);
-                                market.updateAllFiles();
-                                //Success
-                                writer.println("Y");
+                } else if (answer[0].equals("2")) {
+                    this.sendSearch(userChoice.substring(1));
 
-                            }
-                        } else if (nextChoice == 2) {
-                            //Format for search should be productName,storeName,Description
-                            String search = reader.readLine();
-                            String[] searchContents = search.split(",");
-                            if (searchContents[0].equals("")) searchContents[0] = null;
+                } else if (answer[0].equals("3")) {
+                    this.viewProduct(Integer.parseInt(answer[1]));
 
-                            if (searchContents[1].equals("")) searchContents[1] = null;
+                } else if (answer[0].equals("4")) {
+                    this.exportToFile(answer[1], buyer);
 
-                            if (searchContents[2].equals("")) searchContents[2] = null;
-
-                            //TODO: Change so it returns the matched listings
-                            writer.println(market.matchConditions(searchContents[0], searchContents[1],
-                                    searchContents[2]));
-                        } else {
-                            break;
-                        }
-                        nextChoice = reader.readLine();
-                    }
-                } else if (answer.equals("2")) {
-                    //TODO: Change so it returns the shopping cart of products (get this method from main)
-                    printShoppingCart(buyer, market);
-
-                } else if (answer.equals("3")) {
-                    //Sends all store names
-                    writer.println(market.getStoreNames());
-                    //gets back one store name
-                    String storeName = reader.readLine();
-                    Store store = market.getStoreByName(storeName);
-                    if (store == null) {
-                        //Sends Client "N" to signify an error (No such store exists)
-                        writer.println("N");
-                    } else {
-                        String productName = reader.readLine();
-                        Product product = store.getProductByName(productName);
-
-                        if (product == null) {
-                            //Sends Client "N" to signify an error (No such book exists)
-                            writer.println("N");
-                        } else {
-                            //TODO: Change so it returns the details of product (Get this method from main)
-                            printProductPage(product);
-                            System.out.println("Would you like to add to cart? (y/n)");
-                            String answerTwo = reader.readLine();
-                            answerTwo = answerTwo.toLowerCase();
-                            if (answerTwo.equals("yes") || answerTwo.equals("y")) {
-                                boolean num;
-                                int quantity = -1;
-                                while (true) {
-                                    num = true;
-                                    try {
-                                        quantity = Integer.parseInt(reader.readLine());
-                                    } catch (NumberFormatException e) {
-                                        num = false;
-                                    }
-                                    if (quantity < 1) {
-                                        num = false;
-                                    }
-                                    if (num) {
-                                        break;
-                                    } else {
-                                        //Sends Client "N" to signify an error (Invalid Qunatity)
-                                        writer.println("N");
-                                    }
-                                }
-                                buyer.addProductToCart(product.getIndex(), quantity);
-                                market.updateAllFiles();
-                                //Sucess
-                                writer.println("Y");
-                                //Sends new shopping cart
-                                //TODO: Change so it returns the shopping cart of products (get this method from main)
-                                printShoppingCart(buyer, market);
-                            }
-                        }
-                    }
-                } else if (answer.equals("4")) {
-                    this.exportToFile(userChoice, buyer);
                 } else if (answer.equals("5")) {
                     this.makePurchase(buyer);
+
                 } else if (answer.equals("6")) {
-                    //TODO: Change so it returns the shopping cart of products (get this method from main)
-                    printShoppingCart(buyer, market);
-                    boolean num;
-                    int index = -1;
-                    int quantity = -1;
-                    while (true) {
-                        num = true;
-                        try {
-                            //get index of product
-                            index = Integer.parseInt(reader.readLine());
-                        } catch (NumberFormatException e) {
-                            num = false;
-                        }
-                        if (index < 0) {
-                            num = false;
-                        }
-                        if (num) {
-                            ArrayList<String> products = buyer.getShoppingCart();
-                            boolean exists = false;
-                            for (int i = 0; i < products.size(); i++) {
-                                if (index == Integer.parseInt(products.get(i).split(":")[0])) {
-                                    exists = true;
-                                    while (true) {
-                                        num = true;
-                                        try {
-                                            //new quantity (0 for delete)
-                                            quantity = Integer.parseInt(reader.readLine());
-                                        } catch (NumberFormatException e) {
-                                            num = false;
-                                        }
-                                        if (quantity < 1) {
-                                            num = false;
-                                        }
-                                        if (num) {
-                                            break;
-                                        } else {
-                                            //Sends Client "N" to signify an error (Invalid Qunatity)
-                                            writer.println("N");
-                                        }
-                                    }
-                                    buyer.editProductQuantity(index, quantity);
-                                    market.updateAllFiles();
-                                    //Success
-                                    writer.println("Y");
-                                }
-                            }
-                            if (!(exists)) {
-                                //Sends Client "N" to signify an error (Book did not exist within cart)
-                                writer.println("N");
-                            }
-                        } else {
-                            //Sends Client "N" to signify an error (Invalid index)
-                            writer.println("N");
-                        }
-                        break;
-                    }
+                    this.makePurchase(buyer);
+
                 } else if (answer.equals("7")) {
-                    //TODO: Change so it returns the dashboard and does not use a scanner
-                    buyer.printDashboard(scan, market);
+                    this.sendShoppingCart(buyer);
+
                 } else if (answer.equals("8")) {
-                    //TODO: Change so it returns the previous purchases and does not use a scanner
-                    buyer.printPreviousPurchases();
+                    this.changeShoppingCartQuantity(Integer.parseInt(answer[1]), Integer.parseInt(answer[2]), buyer);
+
                 } else if (answer.equals("9")) {
-                    //Success
-                    writer.println("Y");
-                    return;
+                    this.sendPurchaseHistory(buyer);
                 } else {
-                    //Sends Client "N" to signify an error (Invalid choice)
-                    writer.println("N");
+                    //Sends Client "!" to signify a special error (Invalid choice)
+                    writer.writeObject((String) "!");
                 }
             }
             catch (Exception e) {
