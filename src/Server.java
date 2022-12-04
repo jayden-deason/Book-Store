@@ -74,7 +74,7 @@ public class Server extends Thread{
                     Seller s = market.getSellerByEmail(userDetails[2]);
                     if(s == null) {
                         Seller seller = new Seller(userDetails[2], userDetails[3]);
-                        market.addBuyer(seller);
+                        market.addSeller(seller);
                         writer.writeObject("Y");
                         runSeller(seller);
                     }
@@ -111,8 +111,8 @@ public class Server extends Thread{
     public void runBuyer(Buyer buyer) {
         while(true) {
             try {
-                String userChoice = reader.readLine();
-                String answer = (userChoice.substring(0, 1);
+                String userChoice = (String) reader.readObject();
+                String answer = userChoice.substring(0, 1);
                 userChoice = userChoice.substring(1);
                 if (answer.equals("1")) {
                     this.sendAllProducts();
@@ -349,6 +349,7 @@ public class Server extends Thread{
             if(p.getQuantity() > quantity) {
                 //Error: quantity trying to add to cart is more than there are of that product
                 this.writer.writeObject((String) "N");
+                return;
             }
             buyer.addProductToCart(p.getIndex(), quantity);
             market.updateAllFiles();
@@ -402,5 +403,43 @@ public class Server extends Thread{
             }
         }
     }
+    private void changeShoppingCartQuantity(int indexOfProduct, int newQuantity, Buyer buyer) {
+        try {
+            ArrayList<String> products = buyer.getShoppingCart();
+            boolean exists = false;
+            for (int i = 0; i < products.size(); i++) {
+                if (indexOfProduct == Integer.parseInt(products.get(i).split(":")[0])) {
+                    exists = true;
+                    Product p = market.getProductByIndex(Integer.parseInt(products.get(i).split(":")[0]));
+                    //Sends Client "N" to signify an error (Invalid Quantity)
+                    if(p.getQuantity() < newQuantity) {
+                        writer.writeObject((String) "N");
+                        return;
+                    }
+                    buyer.editProductQuantity(indexOfProduct, newQuantity);
+                    market.updateAllFiles();
+                    //Success
+                    writer.writeObject((String) "Y");
+                }
+            }
+            if (!(exists)) {
+                //Sends Client "N" to signify an error (Book did not exist within cart)
+                writer.writeObject((String) "N");
+            }
+        }
+        catch (Exception e) {
+            try {
+                this.writer.writeObject((String) "N");
+            }
+            catch (Exception ex){
+                System.out.println(ex.getStackTrace());
+            }
+        }
+    }
+    private void sendPurchaseHistory(Buyer buyer) {
+        //TODO: Change so it returns the previous purchases and does not use a scanner
+        buyer.printPreviousPurchases();
+    }
+
 
 }
