@@ -401,9 +401,23 @@ public class Server extends Thread {
     }
 
     private void sendPurchaseHistory(Buyer buyer) {
-        //TODO: Change so it returns the previous purchases and does not use a scanner
-        buyer.printPreviousPurchases();
+        try {
+            ArrayList<String> purchaseHistory = buyer.getPurchaseHistory();
+            HashMap<Product, Integer> previousProducts = new HashMap<Product, Integer>();
+            for (String item : purchaseHistory) {
+                int idx = Integer.parseInt(item.split(":")[0]);
+                int quantity = Integer.parseInt(item.split(":")[1]);
+                Product p = this.market.getProductByIndex(idx);
+                previousProducts.put(p, quantity);
+            }
+            this.writer.writeObject((HashMap<Product, Integer>) previousProducts);
+            ;
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((HashMap<Product, Integer>) null);
+            } catch (Exception ex) {
+                System.out.println(ex.getStackTrace());
+            }
+        }
     }
-
-
 }
