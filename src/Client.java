@@ -145,15 +145,20 @@ public class Client extends JComponent implements Runnable{
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         System.out.println("By products sold");
-                        int item = 0;
+
+                        ArrayList<Product> products = getAllProducts("sales");
+
+                        //int item = 0;
                         panel.removeAll();
-                        for (int i = 0; i < 5; i++) {
+                        for (int i = 0; i < products.size(); i++) {
                             for (int j = 0; j < 5; j++) {
-                                JButton product = new JButton("Product" + item++);
+                                JButton product = new JButton(products.get(i).getName());
+                                int finalI = i;
                                 product.addActionListener(new ActionListener() {
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
-                                        JOptionPane.showMessageDialog(null, product.getText() + " Information", "Info",
+                                        JOptionPane.showMessageDialog(null, product.getText() +
+                                                        " Information\n" + products.get(finalI).getDescription(), "Info",
                                                 JOptionPane.INFORMATION_MESSAGE);
                                     }
                                 });
@@ -168,15 +173,20 @@ public class Client extends JComponent implements Runnable{
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         System.out.println("By purchase history");
-                        int item = 0;
+
+                        ArrayList<Product> products = getAllProducts("history");
+
+                        //int item = 0;
                         panel.removeAll();
-                        for (int i = 0; i < 5; i++) {
+                        for (int i = 0; i < products.size(); i++) {
                             for (int j = 0; j < 5; j++) {
-                                JButton product = new JButton("Purchased" + item++);
+                                JButton product = new JButton(products.get(i).getName());
+                                int finalI = i;
                                 product.addActionListener(new ActionListener() {
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
-                                        JOptionPane.showMessageDialog(null, product.getText() + " Information", "Info",
+                                        JOptionPane.showMessageDialog(null, product.getText() +
+                                                        " Information\n" + products.get(finalI).getDescription(), "Info",
                                                 JOptionPane.INFORMATION_MESSAGE);
                                     }
                                 });
@@ -187,6 +197,8 @@ public class Client extends JComponent implements Runnable{
                         panel.updateUI();
                     }
                 });
+
+                //TODO: add seller implementation
                 customers.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -218,17 +230,32 @@ public class Client extends JComponent implements Runnable{
                 Container content = shoppingCartFrame.getContentPane();
                 content.setLayout(new GridLayout(4, 3));
 
-                for (int i = 0; i < 4; i++) {
-                    JTextField name = new JTextField("Product");
+                ArrayList<Product> products = getShoppingCart();
+
+                for (int i = 0; i < products.size(); i++) {
+                    JTextField name = new JTextField(products.get(i).getName());
                     name.setEditable(false);
-                    JTextField quantity = new JTextField("1");
+                    //TODO: fix for proper quantity
+                    JTextField quantity = new JTextField(products.get(i).getQuantity());
                     quantity.setToolTipText("Set to 0 and confirm to remove item");
                     JButton confirm = new JButton("\u2713");
                     confirm.setPreferredSize(new Dimension(20, 35));
+                    int finalI = i;
                     confirm.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            //TODO: code to update shopping cart quantity
+                            String successCheck;
+                            try {
+                                successCheck = editCart(products.get(finalI), Integer.parseInt(quantity.getText()));
+                            } catch (NumberFormatException ex){
+                                JOptionPane.showMessageDialog(null, "Invalid argument. Enter an " +
+                                        "integer.", "Error", JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
+                            if (successCheck.equalsIgnoreCase("n")) {
+                                JOptionPane.showMessageDialog(null, "Not enough stock. Decrease" +
+                                        " the amount in your cart.", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
                         }
                     });
                     content.add(name);
@@ -237,7 +264,15 @@ public class Client extends JComponent implements Runnable{
                 }
                 shoppingCartFrame.pack();
             } else if (e.getSource() == viewPurchaseHistory) {
-                JOptionPane.showMessageDialog(null, "Purchase History", "Purchase History", JOptionPane.INFORMATION_MESSAGE);
+                ArrayList<Product> products = getPurchaseHistory();
+
+                String history = "";
+                for (int i = 0; i < products.size(); i++) {
+                    history += products.get(i).getName() + "\n";
+                }
+                JOptionPane.showMessageDialog(null, history, "Purchase History", JOptionPane.INFORMATION_MESSAGE);
+
+            //TODO: implement following cases for sellers
             } else if (e.getSource() == viewStores) {
                 JFrame storesFrame = new JFrame();
                 storesFrame.setSize(500, 500);
@@ -371,6 +406,8 @@ public class Client extends JComponent implements Runnable{
                 JFrame searchFrame = new JFrame("Search");
                 searchFrame.setVisible(true);
             }
+
+            //TODO: add search, export, and make purchase
         }
     };
 
