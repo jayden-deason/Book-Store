@@ -630,14 +630,7 @@ public class Client extends JComponent implements Runnable{
                     }
                 }
 
-                ArrayList<Product> products;
-                try {
-                    products = (ArrayList<Product>) reader.readObject();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (ClassNotFoundException ex) {
-                    throw new RuntimeException(ex);
-                }
+                ArrayList<Product> products = getAllProducts("none");
 
                 isBuyer.setVisible(false);
                 isSeller.setVisible(false);

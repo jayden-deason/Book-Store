@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class Server extends Thread {
     private final Socket socket;
     private ObjectOutputStream writer;
-    private ObjectInputStream reader;
+    private BufferedReader reader;
 
     public static ArrayList<Socket> sockets = new ArrayList<Socket>();
     public static Market market;
@@ -16,11 +16,9 @@ public class Server extends Thread {
     public void run() {
         try {
             System.out.println("Connection Running Number: " + sockets.size());
-            writer = new ObjectOutputStream(this.socket.getOutputStream());
-            reader = new ObjectInputStream(this.socket.getInputStream());
             //loginString format: (0 for seller or 1 for buyer),(0 for sign in or 1 for sign up),email,password
             //Example: "0,1,test123@t.com,123" should be sign up for seller with email:test123@t.com and password 123
-            String loginString = (String) reader.readObject();
+            String loginString = reader.readLine();
             String[] userDetails = loginString.split(",");
             //Seller
             if (userDetails[0].equals("0")) {
@@ -85,7 +83,7 @@ public class Server extends Thread {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.getStackTrace());
+            e.printStackTrace();
         }
     }
 
@@ -97,9 +95,9 @@ public class Server extends Thread {
             //infinite loop to create a new thread for each connection
             //creates a new socket for each connection
             final Socket socket = serverSocket.accept();
-            System.out.println("Connection Established Number: " + sockets.size());
             //creates a user using the socket
             Server user = new Server(socket);
+            System.out.println("Connection Established Number: " + sockets.size());
             user.start();
         }
     }
@@ -107,12 +105,20 @@ public class Server extends Thread {
     public Server(Socket socket) {
         this.socket = socket;
         sockets.add(this.socket);
+        try {
+            writer = new ObjectOutputStream(socket.getOutputStream());
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println("Streams created");
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void runBuyer(Buyer buyer) {
         while (true) {
             try {
-                String userChoice = (String) reader.readObject();
+                String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
                 if (answer[0].equals("1")) {
                     this.sendAllProducts(answer[1]);
@@ -159,7 +165,7 @@ public class Server extends Thread {
     public void runSeller(Seller seller) {
         while (true) {
             try {
-                String userChoice = (String) reader.readObject();
+                String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
 
                 if (answer[0].equals("1")) {
