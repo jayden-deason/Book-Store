@@ -244,8 +244,7 @@ public class Client extends JComponent implements Runnable{
                 }
             } else if (e.getSource() == confirmAddStore) {
                 //TODO: code to actually add store
-            }
-            else if (e.getSource() == confirmAddProduct) {
+            } else if (e.getSource() == confirmAddProduct) {
                 //TODO: code to actually add product
             } else if (e.getSource() == removeProduct) {
                 JFrame removeProductFrame = new JFrame();
