@@ -867,7 +867,6 @@ public class Client extends JComponent implements Runnable{
         frame.pack();
     }
     public static void main(String[] args) {
-        Client client = new Client();
         try {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception e) {
@@ -879,6 +878,7 @@ public class Client extends JComponent implements Runnable{
     public Client() {
         try {
             socket = new Socket("localhost", 1001);
+            System.out.println("sent request");
 
             writer = new PrintWriter(this.socket.getOutputStream());
             reader = new ObjectInputStream(this.socket.getInputStream());
