@@ -88,6 +88,8 @@ public class Server extends Thread {
     public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
         //Port Number is 1001 and host is "localhost"
         ServerSocket serverSocket = new ServerSocket(1001);
+
+        market = Market.getInstance();
         while (true) {
             //infinite loop to create a new thread for each connection
             //creates a new socket for each connection
