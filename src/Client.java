@@ -5,12 +5,20 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
 
 public class Client extends JComponent implements Runnable{
     private Client client;
+    private Socket socket;
+    private ObjectInputStream reader;
+    private PrintWriter writer;
     private boolean loggedIn;
     private boolean status = true;
+    private boolean userType = true; //true = buyer, false = seller
     private JPanel topBar, userBar, productPage;
     private JScrollPane scrollPane;
 
@@ -34,81 +42,81 @@ public class Client extends JComponent implements Runnable{
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == login) {
-                // log in condition
-                loggedIn = true;
-                isBuyer.setVisible(false);
-                isSeller.setVisible(false);
-                login.setVisible(false);
-                signup.setVisible(false);
-                logout.setVisible(true);
-                userBar.setVisible(true);
-                viewDashboard.setVisible(true);
-                displayMarket(null, "login");
-                if (status) {
-                    viewShoppingCart.setVisible(true);
-                    viewPurchaseHistory.setVisible(true);
-                    checkout.setVisible(true);
-                } else if (!status) {
-                    viewStores.setVisible(true);
-                    viewProducts.setVisible(true);
-                    addStore.setVisible(true);
-                    removeStore.setVisible(true);
-                    editStore.setVisible(true);
-                    addProduct.setVisible(true);
-                    removeProduct.setVisible(true);
-                    editProduct.setVisible(true);
-                }
-            } else if (e.getSource() == signup) {
-                // sign up condition
-                loggedIn = true;
-                isBuyer.setVisible(false);
-                isSeller.setVisible(false);
-                scrollPane.setVisible(true);
-                login.setVisible(false);
-                signup.setVisible(false);
-                logout.setVisible(true);
-                userBar.setVisible(true);
-                viewDashboard.setVisible(true);
-                displayMarket(null, "signup");
-                if (status) {
-                    viewShoppingCart.setVisible(true);
-                    viewPurchaseHistory.setVisible(true);
-                    checkout.setVisible(true);
-                } else if (!status) {
-                    viewStores.setVisible(true);
-                    viewProducts.setVisible(true);
-                    addStore.setVisible(true);
-                    removeStore.setVisible(true);
-                    editStore.setVisible(true);
-                    addProduct.setVisible(true);
-                    removeProduct.setVisible(true);
-                    editProduct.setVisible(true);
-                }
-            } else if (e.getSource() == logout) {
-                // logout conditions
-                loggedIn = false;
-                isBuyer.setVisible(true);
-                isSeller.setVisible(true);
-                scrollPane.setVisible(false);
-                login.setVisible(true);
-                signup.setVisible(true);
-                logout.setVisible(false);
-                userBar.setVisible(false);
-                viewDashboard.setVisible(false);
-
-                viewStores.setVisible(false);
-                viewProducts.setVisible(false);
-                addStore.setVisible(false);
-                removeStore.setVisible(false);
-                editStore.setVisible(false);
-                addProduct.setVisible(false);
-                removeProduct.setVisible(false);
-                editProduct.setVisible(false);
-
-                viewShoppingCart.setVisible(false);
-                viewPurchaseHistory.setVisible(false);
-            } else if (e.getSource() == viewDashboard) {
+//            if (e.getSource() == login) {
+//                // log in condition
+//                loggedIn = true;
+//                isBuyer.setVisible(false);
+//                isSeller.setVisible(false);
+//                login.setVisible(false);
+//                signup.setVisible(false);
+//                logout.setVisible(true);
+//                userBar.setVisible(true);
+//                viewDashboard.setVisible(true);
+//                displayMarket(null, "login");
+//                if (status) {
+//                    viewShoppingCart.setVisible(true);
+//                    viewPurchaseHistory.setVisible(true);
+//                    checkout.setVisible(true);
+//                } else if (!status) {
+//                    viewStores.setVisible(true);
+//                    viewProducts.setVisible(true);
+//                    addStore.setVisible(true);
+//                    removeStore.setVisible(true);
+//                    editStore.setVisible(true);
+//                    addProduct.setVisible(true);
+//                    removeProduct.setVisible(true);
+//                    editProduct.setVisible(true);
+//                }
+//            } else if (e.getSource() == signup) {
+//                // sign up condition
+//                loggedIn = true;
+//                isBuyer.setVisible(false);
+//                isSeller.setVisible(false);
+//                scrollPane.setVisible(true);
+//                login.setVisible(false);
+//                signup.setVisible(false);
+//                logout.setVisible(true);
+//                userBar.setVisible(true);
+//                viewDashboard.setVisible(true);
+//                displayMarket(null, "signup");
+//                if (status) {
+//                    viewShoppingCart.setVisible(true);
+//                    viewPurchaseHistory.setVisible(true);
+//                    checkout.setVisible(true);
+//                } else if (!status) {
+//                    viewStores.setVisible(true);
+//                    viewProducts.setVisible(true);
+//                    addStore.setVisible(true);
+//                    removeStore.setVisible(true);
+//                    editStore.setVisible(true);
+//                    addProduct.setVisible(true);
+//                    removeProduct.setVisible(true);
+//                    editProduct.setVisible(true);
+//                }
+//            } else if (e.getSource() == logout) {
+//                // logout conditions
+//                loggedIn = false;
+//                isBuyer.setVisible(true);
+//                isSeller.setVisible(true);
+//                scrollPane.setVisible(false);
+//                login.setVisible(true);
+//                signup.setVisible(true);
+//                logout.setVisible(false);
+//                userBar.setVisible(false);
+//                viewDashboard.setVisible(false);
+//
+//                viewStores.setVisible(false);
+//                viewProducts.setVisible(false);
+//                addStore.setVisible(false);
+//                removeStore.setVisible(false);
+//                editStore.setVisible(false);
+//                addProduct.setVisible(false);
+//                removeProduct.setVisible(false);
+//                editProduct.setVisible(false);
+//
+//                viewShoppingCart.setVisible(false);
+//                viewPurchaseHistory.setVisible(false);
+            /*} else*/ if (e.getSource() == viewDashboard) {
                 JFrame dashFrame = new JFrame("Dashboard");
                 dashFrame.setSize(500, 500);
                 dashFrame.setVisible(true);
@@ -419,12 +427,14 @@ public class Client extends JComponent implements Runnable{
             @Override
             public void actionPerformed(ActionEvent e) {
                 status = !status;
+                userType = true;
             }
         });
         isSeller.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 status = !status;
+                userType = false;
             }
         });
 
@@ -539,6 +549,52 @@ public class Client extends JComponent implements Runnable{
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                //TODO: figure out why this kills it
+                if (userType) { //logging in as buyer
+                    writer.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
+                    System.out.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
+                    writer.flush();
+                    String response;
+                    try {
+                        response = (String) reader.readObject();
+                        System.out.println(response);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (ClassNotFoundException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    if (response.equalsIgnoreCase("N")) {
+                        JOptionPane.showMessageDialog(null, "Invalid Username or Password." +
+                                "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } else { //logging in as seller
+                    writer.printf("%d,%d,%s,%s\n", 1, 0, username.getText(), password.getText());
+                    writer.flush();
+                    String response;
+                    try {
+                        response = (String) reader.readObject();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (ClassNotFoundException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    if (response.equalsIgnoreCase("N")) {
+                        JOptionPane.showMessageDialog(null, "Invalid Username or Password." +
+                                "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+
+                ArrayList<Product> products;
+                try {
+                    products = (ArrayList<Product>) reader.readObject();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (ClassNotFoundException ex) {
+                    throw new RuntimeException(ex);
+                }
+
                 isBuyer.setVisible(false);
                 isSeller.setVisible(false);
                 login.setVisible(false);
@@ -564,20 +620,22 @@ public class Client extends JComponent implements Runnable{
 
                 System.out.println("Updated");
 
-                int item = 0;
-                for (int i = 0; i < 20; i++) {
+                //int item = 0;
+                for (int i = 0; i < products.size(); i++) {
                     for (int j = 0; j < 8; j++) {
-                        JButton product = new JButton("Product" + item++);
+                        JButton product = new JButton(products.get(i).getName());
+                        int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                JFrame productFrame = new JFrame("Product");
+                                JFrame productFrame = new JFrame(products.get(finalI).getName());
                                 productFrame.setVisible(true);
                                 JPanel productPanel = new JPanel();
                                 Container content = productFrame.getContentPane();
                                 JTextField quantity = new JTextField();
                                 quantity.setPreferredSize(new Dimension(20, 25));
-                                JTextArea info = new JTextArea("Product Information\nInfo\nInfo");
+                                JTextArea info = new JTextArea(String.format("Product Information\n%f\n%s",
+                                        products.get(finalI).getSalePrice(), products.get(finalI).getDescription()));
                                 info.setEditable(false);
                                 productPanel.add(info);
                                 productPanel.add(purchase);
@@ -596,6 +654,60 @@ public class Client extends JComponent implements Runnable{
         signup.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String user = username.getText();
+                String pass = password.getText();
+
+                if (!(user.contains("@") && user.contains(".com"))) {
+                    JOptionPane.showMessageDialog(null, "Enter a valid email address.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (userType) {
+                    writer.printf("%d,%d,%s,%s\n", 0, 1, user, pass);
+                    writer.flush();
+                    String response;
+                    try {
+                        response = (String) reader.readObject();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (ClassNotFoundException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    if (response.equalsIgnoreCase("N")) {
+                        JOptionPane.showMessageDialog(null, "An account with that username " +
+                                "already exists.\n Choose a different one or sign in.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } else {
+                    writer.printf("%d,%d,%s,%s\n", 1, 1, user, pass);
+                    writer.flush();
+                    String response;
+                    try {
+                        response = (String) reader.readObject();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (ClassNotFoundException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    if (response.equalsIgnoreCase("N")) {
+                        JOptionPane.showMessageDialog(null, "An account with that username " +
+                                        "already exists.\n Choose a different one or sign in.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+
+                ArrayList<Product> products;
+                try {
+                    products = (ArrayList<Product>) reader.readObject();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (ClassNotFoundException ex) {
+                    throw new RuntimeException(ex);
+                }
+
                 isBuyer.setVisible(false);
                 isSeller.setVisible(false);
                 login.setVisible(false);
@@ -622,19 +734,21 @@ public class Client extends JComponent implements Runnable{
                 System.out.println("Updated");
 
                 int item = 0;
-                for (int i = 0; i < 20; i++) {
+                for (int i = 0; i < products.size(); i++) {
                     for (int j = 0; j < 8; j++) {
-                        JButton product = new JButton("Product" + item++);
+                        JButton product = new JButton(products.get(i).getName());
+                        int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                JFrame productFrame = new JFrame("Product");
+                                JFrame productFrame = new JFrame(products.get(finalI).getName());
                                 productFrame.setVisible(true);
                                 JPanel productPanel = new JPanel();
                                 Container content = productFrame.getContentPane();
                                 JTextField quantity = new JTextField();
                                 quantity.setPreferredSize(new Dimension(20, 25));
-                                JTextArea info = new JTextArea("Product Information\nInfo\nInfo");
+                                JTextArea info = new JTextArea(String.format("Product Information\n%f\n%s",
+                                        products.get(finalI).getSalePrice(), products.get(finalI).getDescription()));
                                 info.setEditable(false);
                                 productPanel.add(info);
                                 productPanel.add(purchase);
@@ -728,11 +842,23 @@ public class Client extends JComponent implements Runnable{
         scrollPane.updateUI();
     }
     public static void main(String[] args) {
+        Client client = new Client();
         try {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception e) {
             return;
         }
         SwingUtilities.invokeLater(new Client());
+    }
+
+    public Client() {
+        try {
+            socket = new Socket("localhost", 1001);
+
+            writer = new PrintWriter(this.socket.getOutputStream());
+            reader = new ObjectInputStream(this.socket.getInputStream());
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }
