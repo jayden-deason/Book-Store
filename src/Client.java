@@ -5,9 +5,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -768,6 +766,9 @@ public class Client extends JComponent implements Runnable{
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                writer.println("-1");
+                writer.flush();
+
                 loggedIn = false;
                 isBuyer.setVisible(true);
                 isSeller.setVisible(true);
@@ -861,4 +862,101 @@ public class Client extends JComponent implements Runnable{
             e.printStackTrace();
         }
     }
+
+    private ArrayList<Product> getProductsArray() {
+        writer.flush();
+
+        ArrayList<Product> products;
+
+        try {
+            products = (ArrayList<Product>) reader.readObject();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return products;
+    }
+
+    private String getStringArray() {
+        writer.flush();
+
+        String response;
+        try {
+            response = (String) reader.readObject();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
+
+    public ArrayList<Product> getAllProducts(String condition) {
+        writer.println("1," + condition);
+        return getProductsArray();
+    }
+
+    public ArrayList<Product> search(String query) {
+        writer.printf("%d,%s", 2, query);
+        return getProductsArray();
+    }
+
+    public String addToCart(Product product, int quantity) {
+        writer.printf("4,%d,%d", product.getIndex(), quantity);
+        return getStringArray();
+    }
+
+    public boolean exportToFile(String filename) {
+        File testExistence = new File("filename");
+
+        if (testExistence.exists()) {
+            return false;
+        } else {
+            writer.println("5");
+            writer.flush();
+
+            ArrayList<String> fileInfo;
+            try {
+                fileInfo = (ArrayList<String>) reader.readObject();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            try(BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))){
+                PrintWriter exportWriter = new PrintWriter(bw);
+                for (int i = 0; i < fileInfo.size(); i++) {
+                    exportWriter.println(fileInfo.get(i));
+                }
+                exportWriter.close();
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
+            return true;
+        }
+    }
+
+    public String makePurchase() {
+        writer.println("6");
+        return getStringArray();
+    }
+
+    public ArrayList<Product> getShoppingCart() {
+        writer.println("7");
+        return getProductsArray();
+    }
+
+    public String editCart(Product product, int newQuantity) {
+        writer.printf("8,%d,%d", product.getIndex(), newQuantity);
+        return getStringArray();
+    }
+
+    public ArrayList<Product> getPurchaseHistory() {
+        writer.println("9");
+        return getProductsArray();
+    }
+
+
 }
