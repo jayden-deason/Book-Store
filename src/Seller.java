@@ -14,7 +14,7 @@ import java.io.FileWriter;
  * @author Visv Shah
  * @version 11/13/22
  */
-public class Seller extends User {
+public class Seller extends User implements java.io.Serializable{
     private ArrayList<Store> stores; // the seller's products
     private int index; // the index of the Seller in the Seller.csv file
 

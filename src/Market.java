@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author Katya Teodorovich, section 001
  * @version November 14, 2022
  */
-public class Market {
+public class Market implements java.io.Serializable{
     private ArrayList<Buyer> buyers; // the list of buyers in the marketplace
     private ArrayList<Seller> sellers; // the list of sellers
     private ArrayList<Store> stores; // the list of stores in the marketplace
