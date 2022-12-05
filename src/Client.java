@@ -876,7 +876,7 @@ public class Client extends JComponent implements Runnable{
     public static void main(String[] args) {
         Client client = new Client();
         try {
-            UIManager.setLookAndFeel(new FlatIntelliJLaf());
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception e) {
             return;
         }
@@ -958,7 +958,7 @@ public class Client extends JComponent implements Runnable{
             try(BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))){
                 PrintWriter exportWriter = new PrintWriter(bw);
                 for (int i = 0; i < fileInfo.size(); i++) {
-                    exportWriter.println(fileInfo.get(i));
+                    exportWriter.print(fileInfo.get(i));
                 }
                 exportWriter.close();
             }
