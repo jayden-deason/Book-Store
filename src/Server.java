@@ -284,8 +284,9 @@ public class Server extends Thread {
         } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<Product>) null);
+                System.out.println("Sent products, sort type = " + sortType);
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -302,8 +303,9 @@ public class Server extends Thread {
         } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<Product>) null);
+                System.out.println("Sent search results");
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -314,8 +316,9 @@ public class Server extends Thread {
         } catch (Exception e) {
             try {
                 this.writer.writeObject((Product) null);
+                System.out.println("Sent product #" + indexOfProduct);
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -331,12 +334,13 @@ public class Server extends Thread {
             buyer.addProductToCart(p.getIndex(), quantity);
             market.updateAllFiles();
             this.writer.writeObject((String) "Y");
+            System.out.printf("Added product %d to cart\n", indexOfProduct);
             //Sends new shopping cart
         } catch (Exception e) {
             try {
                 this.writer.writeObject((String) "N");
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -356,12 +360,13 @@ public class Server extends Thread {
                 fileInfo.add(s);
             }
             this.writer.writeObject((ArrayList<String>) fileInfo);
-            ;
+            System.out.println("Wrote to file");
+
         } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<String>) null);
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
 
@@ -371,12 +376,13 @@ public class Server extends Thread {
         try {
             market.makePurchase(buyer);
             this.writer.writeObject((String) "Y");
-            ;
+            System.out.println("Made purchase");
+
         } catch (Exception e) {
             try {
                 this.writer.writeObject((String) "N");
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -391,12 +397,13 @@ public class Server extends Thread {
                 shoppingCartProducts.put(p, quantity);
             }
             this.writer.writeObject((HashMap<Product, Integer>) shoppingCartProducts);
+            System.out.println("Sent shopping cart");
             ;
         } catch (Exception e) {
             try {
                 this.writer.writeObject((HashMap<Product, Integer>) null);
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -418,6 +425,7 @@ public class Server extends Thread {
                     market.updateAllFiles();
                     //Success
                     writer.writeObject((String) "Y");
+                    System.out.println("Changed cart quantity");
                 }
             }
             if (!(exists)) {
@@ -428,7 +436,7 @@ public class Server extends Thread {
             try {
                 this.writer.writeObject((String) "N");
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -444,12 +452,12 @@ public class Server extends Thread {
                 previousProducts.put(p, quantity);
             }
             this.writer.writeObject((HashMap<Product, Integer>) previousProducts);
-            ;
+            System.out.println("Wrote purchase history");
         } catch (Exception e) {
             try {
                 this.writer.writeObject((HashMap<Product, Integer>) null);
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
