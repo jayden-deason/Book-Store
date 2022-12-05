@@ -320,7 +320,7 @@ public class Server extends Thread {
 
     private void viewProduct(int indexOfProduct) {
         try {
-            this.writer.writeObject(this.market.getAllProducts(true).get(indexOfProduct));
+            this.writer.writeObject(this.market.getAllProducts(false).get(indexOfProduct));
             System.out.println("Sent product #" + indexOfProduct);
         } catch (Exception e) {
             try {
@@ -334,7 +334,7 @@ public class Server extends Thread {
 
     private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
         try {
-            Product p = this.market.getAllProducts(true).get(indexOfProduct);
+            Product p = this.market.getAllProducts(false).get(indexOfProduct);
             if (p.getQuantity() > quantity) {
                 //Error: quantity trying to add to cart is more than there are of that product
                 this.writer.writeObject((String) "N");
