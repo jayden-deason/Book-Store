@@ -8,6 +8,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.UIManager;
 
 public class Client extends JComponent implements Runnable{
@@ -158,23 +159,23 @@ public class Client extends JComponent implements Runnable{
                 Container content = shoppingCartFrame.getContentPane();
                 content.setLayout(new GridLayout(4, 3));
 
-                ArrayList<Product> products = getShoppingCart();
+                HashMap<Product, Integer> cart = getShoppingCart();
 
-                for (int i = 0; i < products.size(); i++) {
-                    JTextField name = new JTextField(products.get(i).getName());
+                for (Product product : cart.keySet()) {
+                    JTextField name = new JTextField(product.getName());
                     name.setEditable(false);
                     //TODO: fix for proper quantity
-                    JTextField quantity = new JTextField(products.get(i).getQuantity());
+                    int quant = cart.get(product);
+                    JTextField quantity = new JTextField();
                     quantity.setToolTipText("Set to 0 and confirm to remove item");
                     JButton confirm = new JButton("\u2713");
                     confirm.setPreferredSize(new Dimension(20, 35));
-                    int finalI = i;
                     confirm.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             String successCheck;
                             try {
-                                successCheck = editCart(products.get(finalI), Integer.parseInt(quantity.getText()));
+                                successCheck = editCart(product, Integer.parseInt(quantity.getText()));
                             } catch (NumberFormatException ex){
                                 JOptionPane.showMessageDialog(null, "Invalid argument. Enter an " +
                                         "integer.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -192,11 +193,11 @@ public class Client extends JComponent implements Runnable{
                 }
                 shoppingCartFrame.pack();
             } else if (e.getSource() == viewPurchaseHistory) {
-                ArrayList<Product> products = getPurchaseHistory();
+                HashMap<Product, Integer> products = getPurchaseHistory();
 
                 String history = "";
-                for (int i = 0; i < products.size(); i++) {
-                    history += products.get(i).getName() + "\n";
+                for (Product product : products.keySet()) {
+                    history += product.getName() + ": " + products.get(product) + "\n";
                 }
                 JOptionPane.showMessageDialog(null, history, "Purchase History", JOptionPane.INFORMATION_MESSAGE);
 
@@ -593,7 +594,6 @@ public class Client extends JComponent implements Runnable{
         login.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO: figure out why this kills it
                 if (userType) { //logging in as buyer
                     writer.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
                     System.out.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
@@ -669,7 +669,7 @@ public class Client extends JComponent implements Runnable{
                                 Container content = productFrame.getContentPane();
                                 JTextField quantity = new JTextField();
                                 quantity.setPreferredSize(new Dimension(20, 25));
-                                JTextArea info = new JTextArea(String.format("Product Information\n%f\n%s",
+                                JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
                                         products.get(finalI).getSalePrice(), products.get(finalI).getDescription()));
                                 info.setEditable(false);
                                 productPanel.add(info);
@@ -780,7 +780,7 @@ public class Client extends JComponent implements Runnable{
                                 Container content = productFrame.getContentPane();
                                 JTextField quantity = new JTextField();
                                 quantity.setPreferredSize(new Dimension(20, 25));
-                                JTextArea info = new JTextArea(String.format("Product Information\n%f\n%s",
+                                JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
                                         products.get(finalI).getSalePrice(), products.get(finalI).getDescription()));
                                 info.setEditable(false);
                                 productPanel.add(info);
@@ -834,7 +834,7 @@ public class Client extends JComponent implements Runnable{
                 productPage.removeAll();
                 for (int i = 0; i < 20; i++) {
                     for (int j = 0; j < 8; j++) {
-                        JButton product = new JButton("Produc0t" + item++);
+                        JButton product = new JButton("Product" + item++);
                         product.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
@@ -916,6 +916,22 @@ public class Client extends JComponent implements Runnable{
         return response;
     }
 
+    private HashMap<Product, Integer> getProductHash() {
+        writer.flush();
+
+        HashMap<Product, Integer> products;
+
+        try {
+            products = (HashMap<Product, Integer>) reader.readObject();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return products;
+    }
+
     public ArrayList<Product> getAllProducts(String condition) {
         writer.println("1," + condition);
         return getProductsArray();
@@ -926,6 +942,7 @@ public class Client extends JComponent implements Runnable{
         return getProductsArray();
     }
 
+    //TODO: fix visv being silly and sending null
     public String addToCart(Product product, int quantity) {
         writer.printf("4,%d,%d", product.getIndex(), quantity);
         return getStringArray();
@@ -967,9 +984,9 @@ public class Client extends JComponent implements Runnable{
         return getStringArray();
     }
 
-    public ArrayList<Product> getShoppingCart() {
+    public HashMap<Product, Integer> getShoppingCart() {
         writer.println("7");
-        return getProductsArray();
+        return getProductHash();
     }
 
     public String editCart(Product product, int newQuantity) {
@@ -977,10 +994,8 @@ public class Client extends JComponent implements Runnable{
         return getStringArray();
     }
 
-    public ArrayList<Product> getPurchaseHistory() {
+    public HashMap<Product, Integer> getPurchaseHistory() {
         writer.println("9");
-        return getProductsArray();
+        return getProductHash();
     }
-
-
 }
