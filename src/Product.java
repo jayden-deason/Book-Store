@@ -9,7 +9,7 @@ import java.util.Objects;
  * @author Katya Teodorovich, section 001
  * @version November 4, 2022
  */
-public class Product {
+public class Product implements java.io.Serializable{
     private String name; // the name of the product
     private String storeName; // the store associated with the product
     private String description; // a text description of the product

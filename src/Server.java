@@ -112,7 +112,7 @@ public class Server extends Thread {
                     this.sendAllProducts(answer[1]);
 
                 } else if (answer[0].equals("2")) {
-                    this.sendSearch(userChoice.substring(1));
+                    this.sendSearch(userChoice.substring(2));
 
                 } else if (answer[0].equals("3")) {
                     this.viewProduct(Integer.parseInt(answer[1]));
