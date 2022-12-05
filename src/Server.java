@@ -122,19 +122,19 @@ public class Server extends Thread {
                 } else if (answer[0].equals("4")) {
                     this.exportToFile(buyer);
 
-                } else if (answer.equals("5")) {
+                } else if (answer[0].equals("5")) {
                     this.makePurchase(buyer);
 
-                } else if (answer.equals("6")) {
+                } else if (answer[0].equals("6")) {
                     this.makePurchase(buyer);
 
-                } else if (answer.equals("7")) {
+                } else if (answer[0].equals("7")) {
                     this.sendShoppingCart(buyer);
 
-                } else if (answer.equals("8")) {
+                } else if (answer[0].equals("8")) {
                     this.changeShoppingCartQuantity(Integer.parseInt(answer[1]), Integer.parseInt(answer[2]), buyer);
 
-                } else if (answer.equals("9")) {
+                } else if (answer[0].equals("9")) {
                     this.sendPurchaseHistory(buyer);
                 } else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
