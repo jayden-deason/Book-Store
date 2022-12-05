@@ -8,22 +8,22 @@ import java.util.HashMap;
 public class Server extends Thread {
     private final Socket socket;
     private ObjectOutputStream writer;
-    private ObjectInputStream reader;
+    private BufferedReader reader;
 
     public static ArrayList<Socket> sockets = new ArrayList<Socket>();
     public static Market market;
 
     public void run() {
         try {
-            writer = new ObjectOutputStream(this.socket.getOutputStream());
-            reader = new ObjectInputStream(this.socket.getInputStream());
+            System.out.println("Connection Running Number: " + sockets.size());
             //loginString format: (0 for seller or 1 for buyer),(0 for sign in or 1 for sign up),email,password
             //Example: "0,1,test123@t.com,123" should be sign up for seller with email:test123@t.com and password 123
-            String loginString = (String) reader.readObject();
+            String loginString = reader.readLine();
             String[] userDetails = loginString.split(",");
             //Seller
             if (userDetails[0].equals("0")) {
                 if (userDetails[1].equals("0")) {
+                    System.out.println("In Buyer Login");
                     Buyer b = market.getBuyerByEmail(userDetails[2]);
                     if (b == null) {
                         //Sends Client "N" to signify an error (Username is wrong)
@@ -38,10 +38,12 @@ public class Server extends Thread {
                     }
                 }
                 if (userDetails[1].equals("1")) {
+                    System.out.println("In Buyer Sign up");
                     //checks if email already exists in marketplace
                     Buyer b = market.getBuyerByEmail(userDetails[2]);
                     if (b == null) {
                         Buyer buyer = new Buyer(userDetails[2], userDetails[3]);
+                        System.out.println("Created new Buyer");
                         market.addBuyer(buyer);
                         writer.writeObject("Y");
                         runBuyer(buyer);
@@ -81,14 +83,13 @@ public class Server extends Thread {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.getStackTrace());
+            e.printStackTrace();
         }
     }
 
     public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
         //Port Number is 1001 and host is "localhost"
         ServerSocket serverSocket = new ServerSocket(1001);
-
         market = Market.getInstance();
         while (true) {
             //infinite loop to create a new thread for each connection
@@ -96,6 +97,7 @@ public class Server extends Thread {
             final Socket socket = serverSocket.accept();
             //creates a user using the socket
             Server user = new Server(socket);
+            System.out.println("Connection Established Number: " + sockets.size());
             user.start();
         }
     }
@@ -103,12 +105,20 @@ public class Server extends Thread {
     public Server(Socket socket) {
         this.socket = socket;
         sockets.add(this.socket);
+        try {
+            writer = new ObjectOutputStream(socket.getOutputStream());
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println("Streams created");
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void runBuyer(Buyer buyer) {
         while (true) {
             try {
-                String userChoice = (String) reader.readObject();
+                String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
                 if (answer[0].equals("1")) {
                     this.sendAllProducts(answer[1]);
@@ -122,19 +132,19 @@ public class Server extends Thread {
                 } else if (answer[0].equals("4")) {
                     this.exportToFile(buyer);
 
-                } else if (answer.equals("5")) {
+                } else if (answer[0].equals("5")) {
                     this.makePurchase(buyer);
 
-                } else if (answer.equals("6")) {
+                } else if (answer[0].equals("6")) {
                     this.makePurchase(buyer);
 
-                } else if (answer.equals("7")) {
+                } else if (answer[0].equals("7")) {
                     this.sendShoppingCart(buyer);
 
-                } else if (answer.equals("8")) {
+                } else if (answer[0].equals("8")) {
                     this.changeShoppingCartQuantity(Integer.parseInt(answer[1]), Integer.parseInt(answer[2]), buyer);
 
-                } else if (answer.equals("9")) {
+                } else if (answer[0].equals("9")) {
                     this.sendPurchaseHistory(buyer);
                 } else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
@@ -155,7 +165,7 @@ public class Server extends Thread {
     public void runSeller(Seller seller) {
         while (true) {
             try {
-                String userChoice = (String) reader.readObject();
+                String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
 
                 if (answer[0].equals("1")) {

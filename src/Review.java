@@ -6,7 +6,7 @@
  * @author Katya Teodorovich, section 001
  * @version November 29, 2022
  */
-public class Review {
+public class Review implements java.io.Serializable {
     private String userEmail; // email of the reviewer
     private String review; // text of the review
     private int rating; // number of stars (out of 5)
