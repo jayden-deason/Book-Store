@@ -15,6 +15,7 @@ public class Server extends Thread {
 
     public void run() {
         try {
+            System.out.println("Connection Running Number: " + sockets.size());
             writer = new ObjectOutputStream(this.socket.getOutputStream());
             reader = new ObjectInputStream(this.socket.getInputStream());
             //loginString format: (0 for seller or 1 for buyer),(0 for sign in or 1 for sign up),email,password
@@ -24,6 +25,7 @@ public class Server extends Thread {
             //Seller
             if (userDetails[0].equals("0")) {
                 if (userDetails[1].equals("0")) {
+                    System.out.println("In Buyer Login");
                     Buyer b = market.getBuyerByEmail(userDetails[2]);
                     if (b == null) {
                         //Sends Client "N" to signify an error (Username is wrong)
@@ -38,10 +40,12 @@ public class Server extends Thread {
                     }
                 }
                 if (userDetails[1].equals("1")) {
+                    System.out.println("In Buyer Sign up");
                     //checks if email already exists in marketplace
                     Buyer b = market.getBuyerByEmail(userDetails[2]);
                     if (b == null) {
                         Buyer buyer = new Buyer(userDetails[2], userDetails[3]);
+                        System.out.println("Created new Buyer");
                         market.addBuyer(buyer);
                         writer.writeObject("Y");
                         runBuyer(buyer);
@@ -88,12 +92,12 @@ public class Server extends Thread {
     public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
         //Port Number is 1001 and host is "localhost"
         ServerSocket serverSocket = new ServerSocket(1001);
-
         market = Market.getInstance();
         while (true) {
             //infinite loop to create a new thread for each connection
             //creates a new socket for each connection
             final Socket socket = serverSocket.accept();
+            System.out.println("Connection Established Number: " + sockets.size());
             //creates a user using the socket
             Server user = new Server(socket);
             user.start();
