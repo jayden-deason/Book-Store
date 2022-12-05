@@ -281,10 +281,10 @@ public class Server extends Thread {
     private void sendAllProducts(String sortType) {
         try {
             this.writer.writeObject(market.getAllProducts(true));
+            System.out.println("Sent products, sort type = " + sortType);
         } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<Product>) null);
-                System.out.println("Sent products, sort type = " + sortType);
             } catch (Exception ex) {
                 e.printStackTrace();
             }
@@ -300,10 +300,11 @@ public class Server extends Thread {
             if (searchContents[2].equals("")) searchContents[2] = null;
             this.writer.writeObject(market.matchConditions(searchContents[0], searchContents[1],
                     searchContents[2]));
+            System.out.println("Sent search results");
         } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<Product>) null);
-                System.out.println("Sent search results");
+
             } catch (Exception ex) {
                 e.printStackTrace();
             }
@@ -313,10 +314,11 @@ public class Server extends Thread {
     private void viewProduct(int indexOfProduct) {
         try {
             this.writer.writeObject(this.market.getAllProducts(true).get(indexOfProduct));
+            System.out.println("Sent product #" + indexOfProduct);
         } catch (Exception e) {
             try {
                 this.writer.writeObject((Product) null);
-                System.out.println("Sent product #" + indexOfProduct);
+
             } catch (Exception ex) {
                 e.printStackTrace();
             }
