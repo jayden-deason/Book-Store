@@ -9,7 +9,7 @@ import java.util.*;
  * @author Jayden Deason - lab sec 001
  * @version November 14, 2022
  */
-public class Buyer extends User {
+public class Buyer extends User implements java.io.Serializable{
     private int index; // index of user in csv
     private ArrayList<String> shoppingCart; // list of strings describing shopping cart contents
     private ArrayList<String> purchaseHistory; // list of strings describing purchase history

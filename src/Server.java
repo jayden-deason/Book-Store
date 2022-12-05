@@ -112,13 +112,13 @@ public class Server extends Thread {
                     this.sendAllProducts(answer[1]);
 
                 } else if (answer[0].equals("2")) {
-                    this.sendSearch(userChoice.substring(1));
+                    this.sendSearch(userChoice.substring(2));
 
                 } else if (answer[0].equals("3")) {
                     this.viewProduct(Integer.parseInt(answer[1]));
 
                 } else if (answer[0].equals("4")) {
-                    this.exportToFile(answer[1], buyer);
+                    this.exportToFile(buyer);
 
                 } else if (answer.equals("5")) {
                     this.makePurchase(buyer);
@@ -329,9 +329,30 @@ public class Server extends Thread {
         }
     }
 
-    private void exportToFile(String fileName, Buyer buyer) {
-        //TODO: change so client can export the file themselves by sending different info to client
-        buyer.exportToFile(fileName, this.market);
+    //This function sends back an ArrayList of all the strings the need to be in the exported file and sends it
+    private void exportToFile(Buyer buyer) {
+        try {
+            ArrayList<String> purchaseHistory = buyer.getPurchaseHistory();
+            ArrayList<String> fileInfo = new ArrayList<String>();
+            for (String item : purchaseHistory) {
+                int idx = Integer.parseInt(item.split(":")[0]);
+                int quantity = Integer.parseInt(item.split(":")[1]);
+                Product p = market.getProductByIndex(idx);
+
+                String s = String.format("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
+                        p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
+                fileInfo.add(s);
+            }
+            this.writer.writeObject((ArrayList<String>) fileInfo);
+            ;
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((ArrayList<String>) null);
+            } catch (Exception ex) {
+                System.out.println(ex.getStackTrace());
+            }
+        }
+
     }
 
     private void makePurchase(Buyer buyer) {
@@ -401,9 +422,23 @@ public class Server extends Thread {
     }
 
     private void sendPurchaseHistory(Buyer buyer) {
-        //TODO: Change so it returns the previous purchases and does not use a scanner
-        buyer.printPreviousPurchases();
+        try {
+            ArrayList<String> purchaseHistory = buyer.getPurchaseHistory();
+            HashMap<Product, Integer> previousProducts = new HashMap<Product, Integer>();
+            for (String item : purchaseHistory) {
+                int idx = Integer.parseInt(item.split(":")[0]);
+                int quantity = Integer.parseInt(item.split(":")[1]);
+                Product p = this.market.getProductByIndex(idx);
+                previousProducts.put(p, quantity);
+            }
+            this.writer.writeObject((HashMap<Product, Integer>) previousProducts);
+            ;
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((HashMap<Product, Integer>) null);
+            } catch (Exception ex) {
+                System.out.println(ex.getStackTrace());
+            }
+        }
     }
-
-
 }

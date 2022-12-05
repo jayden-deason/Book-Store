@@ -10,7 +10,7 @@ import java.util.Comparator;
  * @author Griffin Chittenden, section 001
  * @version 11-09-2022
  */
-public class Store {
+public class Store implements java.io.Serializable{
     private int index; // Index of the store in the csv file
     private String storeName; // Name of the store
     private String sellerName; // Name of the seller who owns the store
