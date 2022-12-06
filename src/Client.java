@@ -27,7 +27,7 @@ public class Client extends JComponent implements Runnable{
 
     private JButton login, signup, logout, updateMarket;
     private JButton viewDashboard, search;
-    private JButton viewShoppingCart, viewPurchaseHistory, checkout, purchase;
+    private JButton viewShoppingCart, viewPurchaseHistory, checkout, purchase, exportToFile;
     private JButton viewStores, viewProducts, addStore, addProduct, removeProduct, editProduct;
     private JButton confirmAddProduct, confirmAddStore;
     private ArrayList<JButton> productButtons = new ArrayList<>();
@@ -394,15 +394,17 @@ public class Client extends JComponent implements Runnable{
                 Object[] options = {"Confirm", "Cancel"};
                 JOptionPane.showOptionDialog(null, "Are you sure you wish to checkout?", "Checkout",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            } else if (e.getSource() == exportToFile) {
+                //TODO: implement exporting code
+            } else if (e.getSource() == purchase) {
+                //TODO: implement purchasing code
             }
-
-            //TODO: add search, export, and make purchase
         }
     };
 
     public void run() {
         JFrame frame = new JFrame();
-        frame.setSize(1280, 720);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         Container container = frame.getContentPane();
@@ -529,8 +531,11 @@ public class Client extends JComponent implements Runnable{
         viewPurchaseHistory = new JButton("Purchase History");
         viewPurchaseHistory.addActionListener(actionListener);
         purchase = new JButton("Buy");
+        purchase.addActionListener(actionListener);
         checkout = new JButton("Checkout");
         checkout.addActionListener(actionListener);
+        exportToFile = new JButton("Export To File");
+        exportToFile.addActionListener(actionListener);
 
         viewDashboard = new JButton("Dashboard");
         viewDashboard.addActionListener(actionListener);
@@ -569,6 +574,7 @@ public class Client extends JComponent implements Runnable{
         userBar.add(viewShoppingCart);
         userBar.add(viewPurchaseHistory);
         userBar.add(checkout);
+        userBar.add(exportToFile);
 
         logout.setVisible(false);
         viewDashboard.setVisible(false);
@@ -587,6 +593,7 @@ public class Client extends JComponent implements Runnable{
         viewShoppingCart.setVisible(false);
         viewPurchaseHistory.setVisible(false);
         checkout.setVisible(false);
+        exportToFile.setVisible(false);
 
         productPage = new JPanel();
         scrollPane = new JScrollPane(productPage);
@@ -649,6 +656,7 @@ public class Client extends JComponent implements Runnable{
                     viewShoppingCart.setVisible(true);
                     viewPurchaseHistory.setVisible(true);
                     checkout.setVisible(true);
+                    exportToFile.setVisible(true);
                 } else if (!status) {
                     viewStores.setVisible(true);
                     viewProducts.setVisible(true);
@@ -760,6 +768,7 @@ public class Client extends JComponent implements Runnable{
                     viewShoppingCart.setVisible(true);
                     viewPurchaseHistory.setVisible(true);
                     checkout.setVisible(true);
+                    exportToFile.setVisible(true);
                 } else if (!status) {
                     viewStores.setVisible(true);
                     viewProducts.setVisible(true);
@@ -872,7 +881,6 @@ public class Client extends JComponent implements Runnable{
         container.add(topBar, BorderLayout.PAGE_START);
         container.add(userBar, BorderLayout.PAGE_END);
         container.add(scrollPane, BorderLayout.CENTER);
-        frame.pack();
     }
     public static void main(String[] args) {
         try {
