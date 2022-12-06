@@ -181,7 +181,14 @@ public class Server extends Thread {
             try {
                 String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
-                if (answer[0].equals("1")) {
+                if (answer[0].equals("-1")) {
+                    reader.close();
+                    writer.close();
+                    //Make concurrent
+                    this.sockets.remove(this.socket);
+                    this.socket.close();
+                    return;
+                } else if (answer[0].equals("1")) {
                     // send all products
                     this.sendAllProducts(answer[1]);
                 } else if (answer[0].equals("2")) {
