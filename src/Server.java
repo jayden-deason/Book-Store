@@ -135,7 +135,7 @@ public class Server extends Thread {
                     this.socket.close();
                     return;
                 } else if (answer[0].equals("1")) {
-                    this.sendAllProducts(answer[1], buyer);
+                    this.sendAllBuyerProducts(answer[1], buyer);
 
                 } else if (answer[0].equals("2")) {
                     this.sendSearch(userChoice.substring(2));
@@ -190,7 +190,7 @@ public class Server extends Thread {
                     return;
                 } else if (answer[0].equals("1")) {
                     // send all products
-                    this.sendAllProducts(answer[1]);
+                    this.sendAllSellerProducts(answer[1], seller);
                 } else if (answer[0].equals("2")) {
                     // send this seller's products
                     this.sendSellerProducts(seller, answer[1]);
@@ -343,10 +343,7 @@ public class Server extends Thread {
             else {
                 products = this.market.getAllProducts(true);
             }
-
-            else {
-                this.writer.writeObject((ArrayList<Product>) products);
-            }
+            this.writer.writeObject((ArrayList<Product>) products);
             System.out.println("Sent products, sort type = " + sortType);
         } catch (Exception e) {
             try {
