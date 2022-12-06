@@ -14,77 +14,84 @@ public class Server extends Thread {
     public static Market market;
 
     public void run() {
-        try {
-            System.out.println("Connection Running Number: " + sockets.size());
-            //loginString format: (0 for seller or 1 for buyer),(0 for sign in or 1 for sign up),email,password
-            //Example: "0,1,test123@t.com,123" should be sign up for seller with email:test123@t.com and password 123
-            String loginString = reader.readLine();
-            String[] userDetails = loginString.split(",");
-            //Seller
-            if (userDetails[0].equals("0")) {
-                if (userDetails[1].equals("0")) {
-                    System.out.println("In Buyer Login");
-                    Buyer b = market.getBuyerByEmail(userDetails[2]);
-                    if (b == null) {
-                        //Sends Client "N" to signify an error (Username is wrong)
-                        writer.writeObject("N");
-                    } else if (b.getPassword().equals(userDetails[3])) {
-                        //Sends Client "Y" to signify logged in correctly
-                        writer.writeObject("Y");
-                        runBuyer(b);
-                    } else {
-                        //Sends Client "N" to signify an error (Password is wrong)
-                        writer.writeObject("N");
+        System.out.println("Connection Running Number: " + sockets.size());
+        while(true) {
+            try {
+                //loginString format: (0 for seller or 1 for buyer),(0 for sign in or 1 for sign up),email,password
+                //Example: "0,1,test123@t.com,123" should be sign up for seller with email:test123@t.com and password 123
+                String loginString = reader.readLine();
+                String[] userDetails = loginString.split(",");
+                //Seller
+                if (userDetails[0].equals("0")) {
+                    if (userDetails[1].equals("0")) {
+                        System.out.println("In Buyer Login");
+                        Buyer b = market.getBuyerByEmail(userDetails[2]);
+                        if (b == null) {
+                            //Sends Client "N" to signify an error (Username is wrong)
+                            writer.writeObject("N");
+                        } else if (b.getPassword().equals(userDetails[3])) {
+                            //Sends Client "Y" to signify logged in correctly
+                            writer.writeObject("Y");
+                            runBuyer(b);
+                            break;
+                        } else {
+                            //Sends Client "N" to signify an error (Password is wrong)
+                            writer.writeObject("N");
+                        }
+                    }
+                    if (userDetails[1].equals("1")) {
+                        System.out.println("In Buyer Sign up");
+                        //checks if email already exists in marketplace
+                        Buyer b = market.getBuyerByEmail(userDetails[2]);
+                        if (b == null) {
+                            Buyer buyer = new Buyer(userDetails[2], userDetails[3]);
+                            System.out.println("Created new Buyer");
+                            market.addBuyer(buyer);
+                            writer.writeObject("Y");
+                            runBuyer(buyer);
+                            break;
+                        } else {
+                            //Sends Client "N" to signify an error (Username already exists)
+                            writer.writeObject("N");
+                        }
                     }
                 }
-                if (userDetails[1].equals("1")) {
-                    System.out.println("In Buyer Sign up");
-                    //checks if email already exists in marketplace
-                    Buyer b = market.getBuyerByEmail(userDetails[2]);
-                    if (b == null) {
-                        Buyer buyer = new Buyer(userDetails[2], userDetails[3]);
-                        System.out.println("Created new Buyer");
-                        market.addBuyer(buyer);
-                        writer.writeObject("Y");
-                        runBuyer(buyer);
-                    } else {
-                        //Sends Client "N" to signify an error (Username already exists)
-                        writer.writeObject("N");
+                //Buyer
+                else if (userDetails[0].equals("1")) {
+                    if (userDetails[1].equals("0")) {
+                        Seller s = market.getSellerByEmail(userDetails[2]);
+                        if (s == null) {
+                            //Sends Client "N" to signify an error (Username is wrong)
+                            writer.writeObject("N");
+                        } else if (s.getPassword().equals(userDetails[3])) {
+                            //Sends Client "Y" to signify logged in correctly
+                            writer.writeObject("Y");
+                            runSeller(s);
+                            return;
+                        } else {
+                            //Sends Client "N" to signify an error
+                            writer.writeObject("N");
+                        }
+                    }
+                    if (userDetails[1].equals("1")) {
+                        //checks if email already exists in marketplace
+                        Seller s = market.getSellerByEmail(userDetails[2]);
+                        if (s == null) {
+                            Seller seller = new Seller(userDetails[2], userDetails[3]);
+                            market.addSeller(seller);
+                            writer.writeObject("Y");
+                            runSeller(seller);
+                        } else {
+                            //Sends Client "N" to signify an error (Username already exists)
+                            writer.writeObject("N");
+                        }
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            //Buyer
-            else if (userDetails[0].equals("1")) {
-                if (userDetails[1].equals("0")) {
-                    Seller s = market.getSellerByEmail(userDetails[2]);
-                    if (s == null) {
-                        //Sends Client "N" to signify an error (Username is wrong)
-                        writer.writeObject("N");
-                    } else if (s.getPassword().equals(userDetails[3])) {
-                        //Sends Client "Y" to signify logged in correctly
-                        writer.writeObject("Y");
-                    } else {
-                        //Sends Client "N" to signify an error
-                        writer.writeObject("N");
-                    }
-                }
-                if (userDetails[1].equals("1")) {
-                    //checks if email already exists in marketplace
-                    Seller s = market.getSellerByEmail(userDetails[2]);
-                    if (s == null) {
-                        Seller seller = new Seller(userDetails[2], userDetails[3]);
-                        market.addSeller(seller);
-                        writer.writeObject("Y");
-                        runSeller(seller);
-                    } else {
-                        //Sends Client "N" to signify an error (Username already exists)
-                        writer.writeObject("N");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
     }
 
     public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
