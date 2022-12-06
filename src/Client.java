@@ -29,7 +29,7 @@ public class Client extends JComponent implements Runnable{
 
     private JButton login, signup, logout, updateMarket;
     private JButton viewDashboard, search;
-    private JButton viewShoppingCart, viewPurchaseHistory, checkout, purchase;
+    private JButton viewShoppingCart, viewPurchaseHistory, checkout, purchase, exportToFile;
     private JButton viewStores, viewProducts, addStore, addProduct, removeProduct, editProduct;
     private JButton confirmAddProduct, confirmAddStore;
     private ArrayList<JButton> productButtons = new ArrayList<>();
@@ -78,11 +78,11 @@ public class Client extends JComponent implements Runnable{
 
                         ArrayList<Product> products = getAllProducts("sales");
 
-                        //int item = 0;
+                        int item = 0;
                         panel.removeAll();
-                        for (int i = 0; i < products.size(); i++) {
-                            for (int j = 0; j < 5; j++) {
-                                JButton product = new JButton(products.get(i).getName());
+                        for (int i = 0; i < products.size() / 4; i++) {
+                            for (int j = 0; j < products.size() / 2; j++) {
+                                JButton product = new JButton(products.get(item++).getName());
                                 int finalI = i;
                                 product.addActionListener(new ActionListener() {
                                     @Override
@@ -106,11 +106,11 @@ public class Client extends JComponent implements Runnable{
 
                         ArrayList<Product> products = getAllProducts("history");
 
-                        //int item = 0;
+                        int item = 0;
                         panel.removeAll();
-                        for (int i = 0; i < products.size(); i++) {
-                            for (int j = 0; j < 5; j++) {
-                                JButton product = new JButton(products.get(i).getName());
+                        for (int i = 0; i < products.size() / 4; i++) {
+                            for (int j = 0; j < products.size() / 2; j++) {
+                                JButton product = new JButton(products.get(item++).getName());
                                 int finalI = i;
                                 product.addActionListener(new ActionListener() {
                                     @Override
@@ -135,8 +135,9 @@ public class Client extends JComponent implements Runnable{
                         System.out.println("By Customer Info");
                         int item = 0;
                         panel.removeAll();
-                        for (int i = 0; i < 5; i++) {
-                            for (int j = 0; j < 5; j++) {
+                        ArrayList<Product> products = null;
+                        for (int i = 0; i < products.size() / 4; i++) {
+                            for (int j = 0; j < products.size() / 2; j++) {
                                 JButton product = new JButton("Customer" + item++);
                                 product.addActionListener(new ActionListener() {
                                     @Override
@@ -177,6 +178,7 @@ public class Client extends JComponent implements Runnable{
                     quantity.setToolTipText("Set to 0 and confirm to remove item");
                     JButton confirm = new JButton("\u2713");
                     confirm.setPreferredSize(new Dimension(20, 35));
+                    int finalI = i;
                     confirm.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
@@ -238,9 +240,11 @@ public class Client extends JComponent implements Runnable{
                 infoText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
                 infoPanel.add(infoText);
 
-                for (int i = 0; i < 5; i++) {
-                    for (int j = 0; j < 5; j++) {
-                        JButton button = new JButton("Product");
+                ArrayList<Product> products = null;
+                int item = 0;
+                for (int i = 0; i < products.size() / 4; i++) {
+                    for (int j = 0; j < products.size() / 2; j++) {
+                        JButton button = new JButton(products.get(item++).getName());
                         panel.add(button);
                         //TODO:change to a focus listener
                         button.addMouseListener(new MouseListener() {
@@ -382,10 +386,9 @@ public class Client extends JComponent implements Runnable{
                 }
 
                 int item = 0;
-                // Receive arraylist
-                for (int i = 0; i < products.size(); i++) {
-                    for (int j = 0; j < 5; j++) {
-                        JButton product = new JButton(products.get(i).getName());
+                for (int i = 0; i < products.size() / 4; i++) {
+                    for (int j = 0; j < (int) (products.size() / 2); j++) {
+                        JButton product = new JButton(products.get(item++).getName());
                         int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
@@ -442,7 +445,7 @@ public class Client extends JComponent implements Runnable{
 
     public void run() {
         JFrame frame = new JFrame();
-        frame.setSize(1280, 720);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
         Container container = frame.getContentPane();
@@ -568,8 +571,11 @@ public class Client extends JComponent implements Runnable{
         viewPurchaseHistory = new JButton("Purchase History");
         viewPurchaseHistory.addActionListener(actionListener);
         purchase = new JButton("Buy");
+        purchase.addActionListener(actionListener);
         checkout = new JButton("Checkout");
         checkout.addActionListener(actionListener);
+        exportToFile = new JButton("Export To File");
+        exportToFile.addActionListener(actionListener);
 
         viewDashboard = new JButton("Dashboard");
         viewDashboard.addActionListener(actionListener);
@@ -608,6 +614,7 @@ public class Client extends JComponent implements Runnable{
         userBar.add(viewShoppingCart);
         userBar.add(viewPurchaseHistory);
         userBar.add(checkout);
+        userBar.add(exportToFile);
 
         logout.setVisible(false);
         viewDashboard.setVisible(false);
@@ -626,6 +633,7 @@ public class Client extends JComponent implements Runnable{
         viewShoppingCart.setVisible(false);
         viewPurchaseHistory.setVisible(false);
         checkout.setVisible(false);
+        exportToFile.setVisible(false);
 
         productPage = new JPanel();
         scrollPane = new JScrollPane(productPage);
@@ -687,6 +695,7 @@ public class Client extends JComponent implements Runnable{
                     viewShoppingCart.setVisible(true);
                     viewPurchaseHistory.setVisible(true);
                     checkout.setVisible(true);
+                    exportToFile.setVisible(true);
                 } else if (!status) {
                     viewStores.setVisible(true);
                     viewProducts.setVisible(true);
@@ -698,10 +707,10 @@ public class Client extends JComponent implements Runnable{
 
                 System.out.println("Updated");
 
-                //int item = 0;
-                for (int i = 0; i < products.size(); i++) {
-                    for (int j = 0; j < 8; j++) {
-                        JButton product = new JButton(products.get(i).getName());
+                int item = 0;
+                for (int i = 0; i < products.size() / 4; i++) {
+                    for (int j = 0; j < (int) (products.size() / 2); j++) {
+                        JButton product = new JButton(products.get(item++).getName());
                         int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
@@ -817,6 +826,7 @@ public class Client extends JComponent implements Runnable{
                     viewShoppingCart.setVisible(true);
                     viewPurchaseHistory.setVisible(true);
                     checkout.setVisible(true);
+                    exportToFile.setVisible(true);
                 } else if (!status) {
                     viewStores.setVisible(true);
                     viewProducts.setVisible(true);
@@ -829,9 +839,9 @@ public class Client extends JComponent implements Runnable{
                 System.out.println("Updated");
 
                 int item = 0;
-                for (int i = 0; i < products.size(); i++) {
-                    for (int j = 0; j < 8; j++) {
-                        JButton product = new JButton(products.get(i).getName());
+                for (int i = 0; i < products.size() / 4; i++) {
+                    for (int j = 0; j < (int) (products.size() / 2); j++) {
+                        JButton product = new JButton(products.get(item++).getName());
                         int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
@@ -981,7 +991,6 @@ public class Client extends JComponent implements Runnable{
         container.add(topBar, BorderLayout.PAGE_START);
         container.add(userBar, BorderLayout.PAGE_END);
         container.add(scrollPane, BorderLayout.CENTER);
-        frame.pack();
     }
     public static void main(String[] args) {
         try {
