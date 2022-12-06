@@ -302,6 +302,7 @@ public class Server extends Thread {
                 products = this.market.sortByPrice();
             }
             else if(sortType.equals("sales")) {
+                //TODO: fix
                 products = this.market.sortByPrice();
             }
             else {
@@ -322,7 +323,39 @@ public class Server extends Thread {
             }
         }
     }
+    private void sendAllSellerProducts(String sortType, Seller seller) {
+        try {
+            ArrayList<Product> products;
+            if(sortType.equals("quantity")) {
+                products = this.market.sortByQuantity();
+            }
+            else if(sortType.equals("price")) {
+                products = this.market.sortByPrice();
+            }
+            else if(sortType.equals("sales")) {
+                //TODO: fix
+                products = this.market.sortByPrice();
+            }
+            else if(sortType.equals("history")) {
+                //TODO: fix
+                products = seller.viewProductsInCart(this.market);
+            }
+            else {
+                products = this.market.getAllProducts(true);
+            }
 
+            else {
+                this.writer.writeObject((ArrayList<Product>) products);
+            }
+            System.out.println("Sent products, sort type = " + sortType);
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((ArrayList<Product>) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
     private void sendSearch(String search) {
         try {
             //Format for search should be productName,storeName,Description
