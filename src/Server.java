@@ -135,7 +135,7 @@ public class Server extends Thread {
                     this.socket.close();
                     return;
                 } else if (answer[0].equals("1")) {
-                    this.sendAllProducts(answer[1]);
+                    this.sendAllProducts(answer[1], buyer);
 
                 } else if (answer[0].equals("2")) {
                     this.sendSearch(userChoice.substring(2));
@@ -144,10 +144,10 @@ public class Server extends Thread {
                     this.viewProduct(Integer.parseInt(answer[1]));
 
                 } else if (answer[0].equals("4")) {
-                    this.exportToFile(buyer);
+                    this.addToCart(buyer, Integer.parseInt(answer[1]), Integer.parseInt(answer[2]));
 
                 } else if (answer[0].equals("5")) {
-                    this.makePurchase(buyer);
+                    this.exportToFile(buyer);
 
                 } else if (answer[0].equals("6")) {
                     this.makePurchase(buyer);
@@ -262,7 +262,6 @@ public class Server extends Thread {
 
         try {
             Product product = market.getProductByIndex(productIndex);
-
             product.setName(productName);
             product.setDescription(description);
             product.setSalePrice(price);
@@ -293,9 +292,25 @@ public class Server extends Thread {
         // TODO: implement
     }
 
-    private void sendAllProducts(String sortType) {
+    private void sendAllProducts(String sortType, Buyer buyer) {
         try {
-            this.writer.writeObject(market.getAllProducts(true));
+            ArrayList<Product> products;
+            if(sortType.equals("quantity")) {
+                products = this.market.sortByQuantity();
+            }
+            else if(sortType.equals("price")) {
+                products = this.market.sortByPrice();
+            }
+            else if(sortType.equals("history")) {
+                products = buyer.getPurchaseHistory();
+            }
+            else if(sortType.equals("sales")) {
+                products = this.market.sortByPrice();
+            }
+            else {
+                products = this.market.getAllProducts(true);
+            }
+            this.writer.writeObject((ArrayList<Product>) products);
             System.out.println("Sent products, sort type = " + sortType);
         } catch (Exception e) {
             try {
