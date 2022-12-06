@@ -15,7 +15,7 @@ public class Server extends Thread {
 
     public void run() {
         System.out.println("Connection Running Number: " + sockets.size());
-        while(true) {
+        while (true) {
             try {
                 //loginString format: (0 for seller or 1 for buyer),(0 for sign in or 1 for sign up),email,password
                 //Example: "0,1,test123@t.com,123" should be sign up for seller with email:test123@t.com and password 123
@@ -116,8 +116,7 @@ public class Server extends Thread {
             writer = new ObjectOutputStream(socket.getOutputStream());
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println("Streams created");
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -218,6 +217,9 @@ public class Server extends Thread {
                 } else if (answer[0].equals("6")) {
                     // view dashboard
                     this.seeBuyerCarts(seller);
+                } else if (answer[0].equals("7")) {
+                    // show seller store stats
+                    this.showSellerStats(seller, answer[1]);
                 } else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
@@ -277,7 +279,7 @@ public class Server extends Thread {
         this.writer.writeObject("Y");
     }
 
-    private void addSellerStore(Seller seller, String storeName) throws IOException{
+    private void addSellerStore(Seller seller, String storeName) throws IOException {
         if (market.getStoreByName(storeName) == null) {
             market.addStore(new Store(-1, storeName, seller.getEmail()));
             market.updateAllFiles();
@@ -295,23 +297,19 @@ public class Server extends Thread {
     private void sendAllBuyerProducts(String sortType, Buyer buyer) {
         try {
             ArrayList<Product> products;
-            if(sortType.equals("quantity")) {
+            if (sortType.equals("quantity")) {
                 products = this.market.sortByQuantity();
-            }
-            else if(sortType.equals("price")) {
+            } else if (sortType.equals("price")) {
                 products = this.market.sortByPrice();
-            }
-            else if(sortType.equals("sales")) {
+            } else if (sortType.equals("sales")) {
                 //TODO: fix
                 products = this.market.sortByPrice();
-            }
-            else {
+            } else {
                 products = this.market.getAllProducts(true);
             }
-            if(sortType.equals("history")) {
+            if (sortType.equals("history")) {
                 this.sendPurchaseHistory(buyer);
-            }
-            else {
+            } else {
                 this.writer.writeObject((ArrayList<Product>) products);
             }
             System.out.println("Sent products, sort type = " + sortType);
@@ -323,20 +321,17 @@ public class Server extends Thread {
             }
         }
     }
+
     private void sendAllSellerProducts(String sortType, Seller seller) {
         try {
             ArrayList<Product> products;
-            if(sortType.equals("quantity")) {
+            if (sortType.equals("quantity")) {
                 products = this.market.sortByQuantity();
-            }
-            else if(sortType.equals("price")) {
+            } else if (sortType.equals("price")) {
                 products = this.market.sortByPrice();
-            }
-            else if(sortType.equals("sales")) {
-                //TODO: fix
-                products = this.market.sortByPrice();
-            }
-            else {
+            } else if (sortType.equals("sales")) {
+                products = this.market.sortBySales();
+            } else {
                 products = this.market.getAllProducts(true);
             }
             this.writer.writeObject((ArrayList<Product>) products);
@@ -349,6 +344,7 @@ public class Server extends Thread {
             }
         }
     }
+
     private void sendSearch(String search) {
         try {
             //Format for search should be productName,storeName,Description
@@ -521,6 +517,7 @@ public class Server extends Thread {
             }
         }
     }
+
     private void seeBuyerCarts(Seller seller) {
         try {
             HashMap<Product, String> productsInCart = seller.sendProductsInCart(this.market);
@@ -533,5 +530,19 @@ public class Server extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void showSellerStats(Seller seller, String type) throws IOException {
+        int sortType = -1;
+        if (type.equals("none")) sortType = 0;
+        if (type.equals("alphabet")) sortType = 1;
+        if (type.equals("quantity")) sortType = 2;
+
+        if (sortType == -1) {
+            writer.writeObject(null);
+            return;
+        }
+
+        writer.writeObject(seller.getDashboardStrings(sortType, market));
     }
 }

@@ -311,10 +311,25 @@ public class Seller extends User implements java.io.Serializable{
         System.out.println("------------------------------------------");
         for (Store s : stores) {
             System.out.println("Store: " + s.getName());
-            s.statisticsForSeller(sortType, market);
+            for (String line : s.statisticsForSeller(sortType, market)) {
+                System.out.println(line);
+            }
         }
         System.out.println("------------------------------------------");
 
+    }
+
+    public ArrayList<String> getDashboardStrings(int sortType, Market market) {
+        ArrayList<String> out = new ArrayList<>();
+        out.add("------------------------------------------");
+        for (Store s : stores) {
+            out.add("Store: " + s.getName());
+            out.addAll(s.statisticsForSeller(sortType, market));
+
+        }
+        out.add("------------------------------------------");
+
+        return out;
     }
 
     /**

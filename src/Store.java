@@ -286,24 +286,25 @@ public class Store implements java.io.Serializable{
      *                 if sortType == 2, then it will print everything based on the quantity of products being dealt
      *                 wit
      */
-    public void statisticsForSeller(int sortType, Market market) {
+    public ArrayList<String> statisticsForSeller(int sortType, Market market) {
+        ArrayList<String> out = new ArrayList<>();
         String[] customerData = generateCustomerData(market).split("/");
         if (sortType > 2 || sortType < 0) {
             System.out.println("Sort type is invalid, pick a number from 0-2");
-            return;
+            return out;
         }
         // General statistics
-        System.out.println(this.storeName + " Statistics:");
-        System.out.println("--Total Sales: " + sales);
-        System.out.println("--Total Revenue: " + revenue);
+        out.add(this.storeName + " Statistics:");
+        out.add("--Total Sales: " + sales);
+        out.add("--Total Revenue: " + revenue);
         if (sortType == 0) { // No sort condition
-            System.out.println("--Products by sales: ");
+            out.add("--Products by sales: ");
             for (Product product : productsForSales) {
-                System.out.println("\t--" + product.getName() + ": " + market.getSalesForProduct(product));
+                out.add("\t--" + product.getName() + ": " + market.getSalesForProduct(product));
             }
-            System.out.println("--Sales by customer: ");
+            out.add("--Sales by customer: ");
             for (String data : customerData) {
-                System.out.println("\t--" + data.split(":")[0] + ": " + data.split(":")[1]);
+                out.add("\t--" + data.split(":")[0] + ": " + data.split(":")[1]);
             }
         } else {
             ArrayList<Product> sortedProducts = new ArrayList<Product>();
@@ -317,10 +318,10 @@ public class Store implements java.io.Serializable{
                 sortedProducts.sort((p1, p2) -> Integer.compare(salesForProducts.get(productsForSales.indexOf(p1)),
                         salesForProducts.get(productsForSales.indexOf(p2))));
             }
-            System.out.println("--Sales by product " + ((sortType == 1) ? "sorted alphabetically:" : "sorted by " +
+            out.add("--Sales by product " + ((sortType == 1) ? "sorted alphabetically:" : "sorted by " +
                     "quantity:"));
             for (Product product : sortedProducts) {
-                System.out.println("\t--" + product.getName() + ": " + products.get(products.indexOf(product)));
+                out.add("\t--" + product.getName() + ": " + products.get(products.indexOf(product)));
             }
             //ArrayList to track all of the buyers
             ArrayList<String> sortedBuyers = new ArrayList<>();
@@ -329,9 +330,9 @@ public class Store implements java.io.Serializable{
             }
             if (sortType == 1) {
                 sortedBuyers.sort(Comparator.comparing(q -> q.substring(0, 1)));
-                System.out.println("--Sales by customer sorted alphabetically:");
+                out.add("--Sales by customer sorted alphabetically:");
                 for (String buyer : sortedBuyers) {
-                    System.out.println("\t--" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
+                    out.add("\t--" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
                 }
             }
             if (sortType == 2) {
@@ -345,7 +346,7 @@ public class Store implements java.io.Serializable{
                 for (int i = maxQuantity; i > 0; i--) {
                     for (String buyer : sortedBuyers) {
                         if (Integer.parseInt(buyer.split(":")[1]) == i) {
-                            System.out.println("\t--" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
+                            out.add("\t--" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
                         }
                     }
 
@@ -354,6 +355,8 @@ public class Store implements java.io.Serializable{
             }
 
         }
+
+        return out;
 
     }
 
