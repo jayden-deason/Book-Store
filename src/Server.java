@@ -120,7 +120,14 @@ public class Server extends Thread {
             try {
                 String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
-                if (answer[0].equals("1")) {
+                if (answer[0].equals("-1")) {
+                    reader.close();
+                    writer.close();
+                    //Make concurrent
+                    this.sockets.remove(this.socket);
+                    this.socket.close();
+                    return;
+                } else if (answer[0].equals("1")) {
                     this.sendAllProducts(answer[1]);
 
                 } else if (answer[0].equals("2")) {
@@ -281,11 +288,12 @@ public class Server extends Thread {
     private void sendAllProducts(String sortType) {
         try {
             this.writer.writeObject(market.getAllProducts(true));
+            System.out.println("Sent products, sort type = " + sortType);
         } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<Product>) null);
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -299,30 +307,34 @@ public class Server extends Thread {
             if (searchContents[2].equals("")) searchContents[2] = null;
             this.writer.writeObject(market.matchConditions(searchContents[0], searchContents[1],
                     searchContents[2]));
+            System.out.println("Sent search results");
         } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<Product>) null);
+
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
 
     private void viewProduct(int indexOfProduct) {
         try {
-            this.writer.writeObject(this.market.getAllProducts(true).get(indexOfProduct));
+            this.writer.writeObject(this.market.getAllProducts(false).get(indexOfProduct));
+            System.out.println("Sent product #" + indexOfProduct);
         } catch (Exception e) {
             try {
                 this.writer.writeObject((Product) null);
+
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
 
     private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
         try {
-            Product p = this.market.getAllProducts(true).get(indexOfProduct);
+            Product p = this.market.getAllProducts(false).get(indexOfProduct);
             if (p.getQuantity() > quantity) {
                 //Error: quantity trying to add to cart is more than there are of that product
                 this.writer.writeObject((String) "N");
@@ -331,12 +343,13 @@ public class Server extends Thread {
             buyer.addProductToCart(p.getIndex(), quantity);
             market.updateAllFiles();
             this.writer.writeObject((String) "Y");
+            System.out.printf("Added product %d to cart\n", indexOfProduct);
             //Sends new shopping cart
         } catch (Exception e) {
             try {
                 this.writer.writeObject((String) "N");
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -356,12 +369,13 @@ public class Server extends Thread {
                 fileInfo.add(s);
             }
             this.writer.writeObject((ArrayList<String>) fileInfo);
-            ;
+            System.out.println("Wrote to file");
+
         } catch (Exception e) {
             try {
                 this.writer.writeObject((ArrayList<String>) null);
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
 
@@ -371,12 +385,13 @@ public class Server extends Thread {
         try {
             market.makePurchase(buyer);
             this.writer.writeObject((String) "Y");
-            ;
+            System.out.println("Made purchase");
+
         } catch (Exception e) {
             try {
                 this.writer.writeObject((String) "N");
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -391,12 +406,13 @@ public class Server extends Thread {
                 shoppingCartProducts.put(p, quantity);
             }
             this.writer.writeObject((HashMap<Product, Integer>) shoppingCartProducts);
+            System.out.println("Sent shopping cart");
             ;
         } catch (Exception e) {
             try {
                 this.writer.writeObject((HashMap<Product, Integer>) null);
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -418,6 +434,7 @@ public class Server extends Thread {
                     market.updateAllFiles();
                     //Success
                     writer.writeObject((String) "Y");
+                    System.out.println("Changed cart quantity");
                 }
             }
             if (!(exists)) {
@@ -428,7 +445,7 @@ public class Server extends Thread {
             try {
                 this.writer.writeObject((String) "N");
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
@@ -444,12 +461,12 @@ public class Server extends Thread {
                 previousProducts.put(p, quantity);
             }
             this.writer.writeObject((HashMap<Product, Integer>) previousProducts);
-            ;
+            System.out.println("Wrote purchase history");
         } catch (Exception e) {
             try {
                 this.writer.writeObject((HashMap<Product, Integer>) null);
             } catch (Exception ex) {
-                System.out.println(ex.getStackTrace());
+                e.printStackTrace();
             }
         }
     }
