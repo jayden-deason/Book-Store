@@ -8,6 +8,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import javax.swing.UIManager;
 
@@ -161,12 +162,18 @@ public class Client extends JComponent implements Runnable{
 
                 HashMap<Product, Integer> cart = getShoppingCart();
 
+                if (cart.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Cart is empty.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 for (Product product : cart.keySet()) {
                     JTextField name = new JTextField(product.getName());
                     name.setEditable(false);
                     //TODO: fix for proper quantity
                     int quant = cart.get(product);
-                    JTextField quantity = new JTextField();
+                    JTextField quantity = new JTextField(quant);
                     quantity.setToolTipText("Set to 0 and confirm to remove item");
                     JButton confirm = new JButton("\u2713");
                     confirm.setPreferredSize(new Dimension(20, 35));
@@ -355,21 +362,42 @@ public class Client extends JComponent implements Runnable{
                 JTextField itemsFound = new JTextField("# results for " + searchType + " search:");
                 itemsFound.setEditable(false);
                 Container searchContainer = searchFrame.getContentPane();
+
+                ArrayList<Product> products;
+
+                if (searchType.equalsIgnoreCase("name")) {
+                    products = search(searchText.getText() + ",,");
+                } else if (searchType.equalsIgnoreCase("store")) {
+                    products = search("," + searchText.getText() + ",");
+                } else if (searchType.equalsIgnoreCase("description")) {
+                    products = search(",," + searchText.getText());
+                } else {
+                    products = null;
+                }
+
+                if (products.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No matching results.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 int item = 0;
                 // Receive arraylist
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < products.size(); i++) {
                     for (int j = 0; j < 5; j++) {
-                        JButton product = new JButton("Product" + item++);
+                        JButton product = new JButton(products.get(i).getName());
+                        int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                JFrame productFrame = new JFrame("Product");
+                                JFrame productFrame = new JFrame(products.get(finalI).getName());
                                 productFrame.setVisible(true);
                                 JPanel productPanel = new JPanel();
                                 Container content = productFrame.getContentPane();
                                 JTextField quantity = new JTextField();
                                 quantity.setPreferredSize(new Dimension(20, 25));
-                                JTextArea info = new JTextArea("Product Information\nInfo\nInfo");
+                                JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
+                                        products.get(finalI).getSalePrice(), products.get(finalI).getDescription()));
                                 info.setEditable(false);
                                 productPanel.add(info);
                                 productPanel.add(purchase);
@@ -387,11 +415,28 @@ public class Client extends JComponent implements Runnable{
                 searchFrame.pack();
             } else if (e.getSource() == checkout) {
                 Object[] options = {"Confirm", "Cancel"};
-                JOptionPane.showOptionDialog(null, "Are you sure you wish to checkout?", "Checkout",
+                int result = JOptionPane.showOptionDialog(null, "Are you sure you wish to checkout?", "Checkout",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-            }
 
-            //TODO: add search, export, and make purchase
+                if (result == 0) {
+                    String success = makePurchase();
+                    if (success.equalsIgnoreCase("n")) {
+                        JOptionPane.showMessageDialog(null, "One or more books have insufficient " +
+                                "stock.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+            /*else if (e.getSource() == export) {
+                boolean success = exportToFile( *.getText());
+
+                if (success) {
+                    JOptionPane.showMessageDialog(null, "File Exported", "Export",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "A file with that name already exists. " +
+                            "Choose another", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }*/
         }
     };
 
@@ -487,7 +532,6 @@ public class Client extends JComponent implements Runnable{
         sortMarket.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                //TODO: make this use an arraylist of products somehow
                 if (e.getStateChange() == ItemEvent.SELECTED && e.getItem() == sortMarket.getItemAt(0)) {
                     updateMarket.doClick();
                 } else if (e.getStateChange() == ItemEvent.SELECTED && e.getItem() == sortMarket.getItemAt(1)) {
@@ -673,6 +717,25 @@ public class Client extends JComponent implements Runnable{
                                 info.setEditable(false);
                                 productPanel.add(info);
                                 productPanel.add(purchase);
+                                purchase.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        String success = "n";
+                                        try {
+                                            //TODO: fix with proper text field identifier
+//                                            success = addToCart(products.get(finalI),
+//                                                    Integer.parseInt(****.getText()));
+                                        } catch (NumberFormatException ex) {
+                                            JOptionPane.showMessageDialog(null, "Enter an integer.",
+                                                    "Error", JOptionPane.ERROR_MESSAGE);
+                                            return;
+                                        }
+                                        if (success.equalsIgnoreCase("n")) {
+                                            JOptionPane.showMessageDialog(null, "Insufficient stock.",
+                                                    "Error", JOptionPane.ERROR_MESSAGE);
+                                        }
+                                    }
+                                });
                                 productPanel.add(quantity);
                                 content.add(productPanel);
                                 productFrame.pack();
@@ -784,6 +847,24 @@ public class Client extends JComponent implements Runnable{
                                 info.setEditable(false);
                                 productPanel.add(info);
                                 productPanel.add(purchase);
+                                purchase.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        String success = "n";
+                                        try {
+                                            success = addToCart(products.get(finalI),
+                                                    Integer.parseInt(purchase.getText()));
+                                        } catch (NumberFormatException ex) {
+                                            JOptionPane.showMessageDialog(null, "Enter an integer.",
+                                                    "Error", JOptionPane.ERROR_MESSAGE);
+                                            return;
+                                        }
+                                        if (success.equalsIgnoreCase("n")) {
+                                            JOptionPane.showMessageDialog(null, "Insufficient stock.",
+                                                    "Error", JOptionPane.ERROR_MESSAGE);
+                                        }
+                                    }
+                                });
                                 productPanel.add(quantity);
                                 content.add(productPanel);
                                 productFrame.pack();
@@ -831,22 +912,59 @@ public class Client extends JComponent implements Runnable{
             public void actionPerformed(ActionEvent e) {
                 int item = 0;
                 productPage.removeAll();
-                for (int i = 0; i < 20; i++) {
+
+                String choice = (String) sortMarket.getSelectedItem();
+                ArrayList<Product> products = null;
+                if (choice.equalsIgnoreCase("Sort By: Alphabetically")) {
+                    products = getAllProducts("none");
+                    Collections.sort(products, (p1, p2) -> p1.getName().compareToIgnoreCase(p2.getName()));
+                //TODO:fix sorting issue
+                } else if (choice.equalsIgnoreCase("Sort By: Price")) {
+                    products = getAllProducts("price");
+                } else if (choice.equalsIgnoreCase("Sort By: Quantity")) {
+                    products = getAllProducts("quantity");
+                }
+
+                if (products.isEmpty())
+                    return;
+
+                for (int i = 0; i < products.size(); i++) {
                     for (int j = 0; j < 8; j++) {
-                        JButton product = new JButton("Product" + item++);
+                        JButton product = new JButton(products.get(i).getName());
+                        int finalI = i;
+                        ArrayList<Product> finalProducts = products;
                         product.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                JFrame productFrame = new JFrame("Product");
+                                JFrame productFrame = new JFrame(finalProducts.get(finalI).getName());
                                 productFrame.setVisible(true);
                                 JPanel productPanel = new JPanel();
                                 Container content = productFrame.getContentPane();
                                 JTextField quantity = new JTextField();
                                 quantity.setPreferredSize(new Dimension(20, 25));
-                                JTextArea info = new JTextArea("Product Information\nInfo\nInfo");
+                                JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
+                                        finalProducts.get(finalI).getSalePrice(), finalProducts.get(finalI).getDescription()));
                                 info.setEditable(false);
                                 productPanel.add(info);
                                 productPanel.add(purchase);
+                                purchase.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        String success = "n";
+                                        try {
+                                            success = addToCart(finalProducts.get(finalI),
+                                                    Integer.parseInt(purchase.getText()));
+                                        } catch (NumberFormatException ex) {
+                                            JOptionPane.showMessageDialog(null, "Enter an integer.",
+                                                    "Error", JOptionPane.ERROR_MESSAGE);
+                                            return;
+                                        }
+                                        if (success.equalsIgnoreCase("n")) {
+                                            JOptionPane.showMessageDialog(null, "Insufficient stock.",
+                                                    "Error", JOptionPane.ERROR_MESSAGE);
+                                        }
+                                    }
+                                });
                                 productPanel.add(quantity);
                                 content.add(productPanel);
                                 productFrame.pack();
