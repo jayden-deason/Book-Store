@@ -181,16 +181,13 @@ public class Server extends Thread {
             try {
                 String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
-
                 if (answer[0].equals("1")) {
                     // send all products
                     this.sendAllProducts(answer[1]);
-                }
-                if (answer[0].equals("2")) {
+                } else if (answer[0].equals("2")) {
                     // send this seller's products
                     this.sendSellerProducts(seller, answer[1]);
-                }
-                if (answer[0].equals("3")) {
+                } else if (answer[0].equals("3")) {
                     // add product
                     this.addSellerProduct(seller,
                             answer[1], // product name
@@ -199,8 +196,7 @@ public class Server extends Thread {
                             Double.parseDouble(answer[4]), // price
                             Integer.parseInt(answer[5]) // quantity
                     );
-                }
-                if (answer[0].equals("4")) {
+                } else if (answer[0].equals("4")) {
                     // edit product
                     this.editSellerProduct(seller,
                             Integer.parseInt(answer[1]), // product index
@@ -209,12 +205,10 @@ public class Server extends Thread {
                             Double.parseDouble(answer[4]), // price
                             Integer.parseInt(answer[5]) // quantity
                     );
-                }
-                if (answer[0].equals("5")) {
+                } else if (answer[0].equals("5")) {
                     // add store
                     this.addSellerStore(seller, answer[1]);
-                }
-                if (answer[0].equals("6")) {
+                } else if (answer[0].equals("6")) {
                     // view dashboard
                     this.getSellerDashboard(seller); // TODO: params for seller dashboard?
                 } else {
