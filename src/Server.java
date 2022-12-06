@@ -217,7 +217,7 @@ public class Server extends Thread {
                     this.addSellerStore(seller, answer[1]);
                 } else if (answer[0].equals("6")) {
                     // view dashboard
-                    this.getSellerDashboard(seller); // TODO: params for seller dashboard?
+                    this.seeBuyerCarts(seller);
                 } else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
@@ -335,10 +335,6 @@ public class Server extends Thread {
             else if(sortType.equals("sales")) {
                 //TODO: fix
                 products = this.market.sortByPrice();
-            }
-            else if(sortType.equals("history")) {
-                //TODO: fix
-                products = seller.viewProductsInCart(this.market);
             }
             else {
                 products = this.market.getAllProducts(true);
@@ -520,6 +516,19 @@ public class Server extends Thread {
         } catch (Exception e) {
             try {
                 this.writer.writeObject((HashMap<Product, Integer>) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void seeBuyerCarts(Seller seller) {
+        try {
+            HashMap<Product, String> productsInCart = seller.sendProductsInCart(this.market);
+            this.writer.writeObject((HashMap<Product, String>) productsInCart);
+            System.out.println("Wrote purchase history");
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((HashMap<Product, String>) null);
             } catch (Exception ex) {
                 e.printStackTrace();
             }
