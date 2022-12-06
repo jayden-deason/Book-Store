@@ -292,7 +292,7 @@ public class Server extends Thread {
         // TODO: implement
     }
 
-    private void sendAllProducts(String sortType, Buyer buyer) {
+    private void sendAllBuyerProducts(String sortType, Buyer buyer) {
         try {
             ArrayList<Product> products;
             if(sortType.equals("quantity")) {
@@ -301,16 +301,18 @@ public class Server extends Thread {
             else if(sortType.equals("price")) {
                 products = this.market.sortByPrice();
             }
-            else if(sortType.equals("history")) {
-                products = buyer.getPurchaseHistory();
-            }
             else if(sortType.equals("sales")) {
                 products = this.market.sortByPrice();
             }
             else {
                 products = this.market.getAllProducts(true);
             }
-            this.writer.writeObject((ArrayList<Product>) products);
+            if(sortType.equals("history")) {
+                this.sendPurchaseHistory(buyer);
+            }
+            else {
+                this.writer.writeObject((ArrayList<Product>) products);
+            }
             System.out.println("Sent products, sort type = " + sortType);
         } catch (Exception e) {
             try {
