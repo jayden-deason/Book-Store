@@ -123,9 +123,11 @@ public class Server extends Thread {
 
     public void runBuyer(Buyer buyer) {
         while (true) {
+            System.out.println("Loop ran");
             try {
                 String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
+                System.out.println(answer[0]);
                 if (answer[0].equals("-1")) {
                     reader.close();
                     writer.close();
@@ -143,6 +145,7 @@ public class Server extends Thread {
                     this.viewProduct(Integer.parseInt(answer[1]));
 
                 } else if (answer[0].equals("4")) {
+                    System.out.println("Adding to carti");
                     this.addToCart(buyer, Integer.parseInt(answer[1]), Integer.parseInt(answer[2]));
 
                 } else if (answer[0].equals("5")) {
@@ -171,7 +174,7 @@ public class Server extends Thread {
                     ex.printStackTrace();
                 }
             }
-
+            System.out.println("End of loop");
         }
     }
 
@@ -387,15 +390,20 @@ public class Server extends Thread {
     }
 
     private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
+        System.out.println("1");
         try {
             Product p = this.market.getAllProducts(false).get(indexOfProduct);
-            if (p.getQuantity() > quantity) {
+            if (p.getQuantity() < quantity) {
+                System.out.println("In if");
                 //Error: quantity trying to add to cart is more than there are of that product
                 this.writer.writeObject((String) "N");
                 return;
             }
+            System.out.println("2");
             buyer.addProductToCart(p.getIndex(), quantity);
+            System.out.println("3");
             market.updateAllFiles();
+            System.out.println("4");
             this.writer.writeObject((String) "Y");
             System.out.printf("Added product %d to cart\n", indexOfProduct);
             //Sends new shopping cart

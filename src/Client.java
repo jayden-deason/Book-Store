@@ -802,8 +802,6 @@ public class Client extends JComponent implements Runnable {
                     editProduct.setVisible(true);
                 }
 
-                System.out.println("Updated");
-
                 int item = 0;
                 for (Product product : products) {
                     productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
@@ -857,7 +855,6 @@ public class Client extends JComponent implements Runnable {
 
                 viewShoppingCart.setVisible(false);
                 viewPurchaseHistory.setVisible(false);
-                System.out.println("Updated");
                 scrollPane.updateUI();
             }
         });
@@ -904,6 +901,7 @@ public class Client extends JComponent implements Runnable {
                             purchase.addActionListener(new ActionListener() {
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
+                                        System.out.println("Sending purchase");
                                         String success = "n";
                                         try {
                                             success = addToCart(product,
@@ -1061,7 +1059,8 @@ public class Client extends JComponent implements Runnable {
 
     //TODO: fix visv being silly and sending null
     public String addToCart(Product product, int quantity) {
-        writer.printf("4,%d,%d", product.getIndex(), quantity);
+        System.out.printf("4,%d,%d\n", product.getIndex(), quantity);
+        writer.println("4," + product.getIndex() + "," + quantity);
         return getStringArray();
     }
 
