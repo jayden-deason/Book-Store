@@ -298,6 +298,27 @@ public class Buyer extends User implements java.io.Serializable{
         return false;
     }
 
+    public ArrayList<Store> sortStoresByPurchaseHistory(Market market) {
+        ArrayList<Store> stores = new ArrayList<>(market.getStores());
+        stores.sort((s1, s2) -> {
+            return getPurchasesForStore(s1, market) - getPurchasesForStore(s2, market);
+        });
+
+        return stores;
+    }
+
+    public int getPurchasesForStore(Store store, Market market) {
+        int sum = 0;
+        for (String item : purchaseHistory) {
+            Product p = market.getProductByIndex(Integer.parseInt(item.split(":")[0]));
+            if (p.getStoreName().equals(store.getName())) {
+                sum += Integer.parseInt(item.split(":")[1]);
+            }
+        }
+
+        return sum;
+    }
+
     public boolean previouslyPurchasedItem(Product product) {
         return previouslyPurchasedItem(product.getIndex());
     }

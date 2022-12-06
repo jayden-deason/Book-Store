@@ -159,7 +159,10 @@ public class Server extends Thread {
 
                 } else if (answer[0].equals("9")) {
                     this.sendPurchaseHistory(buyer);
-                } else {
+                } else if (answer[0].equals("10")) {
+                    this.sendBuyerDashboard(buyer, answer[1]);
+                }
+                else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
@@ -523,6 +526,32 @@ public class Server extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void sendBuyerDashboard(Buyer buyer, String sortType) throws IOException {
+        ArrayList<String> out = null;
+        if (sortType.equals("sales")) {
+            writer.writeObject(buyerDashboardForStoreList(market.sortStoresByProductsSold()));
+        } else if (sortType.equals("history")) {
+            writer.writeObject(buyerDashboardForStoreList(buyer.sortStoresByPurchaseHistory(market)));
+        } else {
+            writer.writeObject(null);
+        }
+    }
+
+    private ArrayList<String> buyerDashboardForStoreList(ArrayList<Store> stores) {
+        ArrayList<String> out = new ArrayList<>();
+        out.add("------------------------------------------");
+        for (Store store : stores) {
+            out.add("Store: " + store.getName());
+            for (Product p : store.getProducts()) {
+                out.add("--" + p.getName() + ": " + p.getQuantity());
+            }
+        }
+        out.add("------------------------------------------");
+
+        return out;
+
     }
 
     private void seeBuyerCarts(Seller seller) {
