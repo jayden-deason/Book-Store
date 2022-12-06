@@ -540,6 +540,25 @@ public class Market implements java.io.Serializable{
         return products;
     }
 
+    public ArrayList<Store> sortStoresByProductsSold() {
+        ArrayList<Store> out = new ArrayList<>(stores);
+        out.sort((s1, s2) -> {
+            int sum1 = 0;
+            for (Product p : s1.getProducts()) {
+                sum1 += getSalesForProduct(p);
+            }
+
+            int sum2 = 0;
+            for (Product p : s2.getProducts()) {
+                sum2 += getSalesForProduct(p);
+            }
+
+            return sum1 - sum2;
+        });
+
+        return out;
+    }
+
     /**
      * Returns a list of products that match the following conditions (provided they are not null)
      *
