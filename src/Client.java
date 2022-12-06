@@ -76,11 +76,11 @@ public class Client extends JComponent implements Runnable{
 
                         ArrayList<Product> products = getAllProducts("sales");
 
-                        //int item = 0;
+                        int item = 0;
                         panel.removeAll();
-                        for (int i = 0; i < products.size(); i++) {
-                            for (int j = 0; j < 5; j++) {
-                                JButton product = new JButton(products.get(i).getName());
+                        for (int i = 0; i < products.size() / 4; i++) {
+                            for (int j = 0; j < products.size() / 2; j++) {
+                                JButton product = new JButton(products.get(item++).getName());
                                 int finalI = i;
                                 product.addActionListener(new ActionListener() {
                                     @Override
@@ -104,11 +104,11 @@ public class Client extends JComponent implements Runnable{
 
                         ArrayList<Product> products = getAllProducts("history");
 
-                        //int item = 0;
+                        int item = 0;
                         panel.removeAll();
-                        for (int i = 0; i < products.size(); i++) {
-                            for (int j = 0; j < 5; j++) {
-                                JButton product = new JButton(products.get(i).getName());
+                        for (int i = 0; i < products.size() / 4; i++) {
+                            for (int j = 0; j < products.size() / 2; j++) {
+                                JButton product = new JButton(products.get(item++).getName());
                                 int finalI = i;
                                 product.addActionListener(new ActionListener() {
                                     @Override
@@ -133,8 +133,9 @@ public class Client extends JComponent implements Runnable{
                         System.out.println("By Customer Info");
                         int item = 0;
                         panel.removeAll();
-                        for (int i = 0; i < 5; i++) {
-                            for (int j = 0; j < 5; j++) {
+                        ArrayList<Product> products = null;
+                        for (int i = 0; i < products.size() / 4; i++) {
+                            for (int j = 0; j < products.size() / 2; j++) {
                                 JButton product = new JButton("Customer" + item++);
                                 product.addActionListener(new ActionListener() {
                                     @Override
@@ -230,9 +231,11 @@ public class Client extends JComponent implements Runnable{
                 infoText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
                 infoPanel.add(infoText);
 
-                for (int i = 0; i < 5; i++) {
-                    for (int j = 0; j < 5; j++) {
-                        JButton button = new JButton("Product");
+                ArrayList<Product> products = null;
+                int item = 0;
+                for (int i = 0; i < products.size() / 4; i++) {
+                    for (int j = 0; j < products.size() / 2; j++) {
+                        JButton button = new JButton(products.get(item++).getName());
                         panel.add(button);
                         //TODO:change to a focus listener
                         button.addMouseListener(new MouseListener() {
@@ -355,21 +358,23 @@ public class Client extends JComponent implements Runnable{
                 JTextField itemsFound = new JTextField("# results for " + searchType + " search:");
                 itemsFound.setEditable(false);
                 Container searchContainer = searchFrame.getContentPane();
+                ArrayList<Product> products = null;
                 int item = 0;
-                // Receive arraylist
-                for (int i = 0; i < 5; i++) {
-                    for (int j = 0; j < 5; j++) {
-                        JButton product = new JButton("Product" + item++);
+                for (int i = 0; i < products.size() / 4; i++) {
+                    for (int j = 0; j < (int) (products.size() / 2); j++) {
+                        JButton product = new JButton(products.get(item++).getName());
+                        int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                JFrame productFrame = new JFrame("Product");
+                                JFrame productFrame = new JFrame(products.get(finalI).getName());
                                 productFrame.setVisible(true);
                                 JPanel productPanel = new JPanel();
                                 Container content = productFrame.getContentPane();
                                 JTextField quantity = new JTextField();
                                 quantity.setPreferredSize(new Dimension(20, 25));
-                                JTextArea info = new JTextArea("Product Information\nInfo\nInfo");
+                                JTextArea info = new JTextArea(String.format("Product Information\n%f\n%s",
+                                        products.get(finalI).getSalePrice(), products.get(finalI).getDescription()));
                                 info.setEditable(false);
                                 productPanel.add(info);
                                 productPanel.add(purchase);
@@ -655,10 +660,10 @@ public class Client extends JComponent implements Runnable{
 
                 System.out.println("Updated");
 
-                //int item = 0;
-                for (int i = 0; i < products.size(); i++) {
-                    for (int j = 0; j < 8; j++) {
-                        JButton product = new JButton(products.get(i).getName());
+                int item = 0;
+                for (int i = 0; i < products.size() / 4; i++) {
+                    for (int j = 0; j < (int) (products.size() / 2); j++) {
+                        JButton product = new JButton(products.get(item++).getName());
                         int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
@@ -767,9 +772,9 @@ public class Client extends JComponent implements Runnable{
                 System.out.println("Updated");
 
                 int item = 0;
-                for (int i = 0; i < products.size(); i++) {
-                    for (int j = 0; j < 8; j++) {
-                        JButton product = new JButton(products.get(i).getName());
+                for (int i = 0; i < products.size() / 4; i++) {
+                    for (int j = 0; j < (int) (products.size() / 2); j++) {
+                        JButton product = new JButton(products.get(item++).getName());
                         int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
@@ -832,19 +837,22 @@ public class Client extends JComponent implements Runnable{
             public void actionPerformed(ActionEvent e) {
                 int item = 0;
                 productPage.removeAll();
-                for (int i = 0; i < 20; i++) {
-                    for (int j = 0; j < 8; j++) {
-                        JButton product = new JButton("Produc0t" + item++);
+                ArrayList<Product> products = null;
+                for (int i = 0; i < products.size() / 4; i++) {
+                    for (int j = 0; j < (int) (products.size() / 2); j++) {
+                        JButton product = new JButton(products.get(item++).getName());
+                        int finalI = i;
                         product.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                JFrame productFrame = new JFrame("Product");
+                                JFrame productFrame = new JFrame(products.get(finalI).getName());
                                 productFrame.setVisible(true);
                                 JPanel productPanel = new JPanel();
                                 Container content = productFrame.getContentPane();
                                 JTextField quantity = new JTextField();
                                 quantity.setPreferredSize(new Dimension(20, 25));
-                                JTextArea info = new JTextArea("Product Information\nInfo\nInfo");
+                                JTextArea info = new JTextArea(String.format("Product Information\n%f\n%s",
+                                        products.get(finalI).getSalePrice(), products.get(finalI).getDescription()));
                                 info.setEditable(false);
                                 productPanel.add(info);
                                 productPanel.add(purchase);
@@ -981,6 +989,4 @@ public class Client extends JComponent implements Runnable{
         writer.println("9");
         return getProductsArray();
     }
-
-
 }
