@@ -220,7 +220,14 @@ public class Server extends Thread {
                 } else if (answer[0].equals("7")) {
                     // show seller store stats
                     this.showSellerStats(seller, answer[1]);
-                } else {
+                } else if (answer[0].equals("8")) {
+                    // export products to file
+                    this.sendProductStringsForFile(seller, answer[1]);
+                } else if (answer[0].equals("9")) {
+                    // import from file
+                    this.importProductsFromFile(seller, userChoice.substring(2).split("\n"));
+                }
+                else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
@@ -544,5 +551,34 @@ public class Server extends Thread {
         }
 
         writer.writeObject(seller.getDashboardStrings(sortType, market));
+    }
+
+    private void sendProductStringsForFile(Seller seller, String storeName) throws IOException {
+        if (!seller.getStoreNames().contains(storeName)) {
+            writer.writeObject(null);
+            return;
+        }
+
+        Store store = seller.getStoreByName(storeName);
+        ArrayList<String> out = new ArrayList<>();
+        for (Product p : store.getProducts()) {
+            out.add(p.toString());
+        }
+
+        writer.writeObject(out);
+    }
+
+    private void importProductsFromFile(Seller seller, String[] lines) throws IOException {
+        for (String line : lines) {
+            Product newProduct = new Product(line);
+            if (seller.getStoreNames().contains(newProduct.getStoreName())) {
+                market.addProduct(newProduct);
+            }
+        }
+
+        market.updateAllFiles();
+        writer.writeObject("Y");
+
+        // TODO: send N if error
     }
 }
