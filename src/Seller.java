@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.HashMap;
 
 /**
  * Seller
@@ -310,10 +311,25 @@ public class Seller extends User implements java.io.Serializable{
         System.out.println("------------------------------------------");
         for (Store s : stores) {
             System.out.println("Store: " + s.getName());
-            s.statisticsForSeller(sortType, market);
+            for (String line : s.statisticsForSeller(sortType, market)) {
+                System.out.println(line);
+            }
         }
         System.out.println("------------------------------------------");
 
+    }
+
+    public ArrayList<String> getDashboardStrings(int sortType, Market market) {
+        ArrayList<String> out = new ArrayList<>();
+        out.add("------------------------------------------");
+        for (Store s : stores) {
+            out.add("Store: " + s.getName());
+            out.addAll(s.statisticsForSeller(sortType, market));
+
+        }
+        out.add("------------------------------------------");
+
+        return out;
     }
 
     /**
@@ -364,7 +380,20 @@ public class Seller extends User implements java.io.Serializable{
 
         }
     }
-
+    public HashMap<Product, String> sendProductsInCart(Market market) {
+        HashMap<Product, String> productsInCart = new HashMap<Product, String>();
+        for (Buyer b : market.getBuyers()) {
+            ArrayList<String> items = b.getShoppingCart();
+            for (String item : items) {
+                Product p = market.getProductByIndex(Integer.parseInt(item.split(":")[0]));
+                if (market.getStoreByName(p.getStoreName()).getSellerName().equals(this.getEmail())) {
+                    String s = b.getEmail() + "," + item.split(":")[1];
+                    productsInCart.put(p, s);
+                }
+            }
+        }
+        return productsInCart;
+    }
     public void setIndex(int index) {
         this.index = index;
     }

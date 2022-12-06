@@ -521,6 +521,14 @@ public class Market implements java.io.Serializable{
         return products;
     }
 
+    public ArrayList<Product> sortBySales() {
+        products.sort((s1, s2) -> {
+            return getSalesForProduct(s1) - getSalesForProduct(s2);
+        });
+
+        return products;
+    }
+
     /**
      * Sort the list of products by quantity
      *

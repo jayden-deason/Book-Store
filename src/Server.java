@@ -15,7 +15,7 @@ public class Server extends Thread {
 
     public void run() {
         System.out.println("Connection Running Number: " + sockets.size());
-        while(true) {
+        while (true) {
             try {
                 //loginString format: (0 for seller or 1 for buyer),(0 for sign in or 1 for sign up),email,password
                 //Example: "0,1,test123@t.com,123" should be sign up for seller with email:test123@t.com and password 123
@@ -116,8 +116,7 @@ public class Server extends Thread {
             writer = new ObjectOutputStream(socket.getOutputStream());
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println("Streams created");
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -135,7 +134,7 @@ public class Server extends Thread {
                     this.socket.close();
                     return;
                 } else if (answer[0].equals("1")) {
-                    this.sendAllProducts(answer[1]);
+                    this.sendAllBuyerProducts(answer[1], buyer);
 
                 } else if (answer[0].equals("2")) {
                     this.sendSearch(userChoice.substring(2));
@@ -144,10 +143,10 @@ public class Server extends Thread {
                     this.viewProduct(Integer.parseInt(answer[1]));
 
                 } else if (answer[0].equals("4")) {
-                    this.exportToFile(buyer);
+                    this.addToCart(buyer, Integer.parseInt(answer[1]), Integer.parseInt(answer[2]));
 
                 } else if (answer[0].equals("5")) {
-                    this.makePurchase(buyer);
+                    this.exportToFile(buyer);
 
                 } else if (answer[0].equals("6")) {
                     this.makePurchase(buyer);
@@ -181,16 +180,20 @@ public class Server extends Thread {
             try {
                 String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
-
-                if (answer[0].equals("1")) {
+                if (answer[0].equals("-1")) {
+                    reader.close();
+                    writer.close();
+                    //Make concurrent
+                    this.sockets.remove(this.socket);
+                    this.socket.close();
+                    return;
+                } else if (answer[0].equals("1")) {
                     // send all products
-                    this.sendAllProducts(answer[1]);
-                }
-                if (answer[0].equals("2")) {
+                    this.sendAllSellerProducts(answer[1], seller);
+                } else if (answer[0].equals("2")) {
                     // send this seller's products
                     this.sendSellerProducts(seller, answer[1]);
-                }
-                if (answer[0].equals("3")) {
+                } else if (answer[0].equals("3")) {
                     // add product
                     this.addSellerProduct(seller,
                             answer[1], // product name
@@ -199,8 +202,7 @@ public class Server extends Thread {
                             Double.parseDouble(answer[4]), // price
                             Integer.parseInt(answer[5]) // quantity
                     );
-                }
-                if (answer[0].equals("4")) {
+                } else if (answer[0].equals("4")) {
                     // edit product
                     this.editSellerProduct(seller,
                             Integer.parseInt(answer[1]), // product index
@@ -209,15 +211,23 @@ public class Server extends Thread {
                             Double.parseDouble(answer[4]), // price
                             Integer.parseInt(answer[5]) // quantity
                     );
-                }
-                if (answer[0].equals("5")) {
+                } else if (answer[0].equals("5")) {
                     // add store
                     this.addSellerStore(seller, answer[1]);
-                }
-                if (answer[0].equals("6")) {
+                } else if (answer[0].equals("6")) {
                     // view dashboard
-                    this.getSellerDashboard(seller); // TODO: params for seller dashboard?
-                } else {
+                    this.seeBuyerCarts(seller);
+                } else if (answer[0].equals("7")) {
+                    // show seller store stats
+                    this.showSellerStats(seller, answer[1]);
+                } else if (answer[0].equals("8")) {
+                    // export products to file
+                    this.sendProductStringsForFile(seller, answer[1]);
+                } else if (answer[0].equals("9")) {
+                    // import from file
+                    this.importProductsFromFile(seller, userChoice.substring(2).split("\n"));
+                }
+                else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
@@ -261,7 +271,6 @@ public class Server extends Thread {
 
         try {
             Product product = market.getProductByIndex(productIndex);
-
             product.setName(productName);
             product.setDescription(description);
             product.setSalePrice(price);
@@ -277,7 +286,7 @@ public class Server extends Thread {
         this.writer.writeObject("Y");
     }
 
-    private void addSellerStore(Seller seller, String storeName) throws IOException{
+    private void addSellerStore(Seller seller, String storeName) throws IOException {
         if (market.getStoreByName(storeName) == null) {
             market.addStore(new Store(-1, storeName, seller.getEmail()));
             market.updateAllFiles();
@@ -292,9 +301,47 @@ public class Server extends Thread {
         // TODO: implement
     }
 
-    private void sendAllProducts(String sortType) {
+    private void sendAllBuyerProducts(String sortType, Buyer buyer) {
         try {
-            this.writer.writeObject(market.getAllProducts(true));
+            ArrayList<Product> products;
+            if (sortType.equals("quantity")) {
+                products = this.market.sortByQuantity();
+            } else if (sortType.equals("price")) {
+                products = this.market.sortByPrice();
+            } else if (sortType.equals("sales")) {
+                //TODO: fix
+                products = this.market.sortByPrice();
+            } else {
+                products = this.market.getAllProducts(true);
+            }
+            if (sortType.equals("history")) {
+                this.sendPurchaseHistory(buyer);
+            } else {
+                this.writer.writeObject((ArrayList<Product>) products);
+            }
+            System.out.println("Sent products, sort type = " + sortType);
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((ArrayList<Product>) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void sendAllSellerProducts(String sortType, Seller seller) {
+        try {
+            ArrayList<Product> products;
+            if (sortType.equals("quantity")) {
+                products = this.market.sortByQuantity();
+            } else if (sortType.equals("price")) {
+                products = this.market.sortByPrice();
+            } else if (sortType.equals("sales")) {
+                products = this.market.sortBySales();
+            } else {
+                products = this.market.getAllProducts(true);
+            }
+            this.writer.writeObject((ArrayList<Product>) products);
             System.out.println("Sent products, sort type = " + sortType);
         } catch (Exception e) {
             try {
@@ -476,5 +523,62 @@ public class Server extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void seeBuyerCarts(Seller seller) {
+        try {
+            HashMap<Product, String> productsInCart = seller.sendProductsInCart(this.market);
+            this.writer.writeObject((HashMap<Product, String>) productsInCart);
+            System.out.println("Wrote purchase history");
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((HashMap<Product, String>) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void showSellerStats(Seller seller, String type) throws IOException {
+        int sortType = -1;
+        if (type.equals("none")) sortType = 0;
+        if (type.equals("alphabet")) sortType = 1;
+        if (type.equals("quantity")) sortType = 2;
+
+        if (sortType == -1) {
+            writer.writeObject(null);
+            return;
+        }
+
+        writer.writeObject(seller.getDashboardStrings(sortType, market));
+    }
+
+    private void sendProductStringsForFile(Seller seller, String storeName) throws IOException {
+        if (!seller.getStoreNames().contains(storeName)) {
+            writer.writeObject(null);
+            return;
+        }
+
+        Store store = seller.getStoreByName(storeName);
+        ArrayList<String> out = new ArrayList<>();
+        for (Product p : store.getProducts()) {
+            out.add(p.toString());
+        }
+
+        writer.writeObject(out);
+    }
+
+    private void importProductsFromFile(Seller seller, String[] lines) throws IOException {
+        for (String line : lines) {
+            Product newProduct = new Product(line);
+            if (seller.getStoreNames().contains(newProduct.getStoreName())) {
+                market.addProduct(newProduct);
+            }
+        }
+
+        market.updateAllFiles();
+        writer.writeObject("Y");
+
+        // TODO: send N if error
     }
 }
