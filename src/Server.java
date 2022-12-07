@@ -540,6 +540,9 @@ public class Server extends Thread {
                     p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
                 }
                 int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
+                if (shoppingCartProducts.containsKey(p)) {
+                    shoppingCartProducts.put(p, shoppingCartProducts.get(p) + quantity);
+                }
                 shoppingCartProducts.put(p, quantity);
             }
             this.writer.writeObject((HashMap<Product, Integer>) shoppingCartProducts);
