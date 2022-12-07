@@ -125,7 +125,7 @@ public class Server extends Thread {
         while (true) {
             System.out.println("Loop ran");
             try {
-                String userChoice = reader.readLine();
+                String userChoice = reader.readLine().strip();
                 String[] answer = userChoice.split(",");
                 System.out.println(answer[0]);
                 if (answer[0].equals("-1")) {

@@ -492,9 +492,9 @@ public class Client extends JComponent implements Runnable {
             public void windowClosing(WindowEvent e) {}
             @Override
             public void windowClosed(WindowEvent e) {
-                //TODO: send -1
                 System.out.println("Send -1");
                 writer.println("-1");
+                writer.flush();
             }
             @Override
             public void windowIconified(WindowEvent e) {}
@@ -862,6 +862,7 @@ public class Client extends JComponent implements Runnable {
         logout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("Send -1");
                 writer.println("-1");
                 writer.flush();
 
