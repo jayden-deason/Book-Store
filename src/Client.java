@@ -147,7 +147,6 @@ public class Client extends JComponent implements Runnable {
 
                 content.add(scrollPanel);
             } else if (e.getSource() == viewShoppingCart) {
-
                 HashMap<Product, Integer> cart = getShoppingCart();
 
                 if (cart.isEmpty()) {
@@ -354,6 +353,28 @@ public class Client extends JComponent implements Runnable {
                 content.add(panel2, BorderLayout.CENTER);
                 editProductFrame.pack();
             } else if (e.getSource() == search) {
+                ArrayList<Product> products;
+
+                if (searchType.equalsIgnoreCase("name")) {
+                    System.out.println("name search");
+                    products = search(searchText.getText() + ", , ");
+                } else if (searchType.equalsIgnoreCase("store")) {
+                    products = search(" ," + searchText.getText() + ", ");
+                } else if (searchType.equalsIgnoreCase("description")) {
+                    products = search(" , ," + searchText.getText());
+                } else {
+                    System.out.println("dead");
+                    products = null;
+                }
+
+                System.out.println(products.isEmpty());
+
+                if (products == null || products.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No matching results.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 JFrame searchFrame = new JFrame("Search Results");
                 searchFrame.setVisible(true);
                 JPanel results = new JPanel();
@@ -361,24 +382,6 @@ public class Client extends JComponent implements Runnable {
                 JTextField itemsFound = new JTextField("# results for " + searchType + " search:");
                 itemsFound.setEditable(false);
                 Container searchContainer = searchFrame.getContentPane();
-
-                ArrayList<Product> products;
-
-                if (searchType.equalsIgnoreCase("name")) {
-                    products = search(searchText.getText() + ",,");
-                } else if (searchType.equalsIgnoreCase("store")) {
-                    products = search("," + searchText.getText() + ",");
-                } else if (searchType.equalsIgnoreCase("description")) {
-                    products = search(",," + searchText.getText());
-                } else {
-                    products = null;
-                }
-
-                if (products.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "No matching results.",
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
 
                 int item = 0;
                 for (Product product : products) {
@@ -928,7 +931,7 @@ public class Client extends JComponent implements Runnable {
                     products = getAllProducts("quantity");
                 }
 
-                if (products.isEmpty())
+                if (products == null || products.isEmpty())
                     return;
 
                 productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
@@ -1056,6 +1059,7 @@ public class Client extends JComponent implements Runnable {
     }
 
     public ArrayList<Product> search(String query) {
+        System.out.println(query);
         writer.println(String.format("%d,%s", 2, query));
         writer.flush();
         return getProductsArray();
