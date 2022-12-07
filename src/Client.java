@@ -147,7 +147,6 @@ public class Client extends JComponent implements Runnable {
 
                 content.add(scrollPanel);
             } else if (e.getSource() == viewShoppingCart) {
-
                 HashMap<Product, Integer> cart = getShoppingCart();
 
                 if (cart.isEmpty()) {
@@ -354,6 +353,28 @@ public class Client extends JComponent implements Runnable {
                 content.add(panel2, BorderLayout.CENTER);
                 editProductFrame.pack();
             } else if (e.getSource() == search) {
+                ArrayList<Product> products;
+
+                if (searchType.equalsIgnoreCase("name")) {
+                    System.out.println("name search");
+                    products = search(searchText.getText() + ", , ");
+                } else if (searchType.equalsIgnoreCase("store")) {
+                    products = search(" ," + searchText.getText() + ", ");
+                } else if (searchType.equalsIgnoreCase("description")) {
+                    products = search(" , ," + searchText.getText());
+                } else {
+                    System.out.println("dead");
+                    products = null;
+                }
+
+                System.out.println(products.isEmpty());
+
+                if (products == null || products.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No matching results.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 JFrame searchFrame = new JFrame("Search Results");
                 searchFrame.setVisible(true);
                 JPanel results = new JPanel();
@@ -361,24 +382,6 @@ public class Client extends JComponent implements Runnable {
                 JTextField itemsFound = new JTextField("# results for " + searchType + " search:");
                 itemsFound.setEditable(false);
                 Container searchContainer = searchFrame.getContentPane();
-
-                ArrayList<Product> products;
-
-                if (searchType.equalsIgnoreCase("name")) {
-                    products = search(searchText.getText() + ",,");
-                } else if (searchType.equalsIgnoreCase("store")) {
-                    products = search("," + searchText.getText() + ",");
-                } else if (searchType.equalsIgnoreCase("description")) {
-                    products = search(",," + searchText.getText());
-                } else {
-                    products = null;
-                }
-
-                if (products.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "No matching results.",
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
 
                 int item = 0;
                 for (Product product : products) {
@@ -475,9 +478,8 @@ public class Client extends JComponent implements Runnable {
                 content.add(filePath, BorderLayout.PAGE_START);
                 content.add(storePanel);
                 exportFrame.pack();
-            }
-            /*else if (e.getSource() == export) {
-                boolean success = exportToFile( *.getText());
+            } else if (e.getSource() == exportToFile) {
+                boolean success = exportToFile("purchases.txt");
 
                 if (success) {
                     JOptionPane.showMessageDialog(null, "File Exported", "Export",
@@ -486,7 +488,7 @@ public class Client extends JComponent implements Runnable {
                     JOptionPane.showMessageDialog(null, "A file with that name already exists. " +
                             "Choose another", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-            }*/
+            }
         }
     };
 
@@ -734,7 +736,7 @@ public class Client extends JComponent implements Runnable {
                     connectSocket();
                 }
                 if (userType) { //logging in as buyer
-                    writer.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
+                    writer.println(String.format("%d,%d,%s,%s", 0, 0, username.getText(), password.getText()));
                     System.out.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
                     writer.flush();
                     String response;
@@ -752,7 +754,7 @@ public class Client extends JComponent implements Runnable {
                         return;
                     }
                 } else { //logging in as seller
-                    writer.printf("%d,%d,%s,%s\n", 1, 0, username.getText(), password.getText());
+                    writer.println(String.format("%d,%d,%s,%s", 1, 0, username.getText(), password.getText()));
                     writer.flush();
                     String response;
                     try {
@@ -828,7 +830,7 @@ public class Client extends JComponent implements Runnable {
                         return;
                     }
                 } else {
-                    writer.printf("%d,%d,%s,%s\n", 1, 1, user, pass);
+                    writer.println(String.format("%d,%d,%s,%s", 1, 1, user, pass));
                     writer.flush();
                     String response;
                     try {
@@ -929,7 +931,7 @@ public class Client extends JComponent implements Runnable {
                     products = getAllProducts("quantity");
                 }
 
-                if (products.isEmpty())
+                if (products == null || products.isEmpty())
                     return;
 
                 productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
@@ -959,7 +961,7 @@ public class Client extends JComponent implements Runnable {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     System.out.println("Sending purchase");
-                                    String success = "n";
+                                    String success;
                                     try {
                                         System.out.println(product.getName() + quantity.getText());
                                         success = addToCart(product,
@@ -972,10 +974,9 @@ public class Client extends JComponent implements Runnable {
                                     if (success.equalsIgnoreCase("n")) {
                                         JOptionPane.showMessageDialog(null, "Insufficient stock.",
                                                 "Error", JOptionPane.ERROR_MESSAGE);
-                                    } else {
-                                        JOptionPane.showMessageDialog(null, "Added to cart!",
-                                                "", JOptionPane.INFORMATION_MESSAGE);
-                                        productFrame.setVisible(false);
+                                        } else if (success.equalsIgnoreCase("y")) {
+                                            JOptionPane.showMessageDialog(null, "Added to cart.",
+                                                    "Success", JOptionPane.INFORMATION_MESSAGE);
                                     }
                                 }
                             };
@@ -1058,15 +1059,15 @@ public class Client extends JComponent implements Runnable {
     }
 
     public ArrayList<Product> search(String query) {
-        writer.printf("%d,%s", 2, query);
+        System.out.println(query);
+        writer.println(String.format("%d,%s", 2, query));
         writer.flush();
         return getProductsArray();
     }
 
     //TODO: fix visv being silly and sending null
     public String addToCart(Product product, int quantity) {
-        System.out.printf("4,%d,%d\n", product.getIndex(), quantity);
-        writer.println("4," + product.getIndex() + "," + quantity);
+        writer.println(String.format("4,%d,%d", product.getIndex(), quantity));
         writer.flush();
         return getStringArray();
     }
@@ -1114,8 +1115,7 @@ public class Client extends JComponent implements Runnable {
     }
 
     public String editCart(Product product, int newQuantity) {
-//        writer.printf("8,%d,%d", product.getIndex(), newQuantity);
-        writer.println("8," + product.getIndex() + "," + newQuantity);
+        writer.println(String.format("8,%d,%d", product.getIndex(), newQuantity));
         writer.flush();
         return getStringArray();
     }
