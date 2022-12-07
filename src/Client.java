@@ -34,6 +34,7 @@ public class Client extends JComponent implements Runnable {
     importSellerFile;
     private JButton confirmAddProduct, confirmAddStore;
     private ArrayList<JButton> productButtons = new ArrayList<>();
+    private ArrayList<ActionListener> purchaseListeners;
 
     private JTextField username;
     private JTextField password;
@@ -164,7 +165,8 @@ public class Client extends JComponent implements Runnable {
                     name.setEditable(false);
                     //TODO: fix for proper quantity
                     int quant = cart.get(product);
-                    JTextField quantity = new JTextField(quant);
+                    JTextField quantity = new JTextField();
+                    quantity.setText(Integer.toString(quant));
                     quantity.setToolTipText("Set to 0 and confirm to remove item");
                     JButton confirm = new JButton("\u2713");
                     confirm.setPreferredSize(new Dimension(20, 35));
@@ -238,20 +240,16 @@ public class Client extends JComponent implements Runnable {
                         @Override
                         public void mouseClicked(MouseEvent e) {
                         }
-
                         @Override
                         public void mousePressed(MouseEvent e) {
                         }
-
                         @Override
                         public void mouseReleased(MouseEvent e) {
                         }
-
                         @Override
                         public void mouseEntered(MouseEvent e) {
                             infoText.setText("Product info");
                         }
-
                         @Override
                         public void mouseExited(MouseEvent e) {
                             infoText.setText("");
@@ -773,7 +771,6 @@ public class Client extends JComponent implements Runnable {
                     importSellerFile.setVisible(true);
                     exportSellerFile.setVisible(true);
                 }
-
                 System.out.println("Updated");
                 updateMarket.doClick();
             }
@@ -913,15 +910,20 @@ public class Client extends JComponent implements Runnable {
                 if (products.isEmpty())
                     return;
 
+                productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
+                purchaseListeners = new ArrayList<>();
+                ArrayList<JButton> purchaseButtons = new ArrayList<>();
                 for (Product product : products) {
-                    productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
                     JButton productButton = new JButton(product.getName());
                     productPage.add(productButton);
+                    productButtons.add(productButton);
                     productButton.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
+                            System.out.println(product.getName());
                             JFrame productFrame = new JFrame(product.getName());
                             productFrame.setVisible(true);
+                            productFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                             JPanel productPanel = new JPanel();
                             Container content = productFrame.getContentPane();
                             JTextField quantity = new JTextField();
@@ -929,27 +931,54 @@ public class Client extends JComponent implements Runnable {
                             JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
                                     product.getSalePrice(), product.getDescription()));
                             info.setEditable(false);
-                            productPanel.add(info);
-                            productPanel.add(purchase);
-                            purchase.addActionListener(new ActionListener() {
-                                    @Override
-                                    public void actionPerformed(ActionEvent e) {
-                                        System.out.println("Sending purchase");
-                                        String success = "n";
-                                        try {
-                                            success = addToCart(product,
-                                                    Integer.parseInt(quantity.getText()));
-                                        } catch (NumberFormatException ex) {
-                                            JOptionPane.showMessageDialog(null, "Enter an integer.",
-                                                    "Error", JOptionPane.ERROR_MESSAGE);
-                                            return;
-                                        }
-                                        if (success.equalsIgnoreCase("n")) {
-                                            JOptionPane.showMessageDialog(null, "Insufficient stock.",
-                                                    "Error", JOptionPane.ERROR_MESSAGE);
-                                        }
+                            JButton addToCart = new JButton("Buy");
+
+                            ActionListener purchaseListener = new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    System.out.println("Sending purchase");
+                                    String success = "n";
+                                    try {
+                                        System.out.println(product.getName() + quantity.getText());
+                                        success = addToCart(product,
+                                                Integer.parseInt(quantity.getText()));
+                                    } catch (NumberFormatException ex) {
+                                        JOptionPane.showMessageDialog(null, "Enter an integer.",
+                                                "Error", JOptionPane.ERROR_MESSAGE);
+                                        return;
                                     }
-                                });
+                                    if (success.equalsIgnoreCase("n")) {
+                                        JOptionPane.showMessageDialog(null, "Insufficient stock.",
+                                                "Error", JOptionPane.ERROR_MESSAGE);
+                                    }
+                                }
+                            };
+                            addToCart.addActionListener(purchaseListener);
+                            purchaseListeners.add(purchaseListener);
+
+                            productButton.add(addToCart);
+                            productPanel.add(info);
+                            productPanel.add(addToCart);
+//                            purchase.addActionListener(new ActionListener() {
+//                                    @Override
+//                                    public void actionPerformed(ActionEvent e) {
+//                                        System.out.println("Sending purchase");
+//                                        String success = "n";
+//                                        try {
+//                                            System.out.println(product.getName() + quantity.getText());
+//                                            success = addToCart(product,
+//                                                    Integer.parseInt(quantity.getText()));
+//                                        } catch (NumberFormatException ex) {
+//                                            JOptionPane.showMessageDialog(null, "Enter an integer.",
+//                                                    "Error", JOptionPane.ERROR_MESSAGE);
+//                                            return;
+//                                        }
+//                                        if (success.equalsIgnoreCase("n")) {
+//                                            JOptionPane.showMessageDialog(null, "Insufficient stock.",
+//                                                    "Error", JOptionPane.ERROR_MESSAGE);
+//                                        }
+//                                    }
+//                                });
                             productPanel.add(quantity);
                             content.add(productPanel);
                             productFrame.pack();
