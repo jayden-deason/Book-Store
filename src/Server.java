@@ -211,6 +211,7 @@ public class Server extends Thread {
             try {
                 String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
+                System.out.println(answer[0]);
                 if (answer[0].equals("-1")) {
                     reader.close();
                     writer.close();
@@ -328,6 +329,7 @@ public class Server extends Thread {
 
     private void addSellerStore(Seller seller, String storeName) throws IOException {
         synchronized(obj) {
+            System.out.println("adding store");
             if (market.getStoreByName(storeName) == null) {
                 market.addStore(new Store(-1, storeName, seller.getEmail()));
                 market.updateAllFiles();

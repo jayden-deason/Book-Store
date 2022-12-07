@@ -287,9 +287,14 @@ public class Client extends JComponent implements Runnable {
                     userBar.updateUI();
                 }
             } else if (e.getSource() == confirmAddStore) {
-                //TODO: code to actually add store
+                String storeName = storeToAdd.getText(); // todo: check if bad storename
+                addStore(storeName);
+                // todo: code to hide text
             } else if (e.getSource() == confirmAddProduct) {
                 //TODO: code to actually add product
+                String productInfo = productToAdd.getText(); // todo: check if bad format
+                addProduct(productInfo);
+                // todo: code to hide text
             } else if (e.getSource() == removeProduct) {
                 JFrame removeProductFrame = new JFrame("Remove Product");
                 removeProductFrame.setSize(400, 500);
@@ -977,9 +982,9 @@ public class Client extends JComponent implements Runnable {
                                     if (success.equalsIgnoreCase("n")) {
                                         JOptionPane.showMessageDialog(null, "Insufficient stock.",
                                                 "Error", JOptionPane.ERROR_MESSAGE);
-                                        } else if (success.equalsIgnoreCase("y")) {
-                                            JOptionPane.showMessageDialog(null, "Added to cart.",
-                                                    "Success", JOptionPane.INFORMATION_MESSAGE);
+                                    } else if (success.equalsIgnoreCase("y")) {
+                                        JOptionPane.showMessageDialog(null, "Added to cart.",
+                                                "Success", JOptionPane.INFORMATION_MESSAGE);
                                     }
                                 }
                             };
@@ -1014,6 +1019,42 @@ public class Client extends JComponent implements Runnable {
 
     public Client() {
         connectSocket();
+    }
+
+    private void addStore(String storeName) {
+        try {
+            writer.println("5," + storeName);
+            System.out.println("adding store");
+            System.out.println("5," + storeName);
+            writer.flush();
+
+            String response = (String) reader.readObject();
+            if (response.equalsIgnoreCase("n")) {
+                JOptionPane.showMessageDialog(null, "Error adding store!", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Added store!", "", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addProduct(String productString) {
+        try {
+            writer.println("3," + productString);
+            writer.flush();
+
+            String response = (String) reader.readObject();
+            if (response.equalsIgnoreCase("n")) {
+                JOptionPane.showMessageDialog(null, "Error adding product!", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Added product!", "", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private ArrayList<Product> getProductsArray() {
