@@ -161,7 +161,6 @@ public class Server extends Thread {
                     this.viewProduct(Integer.parseInt(answer[1]));
 
                 } else if (answer[0].equals("4")) {
-                    System.out.println("Adding to carti");
                     this.addToCart(buyer, Integer.parseInt(answer[1]), Integer.parseInt(answer[2]));
 
                 } else if (answer[0].equals("5")) {
@@ -178,8 +177,10 @@ public class Server extends Thread {
 
                 } else if (answer[0].equals("9")) {
                     this.sendPurchaseHistory(buyer);
+
                 } else if (answer[0].equals("10")) {
                     this.sendBuyerDashboard(buyer, answer[1]);
+
                 }
                 else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
@@ -264,43 +265,49 @@ public class Server extends Thread {
     }
 
     private void sendSellerProducts(Seller seller, String sortType) throws IOException {
-        ArrayList<Product> products = seller.getProducts();
-
-        if (sortType.equals("sales")) {
-            products.sort(Comparator.comparingInt(s -> market.getSalesForProduct(s)));
-        } else if (sortType.equals("customers")) {
-            products.sort(Comparator.comparingInt(s -> market.getCustomersForProduct(s)));
+        ArrayList<Product> products = null;
+        synchronized(obj) {
+            products = seller.getProducts();
         }
-
+        if (sortType.equals("sales")) {
+            synchronized(obj) {
+                products.sort(Comparator.comparingInt(s -> market.getSalesForProduct(s)));
+            }
+        } else if (sortType.equals("customers")) {
+            synchronized(obj) {
+                products.sort(Comparator.comparingInt(s -> market.getCustomersForProduct(s)));
+            }
+        }
         this.writer.writeObject(products);
     }
 
     private void addSellerProduct(Seller seller, String productName, String storeName, String description,
                                   double price, int quantity) throws IOException {
-        Product product = new Product(productName, storeName, description, quantity, price, price, -1);
-
-        if (seller.getStoreNames().contains(storeName)) {
-            market.addProduct(product);
-            market.updateAllFiles();
-            this.writer.writeObject("Y");
-        } else {
-            this.writer.writeObject("N");
+        synchronized(obj) {
+            Product product = new Product(productName, storeName, description, quantity, price, price, -1);
+            if (seller.getStoreNames().contains(storeName)) {
+                market.addProduct(product);
+                market.updateAllFiles();
+                this.writer.writeObject("Y");
+                return;
+            }
         }
+        this.writer.writeObject("N");
     }
 
     private void editSellerProduct(Seller seller, int productIndex, String productName,
                                    String description, double price, int quantity) throws IOException {
 
         try {
-            Product product = market.getProductByIndex(productIndex);
-            product.setName(productName);
-            product.setDescription(description);
-            product.setSalePrice(price);
-            product.setOriginalPrice(price);
-            product.setQuantity(quantity);
-
-            market.updateAllFiles();
-
+            synchronized(obj) {
+                Product product = market.getProductByIndex(productIndex);
+                product.setName(productName);
+                product.setDescription(description);
+                product.setSalePrice(price);
+                product.setOriginalPrice(price);
+                product.setQuantity(quantity);
+                market.updateAllFiles();
+            }
         } catch (Exception e) {
             this.writer.writeObject("N");
             return;
@@ -309,14 +316,15 @@ public class Server extends Thread {
     }
 
     private void addSellerStore(Seller seller, String storeName) throws IOException {
-        if (market.getStoreByName(storeName) == null) {
-            market.addStore(new Store(-1, storeName, seller.getEmail()));
-            market.updateAllFiles();
-
-            this.writer.writeObject("Y");
-        } else {
-            this.writer.writeObject("N");
+        synchronized(obj) {
+            if (market.getStoreByName(storeName) == null) {
+                market.addStore(new Store(-1, storeName, seller.getEmail()));
+                market.updateAllFiles();
+                this.writer.writeObject("Y");
+                return;
+            }
         }
+        this.writer.writeObject("N");
     }
 
     private void getSellerDashboard(Seller seller) {
