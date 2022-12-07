@@ -496,6 +496,7 @@ public class Client extends JComponent implements Runnable {
             public void windowClosed(WindowEvent e) {
                 //TODO: send -1
                 System.out.println("Send -1");
+                writer.println("-1");
             }
             @Override
             public void windowIconified(WindowEvent e) {}

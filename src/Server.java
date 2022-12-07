@@ -129,10 +129,11 @@ public class Server extends Thread {
                 String[] answer = userChoice.split(",");
                 System.out.println(answer[0]);
                 if (answer[0].equals("-1")) {
+                    System.out.println("Closing socket!");
                     reader.close();
                     writer.close();
                     //Make concurrent
-                    this.sockets.remove(this.socket);
+                    Server.sockets.remove(this.socket);
                     this.socket.close();
                     return;
                 } else if (answer[0].equals("1")) {
