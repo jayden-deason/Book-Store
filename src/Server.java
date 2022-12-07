@@ -102,12 +102,15 @@ public class Server extends Thread {
                         }
                     }
                 }
+            } catch (SocketException e) {
+                System.out.println("Socket Exception! Closing connection.");
+                break;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
     }
+
 
     public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
         //Port Number is 1001 and host is "localhost"
@@ -136,7 +139,7 @@ public class Server extends Thread {
         }
     }
 
-    public void runBuyer(Buyer buyer) {
+    public void runBuyer(Buyer buyer) throws SocketException {
         while (true) {
             System.out.println("Loop ran");
             try {
@@ -186,10 +189,14 @@ public class Server extends Thread {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
+            } catch (SocketException e) {
+                throw e;
             } catch (Exception e) {
                 //Sends Client "!" to signify special error (Invalid choice at high level of program)
                 try {
                     this.writer.writeObject((String) "!");
+                } catch (SocketException ex) {
+                    throw ex;
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -198,7 +205,7 @@ public class Server extends Thread {
         }
     }
 
-    public void runSeller(Seller seller) {
+    public void runSeller(Seller seller) throws SocketException {
         while (true) {
             try {
                 String userChoice = reader.readLine();
@@ -249,14 +256,17 @@ public class Server extends Thread {
                 } else if (answer[0].equals("9")) {
                     // import from file
                     this.importProductsFromFile(seller, userChoice.substring(2).split("\n"));
-                }
-                else {
+                } else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
+            } catch (SocketException e) {
+                throw e;
             } catch (Exception e) {
                 try {
                     this.writer.writeObject((String) "!");
+                } catch (SocketException ex) {
+                    throw ex;
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

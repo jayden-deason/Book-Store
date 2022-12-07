@@ -31,7 +31,7 @@ public class Client extends JComponent implements Runnable {
     private JButton viewDashboard, search;
     private JButton viewShoppingCart, viewPurchaseHistory, checkout, purchase, exportToFile;
     private JButton viewStores, viewProducts, addStore, addProduct, removeProduct, editProduct, exportSellerFile,
-    importSellerFile;
+            importSellerFile;
     private JButton confirmAddProduct, confirmAddStore;
     private ArrayList<JButton> productButtons = new ArrayList<>();
     private ArrayList<ActionListener> purchaseListeners;
@@ -147,7 +147,6 @@ public class Client extends JComponent implements Runnable {
 
                 content.add(scrollPanel);
             } else if (e.getSource() == viewShoppingCart) {
-
                 HashMap<Product, Integer> cart = getShoppingCart();
 
                 if (cart.isEmpty()) {
@@ -185,6 +184,8 @@ public class Client extends JComponent implements Runnable {
                             if (successCheck.equalsIgnoreCase("n")) {
                                 JOptionPane.showMessageDialog(null, "Not enough stock. Decrease" +
                                         " the amount in your cart.", "Error", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Changed quantity!", "", JOptionPane.INFORMATION_MESSAGE);
                             }
                         }
                     });
@@ -241,16 +242,20 @@ public class Client extends JComponent implements Runnable {
                         @Override
                         public void mouseClicked(MouseEvent e) {
                         }
+
                         @Override
                         public void mousePressed(MouseEvent e) {
                         }
+
                         @Override
                         public void mouseReleased(MouseEvent e) {
                         }
+
                         @Override
                         public void mouseEntered(MouseEvent e) {
                             infoText.setText("Product info");
                         }
+
                         @Override
                         public void mouseExited(MouseEvent e) {
                             infoText.setText("");
@@ -348,6 +353,28 @@ public class Client extends JComponent implements Runnable {
                 content.add(panel2, BorderLayout.CENTER);
                 editProductFrame.pack();
             } else if (e.getSource() == search) {
+                ArrayList<Product> products;
+
+                if (searchType.equalsIgnoreCase("name")) {
+                    System.out.println("name search");
+                    products = search(searchText.getText() + ", , ");
+                } else if (searchType.equalsIgnoreCase("store")) {
+                    products = search(" ," + searchText.getText() + ", ");
+                } else if (searchType.equalsIgnoreCase("description")) {
+                    products = search(" , ," + searchText.getText());
+                } else {
+                    System.out.println("dead");
+                    products = null;
+                }
+
+                System.out.println(products.isEmpty());
+
+                if (products == null || products.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No matching results.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 JFrame searchFrame = new JFrame("Search Results");
                 searchFrame.setVisible(true);
                 JPanel results = new JPanel();
@@ -355,24 +382,6 @@ public class Client extends JComponent implements Runnable {
                 JTextField itemsFound = new JTextField("# results for " + searchType + " search:");
                 itemsFound.setEditable(false);
                 Container searchContainer = searchFrame.getContentPane();
-
-                ArrayList<Product> products;
-
-                if (searchType.equalsIgnoreCase("name")) {
-                    products = search(searchText.getText() + ",,");
-                } else if (searchType.equalsIgnoreCase("store")) {
-                    products = search("," + searchText.getText() + ",");
-                } else if (searchType.equalsIgnoreCase("description")) {
-                    products = search(",," + searchText.getText());
-                } else {
-                    products = null;
-                }
-
-                if (products.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "No matching results.",
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
 
                 int item = 0;
                 for (Product product : products) {
@@ -413,6 +422,8 @@ public class Client extends JComponent implements Runnable {
                     if (success.equalsIgnoreCase("n")) {
                         JOptionPane.showMessageDialog(null, "One or more books have insufficient " +
                                 "stock.", "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Checked out successfully!", "", JOptionPane.INFORMATION_MESSAGE);
                     }
                 }
             } else if (e.getSource() == importSellerFile) {
@@ -467,9 +478,8 @@ public class Client extends JComponent implements Runnable {
                 content.add(filePath, BorderLayout.PAGE_START);
                 content.add(storePanel);
                 exportFrame.pack();
-            }
-            /*else if (e.getSource() == export) {
-                boolean success = exportToFile( *.getText());
+            } else if (e.getSource() == exportToFile) {
+                boolean success = exportToFile("purchases.txt");
 
                 if (success) {
                     JOptionPane.showMessageDialog(null, "File Exported", "Export",
@@ -478,7 +488,7 @@ public class Client extends JComponent implements Runnable {
                     JOptionPane.showMessageDialog(null, "A file with that name already exists. " +
                             "Choose another", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-            }*/
+            }
         }
     };
 
@@ -488,23 +498,33 @@ public class Client extends JComponent implements Runnable {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.addWindowListener(new WindowListener() {
             @Override
-            public void windowOpened(WindowEvent e) {}
+            public void windowOpened(WindowEvent e) {
+            }
+
             @Override
-            public void windowClosing(WindowEvent e) {}
+            public void windowClosing(WindowEvent e) {
+            }
+
             @Override
             public void windowClosed(WindowEvent e) {
-                System.out.println("Send -1");
-                writer.println("-1");
-                writer.flush();
+                closeSocket();
             }
+
             @Override
-            public void windowIconified(WindowEvent e) {}
+            public void windowIconified(WindowEvent e) {
+            }
+
             @Override
-            public void windowDeiconified(WindowEvent e) {}
+            public void windowDeiconified(WindowEvent e) {
+            }
+
             @Override
-            public void windowActivated(WindowEvent e) {}
+            public void windowActivated(WindowEvent e) {
+            }
+
             @Override
-            public void windowDeactivated(WindowEvent e) {}
+            public void windowDeactivated(WindowEvent e) {
+            }
         });
         frame.setVisible(true);
         Container container = frame.getContentPane();
@@ -712,8 +732,11 @@ public class Client extends JComponent implements Runnable {
         login.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (socket.isClosed()) {
+                    connectSocket();
+                }
                 if (userType) { //logging in as buyer
-                    writer.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
+                    writer.println(String.format("%d,%d,%s,%s", 0, 0, username.getText(), password.getText()));
                     System.out.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
                     writer.flush();
                     String response;
@@ -731,7 +754,7 @@ public class Client extends JComponent implements Runnable {
                         return;
                     }
                 } else { //logging in as seller
-                    writer.printf("%d,%d,%s,%s\n", 1, 0, username.getText(), password.getText());
+                    writer.println(String.format("%d,%d,%s,%s", 1, 0, username.getText(), password.getText()));
                     writer.flush();
                     String response;
                     try {
@@ -807,7 +830,7 @@ public class Client extends JComponent implements Runnable {
                         return;
                     }
                 } else {
-                    writer.printf("%d,%d,%s,%s\n", 1, 1, user, pass);
+                    writer.println(String.format("%d,%d,%s,%s", 1, 1, user, pass));
                     writer.flush();
                     String response;
                     try {
@@ -863,9 +886,7 @@ public class Client extends JComponent implements Runnable {
         logout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Send -1");
-                writer.println("-1");
-                writer.flush();
+                closeSocket();
 
                 loggedIn = false;
                 isBuyer.setVisible(true);
@@ -910,7 +931,7 @@ public class Client extends JComponent implements Runnable {
                     products = getAllProducts("quantity");
                 }
 
-                if (products.isEmpty())
+                if (products == null || products.isEmpty())
                     return;
 
                 productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
@@ -934,13 +955,13 @@ public class Client extends JComponent implements Runnable {
                             JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
                                     product.getSalePrice(), product.getDescription()));
                             info.setEditable(false);
-                            JButton addToCart = new JButton("Buy");
+                            JButton addToCart = new JButton("Add to Cart");
 
                             ActionListener purchaseListener = new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     System.out.println("Sending purchase");
-                                    String success = "n";
+                                    String success;
                                     try {
                                         System.out.println(product.getName() + quantity.getText());
                                         success = addToCart(product,
@@ -953,6 +974,9 @@ public class Client extends JComponent implements Runnable {
                                     if (success.equalsIgnoreCase("n")) {
                                         JOptionPane.showMessageDialog(null, "Insufficient stock.",
                                                 "Error", JOptionPane.ERROR_MESSAGE);
+                                        } else if (success.equalsIgnoreCase("y")) {
+                                            JOptionPane.showMessageDialog(null, "Added to cart.",
+                                                    "Success", JOptionPane.INFORMATION_MESSAGE);
                                     }
                                 }
                             };
@@ -986,20 +1010,10 @@ public class Client extends JComponent implements Runnable {
     }
 
     public Client() {
-        try {
-            socket = new Socket("localhost", 1001);
-            System.out.println("sent request");
-
-            writer = new PrintWriter(this.socket.getOutputStream());
-            reader = new ObjectInputStream(this.socket.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        connectSocket();
     }
 
     private ArrayList<Product> getProductsArray() {
-        writer.flush();
-
         ArrayList<Product> products;
 
         try {
@@ -1013,8 +1027,6 @@ public class Client extends JComponent implements Runnable {
     }
 
     private String getStringArray() {
-        writer.flush();
-
         String response;
         try {
             response = (String) reader.readObject();
@@ -1027,8 +1039,6 @@ public class Client extends JComponent implements Runnable {
     }
 
     private HashMap<Product, Integer> getProductHash() {
-        writer.flush();
-
         HashMap<Product, Integer> products;
 
         try {
@@ -1044,18 +1054,21 @@ public class Client extends JComponent implements Runnable {
 
     public ArrayList<Product> getAllProducts(String condition) {
         writer.println("1," + condition);
+        writer.flush();
         return getProductsArray();
     }
 
     public ArrayList<Product> search(String query) {
-        writer.printf("%d,%s", 2, query);
+        System.out.println(query);
+        writer.println(String.format("%d,%s", 2, query));
+        writer.flush();
         return getProductsArray();
     }
 
     //TODO: fix visv being silly and sending null
     public String addToCart(Product product, int quantity) {
-        System.out.printf("4,%d,%d\n", product.getIndex(), quantity);
-        writer.println("4," + product.getIndex() + "," + quantity);
+        writer.println(String.format("4,%d,%d", product.getIndex(), quantity));
+        writer.flush();
         return getStringArray();
     }
 
@@ -1091,22 +1104,52 @@ public class Client extends JComponent implements Runnable {
 
     public String makePurchase() {
         writer.println("6");
+        writer.flush();
         return getStringArray();
     }
 
     public HashMap<Product, Integer> getShoppingCart() {
         writer.println("7");
+        writer.flush();
         return getProductHash();
     }
 
     public String editCart(Product product, int newQuantity) {
-//        writer.printf("8,%d,%d", product.getIndex(), newQuantity);
-        writer.println("8," + product.getIndex() + "," + newQuantity);
+        writer.println(String.format("8,%d,%d", product.getIndex(), newQuantity));
+        writer.flush();
         return getStringArray();
     }
 
     public HashMap<Product, Integer> getPurchaseHistory() {
         writer.println("9");
+        writer.flush();
         return getProductHash();
+    }
+
+    public void closeSocket() {
+        try {
+            System.out.println("Send -1");
+            writer.println("-1");
+            writer.flush();
+
+            writer.close();
+            reader.close();
+            socket.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void connectSocket() {
+        try {
+            socket = new Socket("localhost", 1001);
+            System.out.println("sent request");
+
+            writer = new PrintWriter(this.socket.getOutputStream());
+            reader = new ObjectInputStream(this.socket.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
