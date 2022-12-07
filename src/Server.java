@@ -334,18 +334,27 @@ public class Server extends Thread {
     private void sendAllBuyerProducts(String sortType, Buyer buyer) {
         try {
             ArrayList<Product> products;
+
             if (sortType.equals("quantity")) {
-                products = this.market.sortByQuantity();
+                synchronized(obj) {
+                    products = this.market.sortByQuantity();
+                }
             } else if (sortType.equals("price")) {
-                products = this.market.sortByPrice();
+                synchronized(obj) {
+                    products = this.market.sortByPrice();
+                }
             } else if (sortType.equals("sales")) {
                 //TODO: fix
-                products = this.market.sortByPrice();
+                synchronized(obj) {
+                    products = this.market.sortByPrice();
+                }
             } else {
-                products = this.market.getAllProducts(true);
+                synchronized(obj) {
+                    products = this.market.getAllProducts(true);
+                }
             }
             if (sortType.equals("history")) {
-                this.sendPurchaseHistory(buyer);
+                    this.sendPurchaseHistory(buyer);
             } else {
                 this.writer.writeObject((ArrayList<Product>) products);
             }
@@ -363,13 +372,21 @@ public class Server extends Thread {
         try {
             ArrayList<Product> products;
             if (sortType.equals("quantity")) {
-                products = this.market.sortByQuantity();
+                synchronized(obj) {
+                    products = this.market.sortByQuantity();
+                }
             } else if (sortType.equals("price")) {
-                products = this.market.sortByPrice();
+                synchronized(obj) {
+                    products = this.market.sortByPrice();
+                }
             } else if (sortType.equals("sales")) {
-                products = this.market.sortBySales();
+                synchronized(obj) {
+                    products = this.market.sortBySales();
+                }
             } else {
-                products = this.market.getAllProducts(true);
+                synchronized(obj) {
+                    products = this.market.getAllProducts(true);
+                }
             }
             this.writer.writeObject((ArrayList<Product>) products);
             System.out.println("Sent products, sort type = " + sortType);
@@ -389,8 +406,12 @@ public class Server extends Thread {
             if (searchContents[0].equals("")) searchContents[0] = null;
             if (searchContents[1].equals("")) searchContents[1] = null;
             if (searchContents[2].equals("")) searchContents[2] = null;
-            this.writer.writeObject(market.matchConditions(searchContents[0], searchContents[1],
-                    searchContents[2]));
+            ArrayList<Product> searchResults = null;
+            synchronized(obj) {
+                searchResults = market.matchConditions(searchContents[0], searchContents[1],
+                        searchContents[2]);
+            }
+            this.writer.writeObject((ArrayList<Product>) searchResults);
             System.out.println("Sent search results");
         } catch (Exception e) {
             try {
@@ -404,12 +425,15 @@ public class Server extends Thread {
 
     private void viewProduct(int indexOfProduct) {
         try {
-            this.writer.writeObject(this.market.getAllProducts(false).get(indexOfProduct));
+            Product product = null;
+            synchronized(obj) {
+                product = this.market.getAllProducts(false).get(indexOfProduct);
+            }
+            this.writer.writeObject(product);
             System.out.println("Sent product #" + indexOfProduct);
         } catch (Exception e) {
             try {
                 this.writer.writeObject((Product) null);
-
             } catch (Exception ex) {
                 e.printStackTrace();
             }
@@ -419,18 +443,19 @@ public class Server extends Thread {
     private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
         System.out.println("1");
         try {
-            Product p = this.market.getAllProducts(false).get(indexOfProduct);
+            Product p;
+            synchronized(obj) {
+                p = this.market.getAllProducts(false).get(indexOfProduct);
+            }
             if (p.getQuantity() < quantity) {
-                System.out.println("In if");
                 //Error: quantity trying to add to cart is more than there are of that product
                 this.writer.writeObject((String) "N");
                 return;
             }
-            System.out.println("2");
-            buyer.addProductToCart(p.getIndex(), quantity);
-            System.out.println("3");
-            market.updateAllFiles();
-            System.out.println("4");
+            synchronized(obj) {
+                buyer.addProductToCart(p.getIndex(), quantity);
+                market.updateAllFiles();
+            }
             this.writer.writeObject((String) "Y");
             System.out.printf("Added product %d to cart\n", indexOfProduct);
             //Sends new shopping cart
@@ -446,13 +471,18 @@ public class Server extends Thread {
     //This function sends back an ArrayList of all the strings the need to be in the exported file and sends it
     private void exportToFile(Buyer buyer) {
         try {
-            ArrayList<String> purchaseHistory = buyer.getPurchaseHistory();
-            ArrayList<String> fileInfo = new ArrayList<String>();
+            ArrayList<String> purchaseHistory = null;
+            synchronized(obj) {
+                purchaseHistory = buyer.getPurchaseHistory();
+            }
+            ArrayList<String> fileInfo = new ArrayList<String>();;
             for (String item : purchaseHistory) {
                 int idx = Integer.parseInt(item.split(":")[0]);
                 int quantity = Integer.parseInt(item.split(":")[1]);
-                Product p = market.getProductByIndex(idx);
-
+                Product p = null;
+                synchronized(obj) {
+                    p = market.getProductByIndex(idx);
+                }
                 String s = String.format("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
                         p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
                 fileInfo.add(s);
@@ -472,10 +502,12 @@ public class Server extends Thread {
 
     private void makePurchase(Buyer buyer) {
         try {
-            market.makePurchase(buyer);
+            synchronized(obj) {
+                this.market.makePurchase(buyer);
+                this.market.updateAllFiles();
+            }
             this.writer.writeObject((String) "Y");
             System.out.println("Made purchase");
-
         } catch (Exception e) {
             try {
                 this.writer.writeObject((String) "N");
@@ -487,16 +519,21 @@ public class Server extends Thread {
 
     private void sendShoppingCart(Buyer buyer) {
         try {
-            ArrayList<String> shoppingCart = buyer.getShoppingCart();
+            ArrayList<String> shoppingCart = null;
+            synchronized(obj) {
+                shoppingCart = buyer.getShoppingCart();
+            }
             HashMap<Product, Integer> shoppingCartProducts = new HashMap<Product, Integer>();
             for (int i = 0; i < shoppingCart.size(); i++) {
-                Product p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
+                Product p = null;
+                synchronized(obj) {
+                    p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
+                }
                 int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
                 shoppingCartProducts.put(p, quantity);
             }
             this.writer.writeObject((HashMap<Product, Integer>) shoppingCartProducts);
             System.out.println("Sent shopping cart");
-            ;
         } catch (Exception e) {
             try {
                 this.writer.writeObject((HashMap<Product, Integer>) null);
@@ -508,19 +545,27 @@ public class Server extends Thread {
 
     private void changeShoppingCartQuantity(int indexOfProduct, int newQuantity, Buyer buyer) {
         try {
-            ArrayList<String> products = buyer.getShoppingCart();
+            ArrayList<String> products = null;
+            synchronized(obj) {
+                products = buyer.getShoppingCart();
+            }
             boolean exists = false;
             for (int i = 0; i < products.size(); i++) {
                 if (indexOfProduct == Integer.parseInt(products.get(i).split(":")[0])) {
                     exists = true;
-                    Product p = market.getProductByIndex(Integer.parseInt(products.get(i).split(":")[0]));
+                    Product p = null;
+                    synchronized(obj) {
+                        p = market.getProductByIndex(Integer.parseInt(products.get(i).split(":")[0]));
+                    }
                     //Sends Client "N" to signify an error (Invalid Quantity)
                     if (p.getQuantity() < newQuantity) {
                         writer.writeObject((String) "N");
                         return;
                     }
-                    buyer.editProductQuantity(indexOfProduct, newQuantity);
-                    market.updateAllFiles();
+                    synchronized(obj) {
+                        buyer.editProductQuantity(indexOfProduct, newQuantity);
+                        market.updateAllFiles();
+                    }
                     //Success
                     writer.writeObject((String) "Y");
                     System.out.println("Changed cart quantity");
