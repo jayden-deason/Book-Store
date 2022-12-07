@@ -187,6 +187,8 @@ public class Client extends JComponent implements Runnable {
                             } else {
                                 JOptionPane.showMessageDialog(null, "Changed quantity!", "", JOptionPane.INFORMATION_MESSAGE);
                             }
+                            shoppingCartFrame.dispose();
+                            viewShoppingCart.doClick();
                         }
                     });
                     content.add(name);
@@ -950,8 +952,10 @@ public class Client extends JComponent implements Runnable {
                             productFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                             JPanel productPanel = new JPanel();
                             Container content = productFrame.getContentPane();
-                            JTextField quantity = new JTextField();
-                            quantity.setPreferredSize(new Dimension(20, 25));
+//                            JTextField quantity = new JTextField();
+                            SpinnerModel value = new SpinnerNumberModel(1, 0, product.getQuantity(), 1);
+                            JSpinner quantity = new JSpinner(value);
+                            quantity.setPreferredSize(new Dimension(30, 25));
                             JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
                                     product.getSalePrice(), product.getDescription()));
                             info.setEditable(false);
@@ -963,9 +967,8 @@ public class Client extends JComponent implements Runnable {
                                     System.out.println("Sending purchase");
                                     String success;
                                     try {
-                                        System.out.println(product.getName() + quantity.getText());
                                         success = addToCart(product,
-                                                Integer.parseInt(quantity.getText()));
+                                                (Integer) quantity.getValue());
                                     } catch (NumberFormatException ex) {
                                         JOptionPane.showMessageDialog(null, "Enter an integer.",
                                                 "Error", JOptionPane.ERROR_MESSAGE);
