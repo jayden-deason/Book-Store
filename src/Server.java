@@ -2,6 +2,7 @@ import javax.print.attribute.HashPrintJobAttributeSet;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
@@ -412,15 +413,21 @@ public class Server extends Thread {
     private void sendSearch(String search) {
         try {
             //Format for search should be productName,storeName,Description
+            System.out.println("searching...");
             String[] searchContents = search.split(",");
-            if (searchContents[0].equals(" ")) searchContents[0] = null;
-            if (searchContents[1].equals(" ")) searchContents[1] = null;
-            if (searchContents[2].equals(" ")) searchContents[2] = null;
+            System.out.println(Arrays.toString(searchContents));
+            if (searchContents[0].equals("n/a")) searchContents[0] = null;
+            if (searchContents[1].equals("n/a")) searchContents[1] = null;
+            if (searchContents[2].equals("n/a")) searchContents[2] = null;
             ArrayList<Product> searchResults = null;
+//            System.out.println("blah");
             synchronized(obj) {
+//                System.out.println("got here 1");
                 searchResults = market.matchConditions(searchContents[0], searchContents[1],
                         searchContents[2]);
+                System.out.println(searchResults);
             }
+//            System.out.println("blah2");
             this.writer.writeObject((ArrayList<Product>) searchResults);
             System.out.println("Sent search results");
         } catch (Exception e) {

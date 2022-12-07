@@ -574,13 +574,16 @@ public class Market implements java.io.Serializable{
      */
     public ArrayList<Product> matchConditions(String name, String storeName, String description) {
         ArrayList<Product> out = new ArrayList<>();
+        if (name != null) name = name.toLowerCase();
+        if (storeName != null) storeName = storeName.toLowerCase();
+        if (description != null) description = description.toLowerCase();
 
         for (Product p : products) {
-            if (name == null || p.getName().equalsIgnoreCase(name)) {
-                if (storeName == null || p.getStoreName().equalsIgnoreCase(storeName)) {
+            if (name == null || p.getName().toLowerCase().contains(name)) {
+                if (storeName == null || p.getStoreName().toLowerCase().contains(storeName)) {
                     // decided to do .contains() for description instead of equals...
                     // doesn't really make sense to have to type the entire description?
-                    if (description == null || p.getDescription().contains(description)) {
+                    if (description == null || p.getDescription().toLowerCase().contains(description)) {
                         out.add(p);
                     }
                 }
