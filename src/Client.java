@@ -102,7 +102,7 @@ public class Client extends JComponent implements Runnable {
                     public void actionPerformed(ActionEvent e) {
                         System.out.println("By purchase history");
 
-                        ArrayList<Product> products = getAllProducts("history");
+                        ArrayList<Product> products = getAllProducts("history"); // todo: cast to hashmap
 
                         int item = 0;
                         panel.removeAll();
@@ -357,17 +357,17 @@ public class Client extends JComponent implements Runnable {
 
                 if (searchType.equalsIgnoreCase("name")) {
                     System.out.println("name search");
-                    products = search(searchText.getText() + ", , ");
+                    products = search(searchText.getText() + ",n/a,n/a");
                 } else if (searchType.equalsIgnoreCase("store")) {
-                    products = search(" ," + searchText.getText() + ", ");
+                    products = search("n/a," + searchText.getText() + ",n/a");
                 } else if (searchType.equalsIgnoreCase("description")) {
-                    products = search(" , ," + searchText.getText());
+                    products = search("n/a,n/a," + searchText.getText());
                 } else {
                     System.out.println("dead");
                     products = null;
                 }
 
-                System.out.println(products.isEmpty());
+//                System.out.println(products.isEmpty());
 
                 if (products == null || products.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "No matching results.",
@@ -385,7 +385,7 @@ public class Client extends JComponent implements Runnable {
 
                 int item = 0;
                 for (Product product : products) {
-                    productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
+                    productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4)); //todo: breaks if products.size() == 1
                     JButton productButton = new JButton(product.getName());
                     productPage.add(productButton);
                     productButton.addActionListener(new ActionListener() {
@@ -1060,7 +1060,7 @@ public class Client extends JComponent implements Runnable {
 
     public ArrayList<Product> search(String query) {
         System.out.println(query);
-        writer.println(String.format("%d,%s", 2, query));
+        writer.println("2," + query);
         writer.flush();
         return getProductsArray();
     }
