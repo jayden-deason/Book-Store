@@ -1,3 +1,5 @@
+import jdk.security.jarsigner.JarSigner;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -40,6 +42,7 @@ public class Client extends JComponent implements Runnable {
     private JTextField password;
     private JTextField productToAdd, storeToAdd;
     private JTextField searchText;
+    private JSpinner quantity;
 
     private JComboBox<String> searchOptions, sortMarket;
 
@@ -673,6 +676,8 @@ public class Client extends JComponent implements Runnable {
         confirmAddStore.setPreferredSize(new Dimension(45, 25));
         confirmAddStore.addActionListener(actionListener);
 
+        quantity = new JSpinner();
+
         topBar.add(username);
         topBar.add(password);
         topBar.add(login);
@@ -788,6 +793,8 @@ public class Client extends JComponent implements Runnable {
                     viewPurchaseHistory.setVisible(true);
                     checkout.setVisible(true);
                     exportToFile.setVisible(true);
+                    purchase.setVisible(true);
+                    quantity.setVisible(true);
                 } else if (!status) {
                     viewStores.setVisible(true);
                     viewProducts.setVisible(true);
@@ -797,6 +804,8 @@ public class Client extends JComponent implements Runnable {
                     editProduct.setVisible(true);
                     importSellerFile.setVisible(true);
                     exportSellerFile.setVisible(true);
+                    purchase.setVisible(false);
+                    quantity.setVisible(false);
                 }
                 System.out.println("Updated");
                 updateMarket.doClick();
@@ -954,7 +963,7 @@ public class Client extends JComponent implements Runnable {
                             Container content = productFrame.getContentPane();
 //                            JTextField quantity = new JTextField();
                             SpinnerModel value = new SpinnerNumberModel(1, 0, product.getQuantity(), 1);
-                            JSpinner quantity = new JSpinner(value);
+                            quantity = new JSpinner(value);
                             quantity.setPreferredSize(new Dimension(30, 25));
                             JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
                                     product.getSalePrice(), product.getDescription()));
@@ -992,6 +1001,13 @@ public class Client extends JComponent implements Runnable {
                             productPanel.add(quantity);
                             content.add(productPanel);
                             productFrame.pack();
+                            if (userType) {
+                                quantity.setVisible(true);
+                                addToCart.setVisible(true);
+                            } else {
+                                quantity.setVisible(false);
+                                addToCart.setVisible(false);
+                            }
                         }
                     });
                 }
