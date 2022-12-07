@@ -9,7 +9,7 @@ import java.util.*;
  * @author Jayden Deason - lab sec 001
  * @version November 14, 2022
  */
-public class Buyer extends User implements java.io.Serializable{
+public class Buyer extends User implements java.io.Serializable {
     private int index; // index of user in csv
     private ArrayList<String> shoppingCart; // list of strings describing shopping cart contents
     private ArrayList<String> purchaseHistory; // list of strings describing purchase history
@@ -119,7 +119,19 @@ public class Buyer extends User implements java.io.Serializable{
      * @param quantity     quantity to add to cart
      */
     public void addProductToCart(int productIndex, int quantity) {
+
         shoppingCart.add(productIndex + ":" + quantity);
+
+    }
+
+    private int quantityInCart(int productIndex) {
+        for (String item : shoppingCart) {
+            if (Integer.parseInt(item.split(":")[0]) == productIndex) {
+                return Integer.parseInt(item.split(":")[1]);
+            }
+        }
+
+        return -1;
     }
 
     /**
@@ -131,7 +143,11 @@ public class Buyer extends User implements java.io.Serializable{
     public void editProductQuantity(int productIndex, int newQuantity) {
         for (int i = 0; i < shoppingCart.size(); i++) {
             if (Integer.parseInt(shoppingCart.get(i).split(":")[0]) == productIndex) {
-                shoppingCart.set(i, productIndex + ":" + newQuantity);
+                if (newQuantity <= 0) {
+                    shoppingCart.remove(i--);
+                } else {
+                    shoppingCart.set(i, productIndex + ":" + newQuantity);
+                }
             }
         }
 
@@ -284,6 +300,7 @@ public class Buyer extends User implements java.io.Serializable{
 
     /**
      * Return true if a buyer has purchased the item with this index
+     *
      * @param productIndex the product's index
      * @return if the index is in the buyer's purchase history
      */
