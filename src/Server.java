@@ -586,12 +586,18 @@ public class Server extends Thread {
 
     private void sendPurchaseHistory(Buyer buyer) {
         try {
-            ArrayList<String> purchaseHistory = buyer.getPurchaseHistory();
+            ArrayList<String> purchaseHistory = null;
+            synchronized(obj) {
+                purchaseHistory = buyer.getPurchaseHistory();
+            }
             HashMap<Product, Integer> previousProducts = new HashMap<Product, Integer>();
             for (String item : purchaseHistory) {
                 int idx = Integer.parseInt(item.split(":")[0]);
                 int quantity = Integer.parseInt(item.split(":")[1]);
-                Product p = this.market.getProductByIndex(idx);
+                Product p = null;
+                synchronized(obj) {
+                    p = this.market.getProductByIndex(idx);
+                }
                 if(previousProducts.containsKey(p)) {
                     previousProducts.put(p, previousProducts.get(p) + quantity);
                 }
@@ -614,9 +620,17 @@ public class Server extends Thread {
     private void sendBuyerDashboard(Buyer buyer, String sortType) throws IOException {
         ArrayList<String> out = null;
         if (sortType.equals("sales")) {
-            writer.writeObject(buyerDashboardForStoreList(market.sortStoresByProductsSold()));
+            ArrayList<String> dashboard = null;
+            synchronized(obj) {
+                dashboard = buyerDashboardForStoreList(market.sortStoresByProductsSold());
+            }
+            writer.writeObject(dashboard);
         } else if (sortType.equals("history")) {
-            writer.writeObject(buyerDashboardForStoreList(buyer.sortStoresByPurchaseHistory(market)));
+            ArrayList<String> dashboard = null;
+            synchronized(obj) {
+                dashboard = buyerDashboardForStoreList(buyer.sortStoresByPurchaseHistory(market));
+            }
+            writer.writeObject(dashboard);
         } else {
             writer.writeObject(null);
         }
@@ -661,8 +675,11 @@ public class Server extends Thread {
             writer.writeObject(null);
             return;
         }
-
-        writer.writeObject(seller.getDashboardStrings(sortType, market));
+        ArrayList<String> dashboard = null;
+        synchronized(obj) {
+            dashboard = seller.getDashboardStrings(sortType, market);
+        }
+        writer.writeObject(dashboard);
     }
 
     private void sendProductStringsForFile(Seller seller, String storeName) throws IOException {
@@ -670,8 +687,10 @@ public class Server extends Thread {
             writer.writeObject(null);
             return;
         }
-
-        Store store = seller.getStoreByName(storeName);
+        Store store = null;
+        synchronized(obj) {
+            store = seller.getStoreByName(storeName);
+        }
         ArrayList<String> out = new ArrayList<>();
         for (Product p : store.getProducts()) {
             out.add(p.toString());
@@ -682,13 +701,16 @@ public class Server extends Thread {
 
     private void importProductsFromFile(Seller seller, String[] lines) throws IOException {
         for (String line : lines) {
-            Product newProduct = new Product(line);
-            if (seller.getStoreNames().contains(newProduct.getStoreName())) {
-                market.addProduct(newProduct);
+            synchronized(obj) {
+                Product newProduct = new Product(line);
+                if (seller.getStoreNames().contains(newProduct.getStoreName())) {
+                    market.addProduct(newProduct);
+                }
             }
         }
-
-        market.updateAllFiles();
+        synchronized(obj) {
+            market.updateAllFiles();
+        }
         writer.writeObject("Y");
 
         // TODO: send N if error
