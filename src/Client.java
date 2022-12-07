@@ -185,6 +185,8 @@ public class Client extends JComponent implements Runnable {
                             if (successCheck.equalsIgnoreCase("n")) {
                                 JOptionPane.showMessageDialog(null, "Not enough stock. Decrease" +
                                         " the amount in your cart.", "Error", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Changed quantity!", "", JOptionPane.INFORMATION_MESSAGE);
                             }
                         }
                     });
@@ -417,6 +419,8 @@ public class Client extends JComponent implements Runnable {
                     if (success.equalsIgnoreCase("n")) {
                         JOptionPane.showMessageDialog(null, "One or more books have insufficient " +
                                 "stock.", "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Checked out successfully!", "", JOptionPane.INFORMATION_MESSAGE);
                     }
                 }
             } else if (e.getSource() == importSellerFile) {
@@ -948,7 +952,7 @@ public class Client extends JComponent implements Runnable {
                             JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
                                     product.getSalePrice(), product.getDescription()));
                             info.setEditable(false);
-                            JButton addToCart = new JButton("Buy");
+                            JButton addToCart = new JButton("Add to Cart");
 
                             ActionListener purchaseListener = new ActionListener() {
                                 @Override
@@ -968,7 +972,7 @@ public class Client extends JComponent implements Runnable {
                                         JOptionPane.showMessageDialog(null, "Insufficient stock.",
                                                 "Error", JOptionPane.ERROR_MESSAGE);
                                         } else if (success.equalsIgnoreCase("y")) {
-                                            JOptionPane.showMessageDialog(null, "Successfully added to cart.",
+                                            JOptionPane.showMessageDialog(null, "Added to cart.",
                                                     "Success", JOptionPane.INFORMATION_MESSAGE);
                                     }
                                 }
@@ -1007,8 +1011,6 @@ public class Client extends JComponent implements Runnable {
     }
 
     private ArrayList<Product> getProductsArray() {
-        writer.flush();
-
         ArrayList<Product> products;
 
         try {
@@ -1022,8 +1024,6 @@ public class Client extends JComponent implements Runnable {
     }
 
     private String getStringArray() {
-        writer.flush();
-
         String response;
         try {
             response = (String) reader.readObject();
@@ -1036,8 +1036,6 @@ public class Client extends JComponent implements Runnable {
     }
 
     private HashMap<Product, Integer> getProductHash() {
-        writer.flush();
-
         HashMap<Product, Integer> products;
 
         try {
@@ -1053,17 +1051,20 @@ public class Client extends JComponent implements Runnable {
 
     public ArrayList<Product> getAllProducts(String condition) {
         writer.println("1," + condition);
+        writer.flush();
         return getProductsArray();
     }
 
     public ArrayList<Product> search(String query) {
         writer.println(String.format("%d,%s", 2, query));
+        writer.flush();
         return getProductsArray();
     }
 
     //TODO: fix visv being silly and sending null
     public String addToCart(Product product, int quantity) {
         writer.println(String.format("4,%d,%d", product.getIndex(), quantity));
+        writer.flush();
         return getStringArray();
     }
 
@@ -1099,21 +1100,25 @@ public class Client extends JComponent implements Runnable {
 
     public String makePurchase() {
         writer.println("6");
+        writer.flush();
         return getStringArray();
     }
 
     public HashMap<Product, Integer> getShoppingCart() {
         writer.println("7");
+        writer.flush();
         return getProductHash();
     }
 
     public String editCart(Product product, int newQuantity) {
         writer.println(String.format("8,%d,%d", product.getIndex(), newQuantity));
+        writer.flush();
         return getStringArray();
     }
 
     public HashMap<Product, Integer> getPurchaseHistory() {
         writer.println("9");
+        writer.flush();
         return getProductHash();
     }
 
