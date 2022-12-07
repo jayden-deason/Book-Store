@@ -31,7 +31,7 @@ public class Client extends JComponent implements Runnable {
     private JButton viewDashboard, search;
     private JButton viewShoppingCart, viewPurchaseHistory, checkout, purchase, exportToFile;
     private JButton viewStores, viewProducts, addStore, addProduct, removeProduct, editProduct, exportSellerFile,
-    importSellerFile;
+            importSellerFile;
     private JButton confirmAddProduct, confirmAddStore;
     private ArrayList<JButton> productButtons = new ArrayList<>();
     private ArrayList<ActionListener> purchaseListeners;
@@ -241,16 +241,20 @@ public class Client extends JComponent implements Runnable {
                         @Override
                         public void mouseClicked(MouseEvent e) {
                         }
+
                         @Override
                         public void mousePressed(MouseEvent e) {
                         }
+
                         @Override
                         public void mouseReleased(MouseEvent e) {
                         }
+
                         @Override
                         public void mouseEntered(MouseEvent e) {
                             infoText.setText("Product info");
                         }
+
                         @Override
                         public void mouseExited(MouseEvent e) {
                             infoText.setText("");
@@ -488,23 +492,33 @@ public class Client extends JComponent implements Runnable {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.addWindowListener(new WindowListener() {
             @Override
-            public void windowOpened(WindowEvent e) {}
+            public void windowOpened(WindowEvent e) {
+            }
+
             @Override
-            public void windowClosing(WindowEvent e) {}
+            public void windowClosing(WindowEvent e) {
+            }
+
             @Override
             public void windowClosed(WindowEvent e) {
-                System.out.println("Send -1");
-                writer.println("-1");
-                writer.flush();
+                closeSocket();
             }
+
             @Override
-            public void windowIconified(WindowEvent e) {}
+            public void windowIconified(WindowEvent e) {
+            }
+
             @Override
-            public void windowDeiconified(WindowEvent e) {}
+            public void windowDeiconified(WindowEvent e) {
+            }
+
             @Override
-            public void windowActivated(WindowEvent e) {}
+            public void windowActivated(WindowEvent e) {
+            }
+
             @Override
-            public void windowDeactivated(WindowEvent e) {}
+            public void windowDeactivated(WindowEvent e) {
+            }
         });
         frame.setVisible(true);
         Container container = frame.getContentPane();
@@ -712,6 +726,9 @@ public class Client extends JComponent implements Runnable {
         login.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (socket.isClosed()) {
+                    connectSocket();
+                }
                 if (userType) { //logging in as buyer
                     writer.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
                     System.out.printf("%d,%d,%s,%s\n", 0, 0, username.getText(), password.getText());
@@ -863,9 +880,7 @@ public class Client extends JComponent implements Runnable {
         logout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Send -1");
-                writer.println("-1");
-                writer.flush();
+                closeSocket();
 
                 loggedIn = false;
                 isBuyer.setVisible(true);
@@ -986,15 +1001,7 @@ public class Client extends JComponent implements Runnable {
     }
 
     public Client() {
-        try {
-            socket = new Socket("localhost", 1001);
-            System.out.println("sent request");
-
-            writer = new PrintWriter(this.socket.getOutputStream());
-            reader = new ObjectInputStream(this.socket.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        connectSocket();
     }
 
     private ArrayList<Product> getProductsArray() {
@@ -1108,5 +1115,32 @@ public class Client extends JComponent implements Runnable {
     public HashMap<Product, Integer> getPurchaseHistory() {
         writer.println("9");
         return getProductHash();
+    }
+
+    public void closeSocket() {
+        try {
+            System.out.println("Send -1");
+            writer.println("-1");
+            writer.flush();
+
+            writer.close();
+            reader.close();
+            socket.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void connectSocket() {
+        try {
+            socket = new Socket("localhost", 1001);
+            System.out.println("sent request");
+
+            writer = new PrintWriter(this.socket.getOutputStream());
+            reader = new ObjectInputStream(this.socket.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
