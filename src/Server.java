@@ -524,7 +524,13 @@ public class Server extends Thread {
                 int idx = Integer.parseInt(item.split(":")[0]);
                 int quantity = Integer.parseInt(item.split(":")[1]);
                 Product p = this.market.getProductByIndex(idx);
-                previousProducts.put(p, quantity);
+                if(previousProducts.containsKey(p)) {
+                    previousProducts.put(p, previousProducts.get(p) + quantity);
+                }
+                else {
+                    previousProducts.put(p, quantity);
+                }
+
             }
             this.writer.writeObject((HashMap<Product, Integer>) previousProducts);
             System.out.println("Wrote purchase history");
