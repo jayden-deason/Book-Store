@@ -30,7 +30,8 @@ public class Client extends JComponent implements Runnable {
     private JButton login, signup, logout, updateMarket;
     private JButton viewDashboard, search;
     private JButton viewShoppingCart, viewPurchaseHistory, checkout, purchase, exportToFile;
-    private JButton viewStores, viewProducts, addStore, addProduct, removeProduct, editProduct;
+    private JButton viewStores, viewProducts, addStore, addProduct, removeProduct, editProduct, exportSellerFile,
+    importSellerFile;
     private JButton confirmAddProduct, confirmAddStore;
     private ArrayList<JButton> productButtons = new ArrayList<>();
 
@@ -415,6 +416,58 @@ public class Client extends JComponent implements Runnable {
                                 "stock.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
+            } else if (e.getSource() == importSellerFile) {
+                //TODO: change all the "string" stuff to stores
+                JFrame importFrame = new JFrame("Import");
+                importFrame.setVisible(true);
+                Container content = importFrame.getContentPane();
+                JTextField filePath = new JTextField();
+//                ArrayList<Store> stores = null;
+                String[] strings = {"String1", "String2", "String3", "String4"};
+//                JPanel storePanel = new JPanel(new GridLayout(stores.size() / 2, stores.size() / 4));
+                JPanel storePanel = new JPanel(new GridLayout(strings.length / 2, strings.length / 4));
+
+//                for (Store store : stores) {
+                for (String string : strings) {
+//                    JButton storeButton = new JButton(store.getName());
+                    JButton storeButton = new JButton(string);
+                    storeButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            //TODO: when this button is clicked import the file path to the store selected
+                        }
+                    });
+                    storePanel.add(storeButton);
+                }
+                content.add(filePath, BorderLayout.PAGE_START);
+                content.add(storePanel);
+                importFrame.pack();
+            } else if (e.getSource() == exportSellerFile) {
+                //TODO: change all the "string" stuff to stores
+                JFrame exportFrame = new JFrame("Import");
+                exportFrame.setVisible(true);
+                Container content = exportFrame.getContentPane();
+                JTextField filePath = new JTextField();
+//                ArrayList<Store> stores = null;
+                String[] strings = {"String1", "String2", "String3", "String4"};
+//                JPanel storePanel = new JPanel(new GridLayout(stores.size() / 2, stores.size() / 4));
+                JPanel storePanel = new JPanel(new GridLayout(strings.length / 2, strings.length / 4));
+
+//                for (Store store : stores) {
+                for (String string : strings) {
+//                    JButton storeButton = new JButton(store.getName());
+                    JButton storeButton = new JButton(string);
+                    storeButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            //TODO: when this button is clicked export the file path to the store selected
+                        }
+                    });
+                    storePanel.add(storeButton);
+                }
+                content.add(filePath, BorderLayout.PAGE_START);
+                content.add(storePanel);
+                exportFrame.pack();
             }
             /*else if (e.getSource() == export) {
                 boolean success = exportToFile( *.getText());
@@ -433,7 +486,26 @@ public class Client extends JComponent implements Runnable {
     public void run() {
         JFrame frame = new JFrame();
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {}
+            @Override
+            public void windowClosing(WindowEvent e) {}
+            @Override
+            public void windowClosed(WindowEvent e) {
+                //TODO: send -1
+                System.out.println("Send -1");
+            }
+            @Override
+            public void windowIconified(WindowEvent e) {}
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+            @Override
+            public void windowActivated(WindowEvent e) {}
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+        });
         frame.setVisible(true);
         Container container = frame.getContentPane();
         container.setLayout(new BorderLayout());
@@ -553,6 +625,10 @@ public class Client extends JComponent implements Runnable {
         removeProduct.addActionListener(actionListener);
         editProduct = new JButton("Edit Product");
         editProduct.addActionListener(actionListener);
+        exportSellerFile = new JButton("Export");
+        exportSellerFile.addActionListener(actionListener);
+        importSellerFile = new JButton("Import");
+        importSellerFile.addActionListener(actionListener);
 
         viewShoppingCart = new JButton("Shopping Cart");
         viewShoppingCart.addActionListener(actionListener);
@@ -599,6 +675,8 @@ public class Client extends JComponent implements Runnable {
         userBar.add(confirmAddProduct);
         userBar.add(removeProduct);
         userBar.add(editProduct);
+        userBar.add(importSellerFile);
+        userBar.add(exportSellerFile);
         userBar.add(viewShoppingCart);
         userBar.add(viewPurchaseHistory);
         userBar.add(checkout);
@@ -617,6 +695,8 @@ public class Client extends JComponent implements Runnable {
         addProduct.setVisible(false);
         removeProduct.setVisible(false);
         editProduct.setVisible(false);
+        importSellerFile.setVisible(false);
+        exportSellerFile.setVisible(false);
 
         viewShoppingCart.setVisible(false);
         viewPurchaseHistory.setVisible(false);
@@ -690,37 +770,12 @@ public class Client extends JComponent implements Runnable {
                     addProduct.setVisible(true);
                     removeProduct.setVisible(true);
                     editProduct.setVisible(true);
+                    importSellerFile.setVisible(true);
+                    exportSellerFile.setVisible(true);
                 }
 
                 System.out.println("Updated");
-                productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
-
-                int item = 0;
-                for (Product product : products) {
-                    productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
-                    JButton productButton = new JButton(product.getName());
-                    productPage.add(productButton);
-                    productButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            JFrame productFrame = new JFrame(product.getName());
-                            productFrame.setVisible(true);
-                            JPanel productPanel = new JPanel();
-                            Container content = productFrame.getContentPane();
-                            JTextField quantity = new JTextField();
-                            quantity.setPreferredSize(new Dimension(20, 25));
-                            JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
-                                    product.getSalePrice(), product.getDescription()));
-                            info.setEditable(false);
-                            productPanel.add(info);
-                            productPanel.add(purchase);
-                            productPanel.add(quantity);
-                            content.add(productPanel);
-                            productFrame.pack();
-                        }
-                    });
-                }
-                productPage.updateUI();
+                updateMarket.doClick();
             }
         });
         signup.addActionListener(new ActionListener() {
@@ -800,34 +855,10 @@ public class Client extends JComponent implements Runnable {
                     addProduct.setVisible(true);
                     removeProduct.setVisible(true);
                     editProduct.setVisible(true);
+                    importSellerFile.setVisible(true);
+                    exportSellerFile.setVisible(true);
                 }
-
-                int item = 0;
-                for (Product product : products) {
-                    productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
-                    JButton productButton = new JButton(product.getName());
-                    productPage.add(productButton);
-                    productButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            JFrame productFrame = new JFrame(product.getName());
-                            productFrame.setVisible(true);
-                            JPanel productPanel = new JPanel();
-                            Container content = productFrame.getContentPane();
-                            JTextField quantity = new JTextField();
-                            quantity.setPreferredSize(new Dimension(20, 25));
-                            JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
-                                    product.getSalePrice(), product.getDescription()));
-                            info.setEditable(false);
-                            productPanel.add(info);
-                            productPanel.add(purchase);
-                            productPanel.add(quantity);
-                            content.add(productPanel);
-                            productFrame.pack();
-                        }
-                    });
-                }
-                productPage.updateUI();
+                updateMarket.doClick();
             }
         });
         logout.addActionListener(new ActionListener() {
@@ -852,6 +883,8 @@ public class Client extends JComponent implements Runnable {
                 addProduct.setVisible(false);
                 removeProduct.setVisible(false);
                 editProduct.setVisible(false);
+                importSellerFile.setVisible(false);
+                exportSellerFile.setVisible(false);
 
                 viewShoppingCart.setVisible(false);
                 viewPurchaseHistory.setVisible(false);
