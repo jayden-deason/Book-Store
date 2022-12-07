@@ -413,9 +413,9 @@ public class Server extends Thread {
         try {
             //Format for search should be productName,storeName,Description
             String[] searchContents = search.split(",");
-            if (searchContents[0].equals("")) searchContents[0] = null;
-            if (searchContents[1].equals("")) searchContents[1] = null;
-            if (searchContents[2].equals("")) searchContents[2] = null;
+            if (searchContents[0].equals(" ")) searchContents[0] = null;
+            if (searchContents[1].equals(" ")) searchContents[1] = null;
+            if (searchContents[2].equals(" ")) searchContents[2] = null;
             ArrayList<Product> searchResults = null;
             synchronized(obj) {
                 searchResults = market.matchConditions(searchContents[0], searchContents[1],
