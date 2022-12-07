@@ -513,20 +513,23 @@ public class Market implements java.io.Serializable{
      * @return the list of products, sorted
      */
     public ArrayList<Product> sortByPrice() {
-        products.sort((s1, s2) -> {
+        ArrayList<Product> temp = new ArrayList<>(products);
+        temp.sort((s1, s2) -> {
             return (int) (100 * (s1.getSalePrice() - s2.getSalePrice()));
             // multiply by 100 so integer cast doesn't truncate down to 0 if < 1
         });
 
-        return products;
+        return temp;
     }
 
     public ArrayList<Product> sortBySales() {
-        products.sort((s1, s2) -> {
+        ArrayList<Product> temp = new ArrayList<>(products);
+
+        temp.sort((s1, s2) -> {
             return getSalesForProduct(s1) - getSalesForProduct(s2);
         });
 
-        return products;
+        return temp;
     }
 
     /**
@@ -535,9 +538,30 @@ public class Market implements java.io.Serializable{
      * @return the list of products, sorted
      */
     public ArrayList<Product> sortByQuantity() {
-        products.sort((s1, s2) -> s1.getQuantity() - s2.getQuantity());
+        ArrayList<Product> temp = new ArrayList<>(products);
 
-        return products;
+        temp.sort((s1, s2) -> s1.getQuantity() - s2.getQuantity());
+
+        return temp;
+    }
+
+    public ArrayList<Store> sortStoresByProductsSold() {
+        ArrayList<Store> out = new ArrayList<>(stores);
+        out.sort((s1, s2) -> {
+            int sum1 = 0;
+            for (Product p : s1.getProducts()) {
+                sum1 += getSalesForProduct(p);
+            }
+
+            int sum2 = 0;
+            for (Product p : s2.getProducts()) {
+                sum2 += getSalesForProduct(p);
+            }
+
+            return sum1 - sum2;
+        });
+
+        return out;
     }
 
     /**
