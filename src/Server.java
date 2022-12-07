@@ -12,6 +12,7 @@ public class Server extends Thread {
 
     public static ArrayList<Socket> sockets = new ArrayList<Socket>();
     public static Market market;
+    public static Object obj = new Object();
 
     public void run() {
         System.out.println("Connection Running Number: " + sockets.size());
@@ -25,7 +26,10 @@ public class Server extends Thread {
                 if (userDetails[0].equals("0")) {
                     if (userDetails[1].equals("0")) {
                         System.out.println("In Buyer Login");
-                        Buyer b = market.getBuyerByEmail(userDetails[2]);
+                        Buyer b = null;
+                        synchronized(obj) {
+                            b = market.getBuyerByEmail(userDetails[2]);
+                        }
                         if (b == null) {
                             //Sends Client "N" to signify an error (Username is wrong)
                             writer.writeObject("N");
@@ -44,9 +48,13 @@ public class Server extends Thread {
                         //checks if email already exists in marketplace
                         Buyer b = market.getBuyerByEmail(userDetails[2]);
                         if (b == null) {
-                            Buyer buyer = new Buyer(userDetails[2], userDetails[3]);
+                            Buyer buyer = null;
+                            synchronized(obj) {
+                                buyer = new Buyer(userDetails[2], userDetails[3]);
+                                this.market.addBuyer(buyer);
+                                this.market.updateAllFiles();
+                            }
                             System.out.println("Created new Buyer");
-                            market.addBuyer(buyer);
                             writer.writeObject("Y");
                             runBuyer(buyer);
                             break;
@@ -59,7 +67,10 @@ public class Server extends Thread {
                 //Buyer
                 else if (userDetails[0].equals("1")) {
                     if (userDetails[1].equals("0")) {
-                        Seller s = market.getSellerByEmail(userDetails[2]);
+                        Seller s = null;
+                        synchronized(obj) {
+                            s = market.getSellerByEmail(userDetails[2]);
+                        }
                         if (s == null) {
                             //Sends Client "N" to signify an error (Username is wrong)
                             writer.writeObject("N");
@@ -77,8 +88,12 @@ public class Server extends Thread {
                         //checks if email already exists in marketplace
                         Seller s = market.getSellerByEmail(userDetails[2]);
                         if (s == null) {
-                            Seller seller = new Seller(userDetails[2], userDetails[3]);
-                            market.addSeller(seller);
+                            Seller seller = null;
+                            synchronized(obj) {
+                                seller = new Seller(userDetails[2], userDetails[3]);
+                                this.market.addSeller(seller);
+                                this.market.updateAllFiles();
+                            }
                             writer.writeObject("Y");
                             runSeller(seller);
                         } else {
