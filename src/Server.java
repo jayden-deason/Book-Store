@@ -651,14 +651,17 @@ public class Server extends Thread {
 
     private ArrayList<String> buyerDashboardForStoreList(ArrayList<Store> stores) {
         ArrayList<String> out = new ArrayList<>();
-        out.add("------------------------------------------");
+
         for (Store store : stores) {
-            out.add("Store: " + store.getName());
+            String string = "";
+            string += store.getName() + ":";
             for (Product p : store.getProducts()) {
-                out.add("--" + p.getName() + ": " + p.getQuantity());
+                string += p.getName() + ",";
+                string += p.getQuantity() + ";";
             }
+            out.add(string.substring(0, string.length() - 1));
         }
-        out.add("------------------------------------------");
+
 
         return out;
 
