@@ -1,8 +1,4 @@
-import jdk.security.jarsigner.JarSigner;
-
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
@@ -45,6 +41,7 @@ public class Client extends JComponent implements Runnable {
     private JSpinner quantity;
 
     private JComboBox<String> searchOptions, sortMarket;
+    private ActionListener productButtonListener;
 
     ActionListener actionListener = new ActionListener() {
         @Override
@@ -81,21 +78,31 @@ public class Client extends JComponent implements Runnable {
                     public void actionPerformed(ActionEvent e) {
                         System.out.println("By products sold");
 
-                        ArrayList<Product> products = getAllProducts("sales");
+                        ArrayList<String> stores = getBuyerDashboard("sales");
 
-                        int item = 0;
+                        Collections.reverse(stores);
+
                         panel.removeAll();
-                        for (Product product : products) {
-                            JButton productButton = new JButton(product.getName());
-                            productButton.addActionListener(new ActionListener() {
+                        for (String store : stores) {
+                            String[] storeInfo = store.split(":");
+                            String[] products = storeInfo[1].split(";");
+
+                            JButton storeButton = new JButton(storeInfo[0]);
+                            storeButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    JOptionPane.showMessageDialog(null, product.getName() +
-                                                    " Information\n" + product.getDescription(), "Info",
-                                            JOptionPane.INFORMATION_MESSAGE);
+                                    String storeProducts = "";
+
+                                    for (int i = 0; i < products.length; i++) {
+                                        String[] productInfo = products[i].split(",");
+
+                                        storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
+                                    }
+                                    JOptionPane.showMessageDialog(null, storeProducts,
+                                            storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
                                 }
                             });
-                            panel.add(productButton);
+                            panel.add(storeButton);
                         }
                         panel.updateUI();
                     }
@@ -105,21 +112,32 @@ public class Client extends JComponent implements Runnable {
                     public void actionPerformed(ActionEvent e) {
                         System.out.println("By purchase history");
 
-                        ArrayList<Product> products = getAllProducts("history"); // todo: cast to hashmap
+                        ArrayList<String> stores = getBuyerDashboard("history");
 
-                        int item = 0;
+                        Collections.reverse(stores);
+
                         panel.removeAll();
-                        for (Product product : products) {
-                            JButton productButton = new JButton(product.getName());
-                            productButton.addActionListener(new ActionListener() {
+                        for (String store : stores) {
+                            String[] storeInfo = store.split(":");
+                            //TODO: fix error probably caused by stores without products
+                            String[] products = storeInfo[1].split(";");
+
+                            JButton storeButton = new JButton(storeInfo[0]);
+                            storeButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    JOptionPane.showMessageDialog(null, product.getName() +
-                                                    " Information\n" + product.getDescription(), "Info",
-                                            JOptionPane.INFORMATION_MESSAGE);
+                                    String storeProducts = "";
+
+                                    for (int i = 0; i < products.length; i++) {
+                                        String[] productInfo = products[i].split(",");
+
+                                        storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
+                                    }
+                                    JOptionPane.showMessageDialog(null, storeProducts,
+                                            storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
                                 }
                             });
-                            panel.add(productButton);
+                            panel.add(storeButton);
                         }
                         panel.updateUI();
                     }
@@ -421,37 +439,20 @@ public class Client extends JComponent implements Runnable {
                 JFrame searchFrame = new JFrame("Search Results");
                 searchFrame.setVisible(true);
                 JPanel results = new JPanel();
-                results.setLayout(new GridBagLayout());
-                JTextField itemsFound = new JTextField("# results for " + searchType + " search:");
+                JTextField itemsFound = new JTextField("Results for " + searchType + " search:");
                 itemsFound.setEditable(false);
                 Container searchContainer = searchFrame.getContentPane();
 
-                int item = 0;
                 for (Product product : products) {
-                    productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4)); //todo: breaks if products.size() == 1
-                    JButton productButton = new JButton(product.getName());
-                    productPage.add(productButton);
-                    productButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            JFrame productFrame = new JFrame(product.getName());
-                            productFrame.setVisible(true);
-                            JPanel productPanel = new JPanel();
-                            Container content = productFrame.getContentPane();
-                            JTextField quantity = new JTextField();
-                            quantity.setPreferredSize(new Dimension(20, 25));
-                            JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
-                                    product.getSalePrice(), product.getDescription()));
-                            info.setEditable(false);
-                            productPanel.add(info);
-                            productPanel.add(purchase);
-                            productPanel.add(quantity);
-                            content.add(productPanel);
-                            productFrame.pack();
-                        }
-                    });
+                    if (products.size() == 1)
+                        results.setLayout(new GridLayout(products.size(), products.size()));
+                    else
+                        results.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
+
+                    //todo: breaks if products.size() == 1   <----- probably fixed
+                    setProductButton(product, results);
                 }
-                productPage.updateUI();
+                results.updateUI();
                 searchContainer.add(itemsFound, BorderLayout.NORTH);
                 searchContainer.add(results, BorderLayout.CENTER);
                 searchFrame.pack();
@@ -473,64 +474,122 @@ public class Client extends JComponent implements Runnable {
                 //TODO: change all the "string" stuff to stores
                 JFrame importFrame = new JFrame("Import");
                 importFrame.setVisible(true);
-                Container content = importFrame.getContentPane();
-                JTextField filePath = new JTextField();
-//                ArrayList<Store> stores = null;
-                String[] strings = {"String1", "String2", "String3", "String4"};
-//                JPanel storePanel = new JPanel(new GridLayout(stores.size() / 2, stores.size() / 4));
-                JPanel storePanel = new JPanel(new GridLayout(strings.length / 2, strings.length / 4));
+                JPanel content = new JPanel();
+                JLabel file = new JLabel("File Path");
+                JTextField filePath = new JTextField("File Path", 10);
+                JButton importFile = new JButton("Import File");
+
+                importFile.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        boolean successCheck = importSellerFile(filePath.getText());
+
+                        if (successCheck) {
+                            JOptionPane.showMessageDialog(null, "File Imported", "Import",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "A file with that name does not" +
+                                    "exist", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
 
 //                for (Store store : stores) {
-                for (String string : strings) {
+//                for (String string : strings) {
 //                    JButton storeButton = new JButton(store.getName());
-                    JButton storeButton = new JButton(string);
-                    storeButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            //TODO: when this button is clicked import the file path to the store selected
-                        }
-                    });
-                    storePanel.add(storeButton);
-                }
-                content.add(filePath, BorderLayout.PAGE_START);
-                content.add(storePanel);
+//                    JButton storeButton = new JButton(string);
+//                    storeButton.addActionListener(new ActionListener() {
+//                        @Override
+//                        public void actionPerformed(ActionEvent e) {
+//                            //TODO: when this button is clicked import the file path to the store selected
+//                        }
+//                    });
+//                    storePanel.add(storeButton);
+//                }
+                content.add(file);
+                content.add(filePath);
+                content.add(importFile);
+
+                importFrame.add(content);
                 importFrame.pack();
             } else if (e.getSource() == exportSellerFile) {
                 //TODO: change all the "string" stuff to stores
                 JFrame exportFrame = new JFrame("Export");
                 exportFrame.setVisible(true);
-                Container content = exportFrame.getContentPane();
-                JTextField filePath = new JTextField();
-//                ArrayList<Store> stores = null;
-                String[] strings = {"String1", "String2", "String3", "String4"};
-//                JPanel storePanel = new JPanel(new GridLayout(stores.size() / 2, stores.size() / 4));
-                JPanel storePanel = new JPanel(new GridLayout(strings.length / 2, strings.length / 4));
+                JPanel content = new JPanel();
+                JLabel file = new JLabel("File Path");
+                JLabel store = new JLabel("Store Name");
+                JTextField filePath = new JTextField("File Path", 10);
+                JTextField storeName = new JTextField("Store Name", 10);
+                JButton export = new JButton("Export to File");
 
-//                for (Store store : stores) {
-                for (String string : strings) {
-//                    JButton storeButton = new JButton(store.getName());
-                    JButton storeButton = new JButton(string);
-                    storeButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            //TODO: when this button is clicked export the file path to the store selected
+                export.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        boolean successCheck = exportSellerToFile(filePath.getText(), storeName.getText());
+
+                        if (successCheck) {
+                            JOptionPane.showMessageDialog(null, "File Exported", "Export",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "A file with that name already exists,\n" +
+                                    "or Store Name is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
                         }
-                    });
-                    storePanel.add(storeButton);
-                }
-                content.add(filePath, BorderLayout.PAGE_START);
-                content.add(storePanel);
+                    }
+                });
+//                ArrayList<Store> stores = null;
+//                String[] strings = {"String1", "String2", "String3", "String4"};
+//                JPanel storePanel = new JPanel(new GridLayout(stores.size() / 2, stores.size() / 4));
+//                JPanel storePanel = new JPanel(new GridLayout(strings.length / 2, strings.length / 4));
+//
+//                for (Store store : stores) {
+//                for (String string : strings) {
+//                    JButton storeButton = new JButton(store.getName());
+//                    JButton storeButton = new JButton(string);
+//                    storeButton.addActionListener(new ActionListener() {
+//                        @Override
+//                        public void actionPerformed(ActionEvent e) {
+//                            //TODO: when this button is clicked export the file path to the store selected
+//                        }
+//                    });
+//                    storePanel.add(storeButton);
+//                }
+                content.add(file);
+                content.add(filePath);
+                content.add(store);
+                content.add(storeName);
+                content.add(export);
+
+                exportFrame.add(content);
                 exportFrame.pack();
             } else if (e.getSource() == exportToFile) {
-                boolean success = exportToFile("purchases.txt");
+                JFrame exportFrame = new JFrame("Export");
+                exportFrame.setVisible(true);
+                JPanel content = new JPanel();
+                JLabel file = new JLabel("File Path");
+                JTextField filePath = new JTextField("File Path", 10);
+                JButton export = new JButton("Export to File");
 
-                if (success) {
-                    JOptionPane.showMessageDialog(null, "File Exported", "Export",
-                            JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, "A file with that name already exists. " +
-                            "Choose another", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+                export.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        boolean success = exportToBuyerFile(filePath.getText());
+
+                        if (success) {
+                            JOptionPane.showMessageDialog(null, "File Exported", "Export",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "A file with that name already exists.\n" +
+                                    "Choose another.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+                content.add(file);
+                content.add(filePath);
+                content.add(export);
+
+                exportFrame.add(content);
+                exportFrame.pack();
             }
         }
     };
@@ -843,7 +902,6 @@ public class Client extends JComponent implements Runnable {
                                 "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-
                 }
 
                 ArrayList<Product> products = getAllProducts("none");
@@ -1017,69 +1075,10 @@ public class Client extends JComponent implements Runnable {
                 productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
                 purchaseListeners = new ArrayList<>();
                 ArrayList<JButton> purchaseButtons = new ArrayList<>();
+
+
                 for (Product product : products) {
-                    JButton productButton = new JButton(product.getName());
-                    productPage.add(productButton);
-                    productButtons.add(productButton);
-                    productButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            System.out.println(product.getName());
-                            JFrame productFrame = new JFrame(product.getName());
-                            productFrame.setVisible(true);
-                            productFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                            JPanel productPanel = new JPanel();
-                            Container content = productFrame.getContentPane();
-//                            JTextField quantity = new JTextField();
-                            SpinnerModel value = new SpinnerNumberModel(1, 0, product.getQuantity(), 1);
-                            quantity = new JSpinner(value);
-                            quantity.setPreferredSize(new Dimension(30, 25));
-                            JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
-                                    product.getSalePrice(), product.getDescription()));
-                            info.setEditable(false);
-                            JButton addToCart = new JButton("Add to Cart");
-
-                            ActionListener purchaseListener = new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    System.out.println("Sending purchase");
-                                    String success;
-                                    try {
-                                        success = addToCart(product,
-                                                (Integer) quantity.getValue());
-                                    } catch (NumberFormatException ex) {
-                                        JOptionPane.showMessageDialog(null, "Enter an integer.",
-                                                "Error", JOptionPane.ERROR_MESSAGE);
-                                        return;
-                                    }
-                                    if (success.equalsIgnoreCase("n")) {
-                                        JOptionPane.showMessageDialog(null, "Insufficient stock.",
-                                                "Error", JOptionPane.ERROR_MESSAGE);
-                                    } else if (success.equalsIgnoreCase("y")) {
-                                        JOptionPane.showMessageDialog(null, "Added to cart.",
-                                                "Success", JOptionPane.INFORMATION_MESSAGE);
-                                        productFrame.setVisible(false);
-                                    }
-                                }
-                            };
-                            addToCart.addActionListener(purchaseListener);
-                            purchaseListeners.add(purchaseListener);
-
-                            productButton.add(addToCart);
-                            productPanel.add(info);
-                            productPanel.add(addToCart);
-                            productPanel.add(quantity);
-                            content.add(productPanel);
-                            productFrame.pack();
-                            if (userType) {
-                                quantity.setVisible(true);
-                                addToCart.setVisible(true);
-                            } else {
-                                quantity.setVisible(false);
-                                addToCart.setVisible(false);
-                            }
-                        }
-                    });
+                    setProductButton(product, productPage);
                 }
                 productPage.updateUI();
             }
@@ -1272,7 +1271,7 @@ public class Client extends JComponent implements Runnable {
         return products;
     }
 
-    private String getStringArray() {
+    private String getString() {
         String response;
         try {
             response = (String) reader.readObject();
@@ -1284,6 +1283,18 @@ public class Client extends JComponent implements Runnable {
         return response;
     }
 
+    private ArrayList<String> getStringArray() {
+        ArrayList<String> response;
+
+        try {
+            response = (ArrayList<String>) reader.readObject();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
     private HashMap<Product, Integer> getProductHash() {
         HashMap<Product, Integer> products;
 
@@ -1315,11 +1326,11 @@ public class Client extends JComponent implements Runnable {
     public String addToCart(Product product, int quantity) {
         writer.println(String.format("4,%d,%d", product.getIndex(), quantity));
         writer.flush();
-        return getStringArray();
+        return getString();
     }
 
-    public boolean exportToFile(String filename) {
-        File testExistence = new File("filename");
+    public boolean exportToBuyerFile(String filename) {
+        File testExistence = new File(filename);
 
         if (testExistence.exists()) {
             return false;
@@ -1327,14 +1338,8 @@ public class Client extends JComponent implements Runnable {
             writer.println("5");
             writer.flush();
 
-            ArrayList<String> fileInfo;
-            try {
-                fileInfo = (ArrayList<String>) reader.readObject();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            ArrayList<String> fileInfo = getStringArray();
+
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
                 PrintWriter exportWriter = new PrintWriter(bw);
                 for (int i = 0; i < fileInfo.size(); i++) {
@@ -1348,10 +1353,139 @@ public class Client extends JComponent implements Runnable {
         }
     }
 
+    public boolean exportSellerToFile(String filename, String storeName) {
+        File testExistence = new File(filename);
+
+        if (testExistence.exists()) {
+            return false;
+        } else {
+            writer.println("8," + storeName);
+            writer.flush();
+
+            ArrayList<String> fileInfo = getStringArray();
+
+            if (fileInfo.isEmpty())
+                return false;
+
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
+                PrintWriter exportWriter = new PrintWriter(bw);
+                for (int i = 0; i < fileInfo.size(); i++) {
+                    exportWriter.print(fileInfo.get(i));
+                }
+                exportWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+    }
+
+    public boolean importSellerFile(String filename) {
+        File testExistence = new File(filename);
+
+        if (!testExistence.exists()) {
+            return false;
+        } else {
+            String fileContent = "";
+            try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+                String line = br.readLine();
+                while (line != null) {
+                    fileContent += line + "\n";
+                    line = br.readLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            fileContent = fileContent.substring(0, fileContent.length() - 2);
+
+            writer.println("8," + fileContent);
+            writer.flush();
+
+            String successCheck = getString();
+
+            if (successCheck.equalsIgnoreCase("y"))
+                return true;
+            else
+                return false;
+        }
+    }
+
+    private void setProductButton(Product product, JPanel panel) {
+        JButton productButton = new JButton(product.getName());
+        panel.add(productButton);
+        productButtons.add(productButton);
+
+        productButtonListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(product.getName());
+                JFrame productFrame = new JFrame(product.getName());
+                productFrame.setVisible(true);
+                productFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                JPanel productPanel = new JPanel();
+                Container content = productFrame.getContentPane();
+                SpinnerModel value = new SpinnerNumberModel(0, 0, product.getQuantity(), 1);
+                quantity = new JSpinner(value);
+                quantity.setPreferredSize(new Dimension(30, 25));
+                JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
+                        product.getSalePrice(), product.getDescription()));
+                info.setEditable(false);
+                JButton addToCart = new JButton("Add to Cart");
+
+                ActionListener purchaseListener = new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println("Sending purchase");
+                        String success;
+                        try {
+                            if ((Integer) quantity.getValue() < 1) {
+                                JOptionPane.showMessageDialog(null, "Cannot be 0 or negative",
+                                        "Error", JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
+                            success = addToCart(product,
+                                    (Integer) quantity.getValue());
+                        } catch (NumberFormatException ex) {
+                            JOptionPane.showMessageDialog(null, "Enter an integer.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        if (success.equalsIgnoreCase("n")) {
+                            JOptionPane.showMessageDialog(null, "Insufficient stock.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        } else if (success.equalsIgnoreCase("y")) {
+                            JOptionPane.showMessageDialog(null, "Added to cart.",
+                                    "Success", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                };
+
+                addToCart.addActionListener(purchaseListener);
+                purchaseListeners.add(purchaseListener);
+
+                productButton.add(addToCart);
+                productPanel.add(info);
+                productPanel.add(addToCart);
+                productPanel.add(quantity);
+                content.add(productPanel);
+                productFrame.pack();
+                if (userType) {
+                    quantity.setVisible(true);
+                    addToCart.setVisible(true);
+                } else {
+                    quantity.setVisible(false);
+                    addToCart.setVisible(false);
+                }
+            }
+        };
+        productButton.addActionListener(productButtonListener);
+    }
+
     public String makePurchase() {
         writer.println("6");
         writer.flush();
-        return getStringArray();
+        return getString();
     }
 
     public HashMap<Product, Integer> getShoppingCart() {
@@ -1363,13 +1497,19 @@ public class Client extends JComponent implements Runnable {
     public String editCart(Product product, int newQuantity) {
         writer.println(String.format("8,%d,%d", product.getIndex(), newQuantity));
         writer.flush();
-        return getStringArray();
+        return getString();
     }
 
     public HashMap<Product, Integer> getPurchaseHistory() {
         writer.println("9");
         writer.flush();
         return getProductHash();
+    }
+
+    public ArrayList<String> getBuyerDashboard(String condition) {
+        writer.println("10," + condition);
+        writer.flush();
+        return getStringArray();
     }
 
     public void closeSocket() {
