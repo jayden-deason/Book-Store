@@ -46,6 +46,7 @@ public class Client extends JComponent implements Runnable {
     private JSpinner quantity;
 
     private JComboBox<String> searchOptions, sortMarket;
+    private ActionListener productButtonListener;
 
     ActionListener actionListener = new ActionListener() {
         @Override
@@ -82,21 +83,31 @@ public class Client extends JComponent implements Runnable {
                     public void actionPerformed(ActionEvent e) {
                         System.out.println("By products sold");
 
-                        ArrayList<Product> products = getAllProducts("sales");
+                        ArrayList<String> stores = getBuyerDashboard("sales");
 
-                        int item = 0;
+                        Collections.reverse(stores);
+
                         panel.removeAll();
-                        for (Product product : products) {
-                            JButton productButton = new JButton(product.getName());
-                            productButton.addActionListener(new ActionListener() {
+                        for (String store : stores) {
+                            String[] storeInfo = store.split(":");
+                            String[] products = storeInfo[1].split(";");
+
+                            JButton storeButton = new JButton(storeInfo[0]);
+                            storeButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    JOptionPane.showMessageDialog(null, product.getName() +
-                                                    " Information\n" + product.getDescription(), "Info",
-                                            JOptionPane.INFORMATION_MESSAGE);
+                                    String storeProducts = "";
+
+                                    for (int i = 0; i < products.length; i++) {
+                                        String[] productInfo = products[i].split(",");
+
+                                        storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
+                                    }
+                                    JOptionPane.showMessageDialog(null, storeProducts,
+                                            storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
                                 }
                             });
-                            panel.add(productButton);
+                            panel.add(storeButton);
                         }
                         panel.updateUI();
                     }
@@ -108,19 +119,29 @@ public class Client extends JComponent implements Runnable {
 
                         ArrayList<String> stores = getBuyerDashboard("history");
 
-                        int item = 0;
+                        Collections.reverse(stores);
+
                         panel.removeAll();
                         for (String store : stores) {
-                            JButton productButton = new JButton();
-                            productButton.addActionListener(new ActionListener() {
+                            String[] storeInfo = store.split(":");
+                            String[] products = storeInfo[1].split(";");
+
+                            JButton storeButton = new JButton(storeInfo[0]);
+                            storeButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    JOptionPane.showMessageDialog(null, product.getName() +
-                                                    " Information\n" + product.getDescription(), "Info",
-                                            JOptionPane.INFORMATION_MESSAGE);
+                                    String storeProducts = "";
+
+                                    for (int i = 0; i < products.length; i++) {
+                                        String[] productInfo = products[i].split(",");
+
+                                        storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
+                                    }
+                                    JOptionPane.showMessageDialog(null, storeProducts,
+                                            storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
                                 }
                             });
-                            panel.add(productButton);
+                            panel.add(storeButton);
                         }
                         panel.updateUI();
                     }
@@ -422,38 +443,21 @@ public class Client extends JComponent implements Runnable {
                 JFrame searchFrame = new JFrame("Search Results");
                 searchFrame.setVisible(true);
                 JPanel results = new JPanel();
-                results.setLayout(new GridBagLayout());
-                JTextField itemsFound = new JTextField("# results for " + searchType + " search:");
+                JTextField itemsFound = new JTextField("Results for " + searchType + " search:");
                 itemsFound.setEditable(false);
                 Container searchContainer = searchFrame.getContentPane();
 
-                int item = 0;
                 for (Product product : products) {
-                    productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
-                    //todo: breaks if products.size() == 1
-                    JButton productButton = new JButton(product.getName());
-                    productPage.add(productButton);
-                    productButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            JFrame productFrame = new JFrame(product.getName());
-                            productFrame.setVisible(true);
-                            JPanel productPanel = new JPanel();
-                            Container content = productFrame.getContentPane();
-                            JTextField quantity = new JTextField();
-                            quantity.setPreferredSize(new Dimension(20, 25));
-                            JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
-                                    product.getSalePrice(), product.getDescription()));
-                            info.setEditable(false);
-                            productPanel.add(info);
-                            productPanel.add(purchase);
-                            productPanel.add(quantity);
-                            content.add(productPanel);
-                            productFrame.pack();
-                        }
-                    });
+                    if (products.size() == 1)
+                        results.setLayout(new GridLayout(products.size(), products.size()));
+                    else
+                        results.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
+
+                    //todo: breaks if products.size() == 1   <----- probably fixed
+
+                    setProductButton(product, results);
                 }
-                productPage.updateUI();
+                results.updateUI();
                 searchContainer.add(itemsFound, BorderLayout.NORTH);
                 searchContainer.add(results, BorderLayout.CENTER);
                 searchFrame.pack();
@@ -845,7 +849,6 @@ public class Client extends JComponent implements Runnable {
                                 "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-
                 }
 
                 ArrayList<Product> products = getAllProducts("none");
@@ -1019,73 +1022,10 @@ public class Client extends JComponent implements Runnable {
                 productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
                 purchaseListeners = new ArrayList<>();
                 ArrayList<JButton> purchaseButtons = new ArrayList<>();
+
+
                 for (Product product : products) {
-                    JButton productButton = new JButton(product.getName());
-                    productPage.add(productButton);
-                    productButtons.add(productButton);
-                    productButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            System.out.println(product.getName());
-                            JFrame productFrame = new JFrame(product.getName());
-                            productFrame.setVisible(true);
-                            productFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                            JPanel productPanel = new JPanel();
-                            Container content = productFrame.getContentPane();
-                            SpinnerModel value = new SpinnerNumberModel(0, 0, product.getQuantity(), 1);
-                            quantity = new JSpinner(value);
-                            quantity.setPreferredSize(new Dimension(30, 25));
-                            JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
-                                    product.getSalePrice(), product.getDescription()));
-                            info.setEditable(false);
-                            JButton addToCart = new JButton("Add to Cart");
-
-                            ActionListener purchaseListener = new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    System.out.println("Sending purchase");
-                                    String success;
-                                    try {
-                                        if ((Integer) quantity.getValue() < 1) {
-                                            JOptionPane.showMessageDialog(null, "Cannot be 0 or negative",
-                                                    "Error", JOptionPane.ERROR_MESSAGE);
-                                            return;
-                                        }
-                                        success = addToCart(product,
-                                                (Integer) quantity.getValue());
-                                    } catch (NumberFormatException ex) {
-                                        JOptionPane.showMessageDialog(null, "Enter an integer.",
-                                                "Error", JOptionPane.ERROR_MESSAGE);
-                                        return;
-                                    }
-                                    if (success.equalsIgnoreCase("n")) {
-                                        JOptionPane.showMessageDialog(null, "Insufficient stock.",
-                                                "Error", JOptionPane.ERROR_MESSAGE);
-                                    } else if (success.equalsIgnoreCase("y")) {
-                                        JOptionPane.showMessageDialog(null, "Added to cart.",
-                                                "Success", JOptionPane.INFORMATION_MESSAGE);
-                                        productFrame.setVisible(false);
-                                    }
-                                }
-                            };
-                            addToCart.addActionListener(purchaseListener);
-                            purchaseListeners.add(purchaseListener);
-
-                            productButton.add(addToCart);
-                            productPanel.add(info);
-                            productPanel.add(addToCart);
-                            productPanel.add(quantity);
-                            content.add(productPanel);
-                            productFrame.pack();
-                            if (userType) {
-                                quantity.setVisible(true);
-                                addToCart.setVisible(true);
-                            } else {
-                                quantity.setVisible(false);
-                                addToCart.setVisible(false);
-                            }
-                        }
-                    });
+                    setProductButton(product, productPage);
                 }
                 productPage.updateUI();
             }
@@ -1364,6 +1304,77 @@ public class Client extends JComponent implements Runnable {
             }
             return true;
         }
+    }
+
+    private void setProductButton(Product product, JPanel panel) {
+        JButton productButton = new JButton(product.getName());
+        panel.add(productButton);
+        productButtons.add(productButton);
+
+        productButtonListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(product.getName());
+                JFrame productFrame = new JFrame(product.getName());
+                productFrame.setVisible(true);
+                productFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                JPanel productPanel = new JPanel();
+                Container content = productFrame.getContentPane();
+                SpinnerModel value = new SpinnerNumberModel(0, 0, product.getQuantity(), 1);
+                quantity = new JSpinner(value);
+                quantity.setPreferredSize(new Dimension(30, 25));
+                JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
+                        product.getSalePrice(), product.getDescription()));
+                info.setEditable(false);
+                JButton addToCart = new JButton("Add to Cart");
+
+                ActionListener purchaseListener = new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println("Sending purchase");
+                        String success;
+                        try {
+                            if ((Integer) quantity.getValue() < 1) {
+                                JOptionPane.showMessageDialog(null, "Cannot be 0 or negative",
+                                        "Error", JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
+                            success = addToCart(product,
+                                    (Integer) quantity.getValue());
+                        } catch (NumberFormatException ex) {
+                            JOptionPane.showMessageDialog(null, "Enter an integer.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        if (success.equalsIgnoreCase("n")) {
+                            JOptionPane.showMessageDialog(null, "Insufficient stock.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        } else if (success.equalsIgnoreCase("y")) {
+                            JOptionPane.showMessageDialog(null, "Added to cart.",
+                                    "Success", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                };
+
+                addToCart.addActionListener(purchaseListener);
+                purchaseListeners.add(purchaseListener);
+
+                productButton.add(addToCart);
+                productPanel.add(info);
+                productPanel.add(addToCart);
+                productPanel.add(quantity);
+                content.add(productPanel);
+                productFrame.pack();
+                if (userType) {
+                    quantity.setVisible(true);
+                    addToCart.setVisible(true);
+                } else {
+                    quantity.setVisible(false);
+                    addToCart.setVisible(false);
+                }
+            }
+        };
+        productButton.addActionListener(productButtonListener);
     }
 
     public String makePurchase() {
