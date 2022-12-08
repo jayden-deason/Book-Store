@@ -215,8 +215,8 @@ public class Client extends JComponent implements Runnable {
                 storesFrame.setVisible(true);
                 Container content = storesFrame.getContentPane();
                 JPanel panel = new JPanel();
-                JTable table = new JTable(new String[][]{{"Name", "#Sales", "#Revenue", "#Customer Info"}, {"Name", "#Sales", "#Revenue", "#Customer Info"},
-                        {"Name", "#Sales", "#Revenue", "#Customer Info"}},
+                String[][] storeInfo = getStoreInfo();
+                JTable table = new JTable(storeInfo,
                         new String[]{"Store Name", "Sales", "Revenue", "Customer Info"});
                 table.setEnabled(false);
                 content.add(table);
@@ -237,7 +237,7 @@ public class Client extends JComponent implements Runnable {
                 infoText.setEditable(false);
                 infoText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
                 infoPanel.add(infoText);
-                ArrayList<Product> products = null;
+                ArrayList<Product> products = getSellerProducts("none");
                 int item = 0;
                 for (Product product : products) {
                     JButton productButton = new JButton(product.getName());
@@ -258,7 +258,7 @@ public class Client extends JComponent implements Runnable {
 
                         @Override
                         public void mouseEntered(MouseEvent e) {
-                            infoText.setText("Product info");
+                            infoText.setText(getProductInfo(productButton.getText()));
                         }
 
                         @Override
@@ -290,12 +290,12 @@ public class Client extends JComponent implements Runnable {
                     userBar.updateUI();
                 }
             } else if (e.getSource() == confirmAddStore) {
-                String storeName = storeToAdd.getText(); // todo: check if bad storename
+                String storeName = storeToAdd.getText();
                 addStore(storeName);
                 // todo: code to hide text
             } else if (e.getSource() == confirmAddProduct) {
                 //TODO: code to actually add product
-                String productInfo = productToAdd.getText(); // todo: check if bad format
+                String productInfo = productToAdd.getText();
                 addProduct(productInfo);
                 // todo: code to hide text
             } else if (e.getSource() == removeProduct) {
@@ -303,8 +303,10 @@ public class Client extends JComponent implements Runnable {
                 removeProductFrame.setSize(400, 500);
                 removeProductFrame.setVisible(true);
                 final DefaultListModel<String> list = new DefaultListModel<>();
-                for (int i = 0; i < 10; i++) {
-                    list.addElement("Product" + i);
+
+                ArrayList<Product> products = getSellerProducts("none");
+                for (Product p : products) {
+                    list.addElement(p.getName());
                 }
                 final JList<String> jList = new JList<>(list);
                 JPanel panel = new JPanel();
@@ -312,7 +314,7 @@ public class Client extends JComponent implements Runnable {
                 remove.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        //TODO: code to actually remove the product
+                        removeProduct(jList.getSelectedValue());
                     }
                 });
                 Container content = removeProductFrame.getContentPane();
@@ -324,9 +326,11 @@ public class Client extends JComponent implements Runnable {
                 JFrame editProductFrame = new JFrame("Edit Product");
                 editProductFrame.setSize(400, 500);
                 editProductFrame.setVisible(true);
+
+                ArrayList<Product> products = getSellerProducts("none");
                 final DefaultListModel<String> list = new DefaultListModel<>();
-                for (int i = 0; i < 10; i++) {
-                    list.addElement("Product" + i);
+                for (Product p : products) {
+                    list.addElement(p.getName());
                 }
                 final JList<String> jList = new JList<>(list);
                 JPanel panel = new JPanel();
@@ -548,10 +552,9 @@ public class Client extends JComponent implements Runnable {
         buttonGroup.add(isBuyer);
         buttonGroup.add(isSeller);
         productToAdd = new JTextField("", 40);
-        productToAdd.setToolTipText("Example: index,bookname,storename,description,quantity,price");
+        productToAdd.setToolTipText("bookname,storename,description,price,quantity");
         storeToAdd = new JTextField("", 40);
-        storeToAdd.setToolTipText("Example: index,storename,username,#sales,#revenue," +
-                "<product index/product index>,<product index/#sales:product index/#sales>");
+        storeToAdd.setToolTipText("storename");
         username.addFocusListener(new FocusListener() { // Creates default text
             @Override
             public void focusGained(FocusEvent e) {
@@ -1071,6 +1074,73 @@ public class Client extends JComponent implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void removeProduct(String productName) {
+        try {
+            writer.println("12," + productName);
+            writer.flush();
+            System.out.println("removing " + productName);
+
+            String response = (String) reader.readObject();
+            if (response.equalsIgnoreCase("n")) {
+                JOptionPane.showMessageDialog(null, "Error removing product!", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Removed product!", "", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String[][] getStoreInfo() {
+        String[][] stores = null;
+
+        try {
+            writer.println("10");
+            writer.flush();
+
+            stores = (String[][]) reader.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (stores == null) return new String[][]{};
+
+        return stores;
+    }
+
+    private String getProductInfo(String productName) {
+        writer.println("11," + productName);
+        writer.flush();
+
+        System.out.println("getting product info");
+
+        String info = null;
+        try {
+            info = (String) reader.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return info;
+    }
+
+    private ArrayList<Product> getSellerProducts(String sortType) {
+        writer.println("2," + sortType);
+        writer.flush();
+        System.out.println("2,none");
+
+        ArrayList<Product> products = null;
+        try {
+            products = (ArrayList<Product>) reader.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(products);
+        return products;
     }
 
     private ArrayList<Product> getProductsArray() {

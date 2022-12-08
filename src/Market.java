@@ -175,6 +175,7 @@ public class Market implements java.io.Serializable{
         if (s.getIndex() == -1) {
             s.setIndex(stores.size());
         }
+        if (getStoreByName(s.getName()) != null) throw new RuntimeException("store already exists!");
         Seller seller = getSellerByEmail(s.getSellerName());
         seller.addStore(s);
         stores.add(s);

@@ -28,7 +28,7 @@ public class Server extends Thread {
                     if (userDetails[1].equals("0")) {
                         System.out.println("In Buyer Login");
                         Buyer b = null;
-                        synchronized(obj) {
+                        synchronized (obj) {
                             b = market.getBuyerByEmail(userDetails[2]);
                         }
                         if (b == null) {
@@ -50,7 +50,7 @@ public class Server extends Thread {
                         Buyer b = market.getBuyerByEmail(userDetails[2]);
                         if (b == null) {
                             Buyer buyer = null;
-                            synchronized(obj) {
+                            synchronized (obj) {
                                 buyer = new Buyer(userDetails[2], userDetails[3]);
                                 this.market.addBuyer(buyer);
                                 this.market.updateAllFiles();
@@ -69,7 +69,7 @@ public class Server extends Thread {
                 else if (userDetails[0].equals("1")) {
                     if (userDetails[1].equals("0")) {
                         Seller s = null;
-                        synchronized(obj) {
+                        synchronized (obj) {
                             s = market.getSellerByEmail(userDetails[2]);
                         }
                         if (s == null) {
@@ -90,7 +90,7 @@ public class Server extends Thread {
                         Seller s = market.getSellerByEmail(userDetails[2]);
                         if (s == null) {
                             Seller seller = null;
-                            synchronized(obj) {
+                            synchronized (obj) {
                                 seller = new Seller(userDetails[2], userDetails[3]);
                                 this.market.addSeller(seller);
                                 this.market.updateAllFiles();
@@ -185,8 +185,7 @@ public class Server extends Thread {
                 } else if (answer[0].equals("10")) {
                     this.sendBuyerDashboard(buyer, answer[1]);
 
-                }
-                else {
+                } else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
@@ -227,13 +226,8 @@ public class Server extends Thread {
                     this.sendSellerProducts(seller, answer[1]);
                 } else if (answer[0].equals("3")) {
                     // add product
-                    this.addSellerProduct(seller,
-                            answer[1], // product name
-                            answer[2], // store name
-                            answer[3], // description
-                            Double.parseDouble(answer[4]), // price
-                            Integer.parseInt(answer[5]) // quantity
-                    );
+                    this.addSellerProduct(seller, userChoice.substring(2));
+
                 } else if (answer[0].equals("4")) {
                     // edit product
                     this.editSellerProduct(seller,
@@ -258,7 +252,14 @@ public class Server extends Thread {
                 } else if (answer[0].equals("9")) {
                     // import from file
                     this.importProductsFromFile(seller, userChoice.substring(2).split("\n"));
-                } else {
+                } else if (answer[0].equals("10")) {
+                    this.sendStoreInfo(seller);
+                } else if (answer[0].equals("11")) {
+                    this.sendProductInfo(answer[1]);
+                } else if (answer[0].equals("12")) {
+                    this.removeSellerProduct(answer[1]);
+                }
+                else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
@@ -278,40 +279,54 @@ public class Server extends Thread {
 
     private void sendSellerProducts(Seller seller, String sortType) throws IOException {
         ArrayList<Product> products = null;
-        synchronized(obj) {
+        synchronized (obj) {
             products = seller.getProducts();
         }
         if (sortType.equals("sales")) {
-            synchronized(obj) {
+            synchronized (obj) {
                 products.sort(Comparator.comparingInt(s -> market.getSalesForProduct(s)));
             }
         } else if (sortType.equals("customers")) {
-            synchronized(obj) {
+            synchronized (obj) {
                 products.sort(Comparator.comparingInt(s -> market.getCustomersForProduct(s)));
             }
         }
         this.writer.writeObject(products);
     }
 
-    private void addSellerProduct(Seller seller, String productName, String storeName, String description,
-                                  double price, int quantity) throws IOException {
-        synchronized(obj) {
-            Product product = new Product(productName, storeName, description, quantity, price, price, -1);
-            if (seller.getStoreNames().contains(storeName)) {
-                market.addProduct(product);
-                market.updateAllFiles();
-                this.writer.writeObject("Y");
-                return;
+    private void addSellerProduct(Seller seller, String productString) {
+        try {
+            String[] arr = productString.split(",");
+            String productName = arr[0].strip();
+            String storeName = arr[1].strip();
+            String description = arr[2].strip();
+            double price = Double.parseDouble(arr[3].strip());
+            int quantity = Integer.parseInt(arr[4].strip());
+
+            System.out.println("adding product " + productName);
+            synchronized (obj) {
+                Product product = new Product(productName, storeName, description, quantity, price, price, -1);
+                if (seller.getStoreNames().contains(storeName)) {
+                    market.addProduct(product);
+                    market.updateAllFiles();
+                    this.writer.writeObject("Y");
+                }
+            }
+
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject("N");
+            } catch (IOException ex) {
+                e.printStackTrace();
             }
         }
-        this.writer.writeObject("N");
     }
 
     private void editSellerProduct(Seller seller, int productIndex, String productName,
                                    String description, double price, int quantity) throws IOException {
 
         try {
-            synchronized(obj) {
+            synchronized (obj) {
                 Product product = market.getProductByIndex(productIndex);
                 product.setName(productName);
                 product.setDescription(description);
@@ -327,47 +342,68 @@ public class Server extends Thread {
         this.writer.writeObject("Y");
     }
 
-    private void addSellerStore(Seller seller, String storeName) throws IOException {
-        synchronized(obj) {
-            System.out.println("adding store");
-            if (market.getStoreByName(storeName) == null) {
+    private void addSellerStore(Seller seller, String storeName) {
+        try {
+            synchronized (obj) {
+                System.out.println("adding store");
+//                if (market.getStoreByName(storeName) == null) {
                 market.addStore(new Store(-1, storeName, seller.getEmail()));
                 market.updateAllFiles();
                 this.writer.writeObject("Y");
-                return;
+
+
+            }
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject("N");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         }
-        this.writer.writeObject("N");
     }
 
-    private void getSellerDashboard(Seller seller) {
-        // TODO: implement
+    private void removeSellerProduct(String productName) {
+        try {
+            market.removeProduct(market.getProductByName(productName));
+            writer.writeObject("Y");
+            System.out.println("removed product: " + productName);
+        } catch (Exception e) {
+            try {
+                e.printStackTrace();
+                writer.writeObject("N");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
+
+
+
 
     private void sendAllBuyerProducts(String sortType, Buyer buyer) {
         try {
             ArrayList<Product> products;
 
             if (sortType.equals("quantity")) {
-                synchronized(obj) {
+                synchronized (obj) {
                     products = this.market.sortByQuantity();
                 }
             } else if (sortType.equals("price")) {
-                synchronized(obj) {
+                synchronized (obj) {
                     products = this.market.sortByPrice();
                 }
             } else if (sortType.equals("sales")) {
                 //TODO: fix
-                synchronized(obj) {
+                synchronized (obj) {
                     products = this.market.sortByPrice();
                 }
             } else {
-                synchronized(obj) {
+                synchronized (obj) {
                     products = this.market.getAllProducts(true);
                 }
             }
             if (sortType.equals("history")) {
-                    this.sendPurchaseHistory(buyer);
+                this.sendPurchaseHistory(buyer);
             } else {
                 this.writer.writeObject((ArrayList<Product>) products);
             }
@@ -385,19 +421,19 @@ public class Server extends Thread {
         try {
             ArrayList<Product> products;
             if (sortType.equals("quantity")) {
-                synchronized(obj) {
+                synchronized (obj) {
                     products = this.market.sortByQuantity();
                 }
             } else if (sortType.equals("price")) {
-                synchronized(obj) {
+                synchronized (obj) {
                     products = this.market.sortByPrice();
                 }
             } else if (sortType.equals("sales")) {
-                synchronized(obj) {
+                synchronized (obj) {
                     products = this.market.sortBySales();
                 }
             } else {
-                synchronized(obj) {
+                synchronized (obj) {
                     products = this.market.getAllProducts(true);
                 }
             }
@@ -423,7 +459,7 @@ public class Server extends Thread {
             if (searchContents[2].equals("n/a")) searchContents[2] = null;
             ArrayList<Product> searchResults = null;
 //            System.out.println("blah");
-            synchronized(obj) {
+            synchronized (obj) {
 //                System.out.println("got here 1");
                 searchResults = market.matchConditions(searchContents[0], searchContents[1],
                         searchContents[2]);
@@ -445,7 +481,7 @@ public class Server extends Thread {
     private void viewProduct(int indexOfProduct) {
         try {
             Product product = null;
-            synchronized(obj) {
+            synchronized (obj) {
                 product = this.market.getAllProducts(false).get(indexOfProduct);
             }
             this.writer.writeObject(product);
@@ -463,7 +499,7 @@ public class Server extends Thread {
         System.out.println("1");
         try {
             Product p;
-            synchronized(obj) {
+            synchronized (obj) {
                 p = this.market.getAllProducts(false).get(indexOfProduct);
             }
             if (p.getQuantity() < quantity) {
@@ -471,7 +507,7 @@ public class Server extends Thread {
                 this.writer.writeObject((String) "N");
                 return;
             }
-            synchronized(obj) {
+            synchronized (obj) {
                 buyer.addProductToCart(p.getIndex(), quantity);
                 market.updateAllFiles();
             }
@@ -491,15 +527,16 @@ public class Server extends Thread {
     private void exportToFile(Buyer buyer) {
         try {
             ArrayList<String> purchaseHistory = null;
-            synchronized(obj) {
+            synchronized (obj) {
                 purchaseHistory = buyer.getPurchaseHistory();
             }
-            ArrayList<String> fileInfo = new ArrayList<String>();;
+            ArrayList<String> fileInfo = new ArrayList<String>();
+            ;
             for (String item : purchaseHistory) {
                 int idx = Integer.parseInt(item.split(":")[0]);
                 int quantity = Integer.parseInt(item.split(":")[1]);
                 Product p = null;
-                synchronized(obj) {
+                synchronized (obj) {
                     p = market.getProductByIndex(idx);
                 }
                 String s = String.format("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
@@ -521,7 +558,7 @@ public class Server extends Thread {
 
     private void makePurchase(Buyer buyer) {
         try {
-            synchronized(obj) {
+            synchronized (obj) {
                 this.market.makePurchase(buyer);
                 this.market.updateAllFiles();
             }
@@ -539,13 +576,13 @@ public class Server extends Thread {
     private void sendShoppingCart(Buyer buyer) {
         try {
             ArrayList<String> shoppingCart = null;
-            synchronized(obj) {
+            synchronized (obj) {
                 shoppingCart = buyer.getShoppingCart();
             }
             HashMap<Product, Integer> shoppingCartProducts = new HashMap<Product, Integer>();
             for (int i = 0; i < shoppingCart.size(); i++) {
                 Product p = null;
-                synchronized(obj) {
+                synchronized (obj) {
                     p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
                 }
                 int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
@@ -568,7 +605,7 @@ public class Server extends Thread {
     private void changeShoppingCartQuantity(int indexOfProduct, int newQuantity, Buyer buyer) {
         try {
             ArrayList<String> products = null;
-            synchronized(obj) {
+            synchronized (obj) {
                 products = buyer.getShoppingCart();
             }
             boolean exists = false;
@@ -576,7 +613,7 @@ public class Server extends Thread {
                 if (indexOfProduct == Integer.parseInt(products.get(i).split(":")[0])) {
                     exists = true;
                     Product p = null;
-                    synchronized(obj) {
+                    synchronized (obj) {
                         p = market.getProductByIndex(Integer.parseInt(products.get(i).split(":")[0]));
                     }
                     //Sends Client "N" to signify an error (Invalid Quantity)
@@ -584,7 +621,7 @@ public class Server extends Thread {
                         writer.writeObject((String) "N");
                         return;
                     }
-                    synchronized(obj) {
+                    synchronized (obj) {
                         buyer.editProductQuantity(indexOfProduct, newQuantity);
                         market.updateAllFiles();
                     }
@@ -609,7 +646,7 @@ public class Server extends Thread {
     private void sendPurchaseHistory(Buyer buyer) {
         try {
             ArrayList<String> purchaseHistory = null;
-            synchronized(obj) {
+            synchronized (obj) {
                 purchaseHistory = buyer.getPurchaseHistory();
             }
             HashMap<Product, Integer> previousProducts = new HashMap<Product, Integer>();
@@ -617,13 +654,12 @@ public class Server extends Thread {
                 int idx = Integer.parseInt(item.split(":")[0]);
                 int quantity = Integer.parseInt(item.split(":")[1]);
                 Product p = null;
-                synchronized(obj) {
+                synchronized (obj) {
                     p = this.market.getProductByIndex(idx);
                 }
-                if(previousProducts.containsKey(p)) {
+                if (previousProducts.containsKey(p)) {
                     previousProducts.put(p, previousProducts.get(p) + quantity);
-                }
-                else {
+                } else {
                     previousProducts.put(p, quantity);
                 }
 
@@ -643,13 +679,13 @@ public class Server extends Thread {
         ArrayList<String> out = null;
         if (sortType.equals("sales")) {
             ArrayList<String> dashboard = null;
-            synchronized(obj) {
+            synchronized (obj) {
                 dashboard = buyerDashboardForStoreList(market.sortStoresByProductsSold());
             }
             writer.writeObject(dashboard);
         } else if (sortType.equals("history")) {
             ArrayList<String> dashboard = null;
-            synchronized(obj) {
+            synchronized (obj) {
                 dashboard = buyerDashboardForStoreList(buyer.sortStoresByPurchaseHistory(market));
             }
             writer.writeObject(dashboard);
@@ -701,7 +737,7 @@ public class Server extends Thread {
             return;
         }
         ArrayList<String> dashboard = null;
-        synchronized(obj) {
+        synchronized (obj) {
             dashboard = seller.getDashboardStrings(sortType, market);
         }
         writer.writeObject(dashboard);
@@ -713,7 +749,7 @@ public class Server extends Thread {
             return;
         }
         Store store = null;
-        synchronized(obj) {
+        synchronized (obj) {
             store = seller.getStoreByName(storeName);
         }
         ArrayList<String> out = new ArrayList<>();
@@ -726,18 +762,69 @@ public class Server extends Thread {
 
     private void importProductsFromFile(Seller seller, String[] lines) throws IOException {
         for (String line : lines) {
-            synchronized(obj) {
+            synchronized (obj) {
                 Product newProduct = new Product(line);
                 if (seller.getStoreNames().contains(newProduct.getStoreName())) {
                     market.addProduct(newProduct);
                 }
             }
         }
-        synchronized(obj) {
+        synchronized (obj) {
             market.updateAllFiles();
         }
         writer.writeObject("Y");
 
         // TODO: send N if error
+    }
+
+    private void sendStoreInfo(Seller seller) {
+        ArrayList<Store> stores = seller.getStores();
+        String[][] out = null;
+
+        if (stores.size() == 0) {
+            out = new String[1][4];
+            out[0] = new String[]{"Name", "Sales", "Revenue", "Customer Info"};
+
+        } else {
+
+            out = new String[stores.size() + 1][4];
+            out[0] = new String[]{"Name", "Sales", "Revenue", "Customer Info"};
+            for (int i = 0; i < stores.size(); i++) {
+                Store s = stores.get(i);
+                out[i + 1] = new String[]{s.getName(), String.valueOf(s.getSales(market)), String.valueOf(s.getRevenue()), "#Customer Info"};
+            }
+        }
+
+        try {
+            writer.writeObject(out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendProductInfo(String productName) {
+        System.out.println("got here 2");
+        Product p = market.getProductByName(productName);
+
+        if (p == null) {
+            System.out.printf("failed to get '%s'\n", productName);
+        }
+
+        String info = String.format("------------------------------------------\n" +
+                        "%s\n" +
+                        "Store: %s | Price: $%.2f | Quantity: %d\n" +
+                        "Description: %s\n" +
+                        "------------------------------------------\n",
+                p.getName(), p.getStoreName(), p.getSalePrice(), p.getQuantity(), p.getDescription());
+
+
+        try {
+            writer.writeObject(info);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("sent product info:");
+//        System.out.println(info);
     }
 }
