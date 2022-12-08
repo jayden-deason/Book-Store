@@ -1528,18 +1528,19 @@ public class Client extends JComponent implements Runnable {
                 writer.println("3," + product.getIndex());
                 writer.flush();
 
-                Product productActual;
+//                Product productActual = null;
+//
+//                try {
+//                    productActual = (Product) reader.readObject();
+//                } catch (IOException ex) {
+//                    throw new RuntimeException(ex);
+//                } catch (ClassNotFoundException ex) {
+//                    throw new RuntimeException(ex);
+//                }
+//                System.out.println("Received Product with q: " + productActual.getQuantity());
+//                System.out.println(productActual);
 
-                try {
-                    productActual = (Product) reader.readObject();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (ClassNotFoundException ex) {
-                    throw new RuntimeException(ex);
-                }
-                System.out.println(productActual);
-
-                JTextArea info = new JTextArea(getProductInfo(productActual));
+                JTextArea info = new JTextArea(getProductInfo(product));
                 info.setEditable(false);
                 JButton addToCart = new JButton("Add to Cart");
 

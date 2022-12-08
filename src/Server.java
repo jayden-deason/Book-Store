@@ -143,6 +143,7 @@ public class Server extends Thread {
         while (true) {
             System.out.println("Loop ran");
             try {
+                writer.reset();
                 String userChoice = reader.readLine().strip();
                 String[] answer = userChoice.split(",");
                 System.out.println(answer[0]);
@@ -207,6 +208,7 @@ public class Server extends Thread {
     public void runSeller(Seller seller) throws SocketException {
         while (true) {
             try {
+                writer.reset();
                 String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
                 System.out.println(answer[0]);
@@ -390,7 +392,6 @@ public class Server extends Thread {
     private void sendAllBuyerProducts(String sortType, Buyer buyer) {
         try {
             ArrayList<Product> products;
-
             if (sortType.equals("quantity")) {
                 synchronized (obj) {
                     products = this.market.sortByQuantity();
@@ -492,7 +493,7 @@ public class Server extends Thread {
                 product = this.market.getProductByIndex(indexOfProduct);
             }
             this.writer.writeObject(product);
-            System.out.println("Sent product #" + indexOfProduct);
+            System.out.println("Sent Product with q: " + product.getQuantity());
             System.out.println(product);
         } catch (Exception e) {
             try {
