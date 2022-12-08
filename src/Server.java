@@ -489,10 +489,11 @@ public class Server extends Thread {
         try {
             Product product = null;
             synchronized (obj) {
-                product = this.market.getAllProducts(false).get(indexOfProduct);
+                product = this.market.getProductByIndex(indexOfProduct);
             }
             this.writer.writeObject(product);
             System.out.println("Sent product #" + indexOfProduct);
+            System.out.println(product);
         } catch (Exception e) {
             try {
                 this.writer.writeObject((Product) null);
