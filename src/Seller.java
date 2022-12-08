@@ -319,7 +319,7 @@ public class Seller extends User implements java.io.Serializable{
 
     }
 
-    public ArrayList<String> getDashboardStrings(int sortType, Market market) {
+    public String getDashboardString(int sortType, Market market) {
         ArrayList<String> out = new ArrayList<>();
         out.add("------------------------------------------");
         for (Store s : stores) {
@@ -329,7 +329,7 @@ public class Seller extends User implements java.io.Serializable{
         }
         out.add("------------------------------------------");
 
-        return out;
+        return String.join("\n", out);
     }
 
     /**

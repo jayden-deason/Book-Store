@@ -257,8 +257,7 @@ public class Server extends Thread {
                     this.sendProduct(answer[1]);
                 } else if (answer[0].equals("12")) {
                     this.removeSellerProduct(answer[1]);
-                }
-                else {
+                } else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
                     writer.writeObject((String) "!");
                 }
@@ -386,8 +385,6 @@ public class Server extends Thread {
             }
         }
     }
-
-
 
 
     private void sendAllBuyerProducts(String sortType, Buyer buyer) {
@@ -724,7 +721,7 @@ public class Server extends Thread {
 
     private void seeBuyerCarts(Seller seller) {
         try {
-            HashMap<Product, String> productsInCart = seller.sendProductsInCart(this.market);
+            HashMap<Product, String> productsInCart = seller.sendProductsInCart(market);
             this.writer.writeObject((HashMap<Product, String>) productsInCart);
             System.out.println("Wrote purchase history");
         } catch (Exception e) {
@@ -736,21 +733,27 @@ public class Server extends Thread {
         }
     }
 
-    private void showSellerStats(Seller seller, String type) throws IOException {
-        int sortType = -1;
-        if (type.equals("none")) sortType = 0;
-        if (type.equals("alphabet")) sortType = 1;
-        if (type.equals("quantity")) sortType = 2;
+    private void showSellerStats(Seller seller, String type) {
+        try {
+            int sortType = -1;
+            if (type.equals("none")) sortType = 0;
+            if (type.equals("alphabet")) sortType = 1;
+            if (type.equals("sales")) sortType = 2;
 
-        if (sortType == -1) {
-            writer.writeObject(null);
-            return;
+            if (sortType == -1) {
+                writer.writeObject(null);
+                return;
+            }
+            String dashboard = null;
+            synchronized (obj) {
+                dashboard = seller.getDashboardString(sortType, market);
+            }
+
+
+            writer.writeObject(dashboard);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        ArrayList<String> dashboard = null;
-        synchronized (obj) {
-            dashboard = seller.getDashboardStrings(sortType, market);
-        }
-        writer.writeObject(dashboard);
     }
 
     private void sendProductStringsForFile(Seller seller, String storeName) throws IOException {
