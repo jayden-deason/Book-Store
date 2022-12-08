@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -97,7 +99,8 @@ public class Client extends JComponent implements Runnable {
 
                                         storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
                                     }
-                                    JOptionPane.showMessageDialog(null, storeProducts, storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
+                                    JOptionPane.showMessageDialog(null, storeProducts,
+                                            storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
                                 }
                             });
                             panel.add(storeButton);
@@ -132,7 +135,8 @@ public class Client extends JComponent implements Runnable {
 
                                         storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
                                     }
-                                    JOptionPane.showMessageDialog(null, storeProducts, storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
+                                    JOptionPane.showMessageDialog(null, storeProducts,
+                                            storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
                                 }
                             });
                             panel.add(storeButton);
@@ -154,7 +158,8 @@ public class Client extends JComponent implements Runnable {
                             productButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    JOptionPane.showMessageDialog(null, productButton.getText() + " Information", "Info", JOptionPane.INFORMATION_MESSAGE);
+                                    JOptionPane.showMessageDialog(null, productButton.getText() + " Information", "Info",
+                                            JOptionPane.INFORMATION_MESSAGE);
                                 }
                             });
                             panel.add(productButton);
@@ -168,7 +173,8 @@ public class Client extends JComponent implements Runnable {
                 HashMap<Product, Integer> cart = getShoppingCart();
 
                 if (cart.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Cart is empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Cart is empty.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -489,7 +495,8 @@ public class Client extends JComponent implements Runnable {
 //                System.out.println(products.isEmpty());
 
                 if (products == null || products.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "No matching results.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "No matching results.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -501,8 +508,10 @@ public class Client extends JComponent implements Runnable {
                 Container searchContainer = searchFrame.getContentPane();
 
                 for (Product product : products) {
-                    if (products.size() == 1) results.setLayout(new GridLayout(products.size(), products.size()));
-                    else results.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
+                    if (products.size() == 1)
+                        results.setLayout(new GridLayout(products.size(), products.size()));
+                    else
+                        results.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
 
                     //todo: breaks if products.size() == 1   <----- probably fixed
                     setProductButton(product, results);
@@ -513,12 +522,14 @@ public class Client extends JComponent implements Runnable {
                 searchFrame.pack();
             } else if (e.getSource() == checkout) {
                 Object[] options = {"Confirm", "Cancel"};
-                int result = JOptionPane.showOptionDialog(null, "Are you sure you wish to checkout?", "Checkout", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                int result = JOptionPane.showOptionDialog(null, "Are you sure you wish to checkout?", "Checkout",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
                 if (result == 0) {
                     String success = makePurchase();
                     if (success.equalsIgnoreCase("n")) {
-                        JOptionPane.showMessageDialog(null, "One or more books have insufficient " + "stock.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "One or more books have insufficient " +
+                                "stock.", "Error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         JOptionPane.showMessageDialog(null, "Checked out successfully!", "", JOptionPane.INFORMATION_MESSAGE);
                     }
@@ -538,9 +549,11 @@ public class Client extends JComponent implements Runnable {
                         boolean successCheck = importSellerFile(filePath.getText());
 
                         if (successCheck) {
-                            JOptionPane.showMessageDialog(null, "File Imported", "Import", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "File Imported", "Import",
+                                    JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JOptionPane.showMessageDialog(null, "A file with that name does not" + "exist", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "A file with that name does not" +
+                                    "exist", "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 });
@@ -580,9 +593,11 @@ public class Client extends JComponent implements Runnable {
                         boolean successCheck = exportSellerToFile(filePath.getText(), storeName.getText());
 
                         if (successCheck) {
-                            JOptionPane.showMessageDialog(null, "File Exported", "Export", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "File Exported", "Export",
+                                    JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JOptionPane.showMessageDialog(null, "A file with that name already exists,\n" + "or Store Name is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "A file with that name already exists,\n" +
+                                    "or Store Name is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 });
@@ -616,7 +631,7 @@ public class Client extends JComponent implements Runnable {
                 exportFrame.setVisible(true);
                 JPanel content = new JPanel();
                 JLabel file = new JLabel("File Path");
-                JTextField filePath = new JTextField("File Path", 10);
+                JTextField filePath = new JTextField("", 10);
                 JButton export = new JButton("Export to File");
 
                 export.addActionListener(new ActionListener() {
@@ -625,9 +640,11 @@ public class Client extends JComponent implements Runnable {
                         boolean success = exportToBuyerFile(filePath.getText());
 
                         if (success) {
-                            JOptionPane.showMessageDialog(null, "File Exported", "Export", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "File Exported", "Export",
+                                    JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JOptionPane.showMessageDialog(null, "A file with that name already exists.\n" + "Choose another.", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "A file with that name already exists.\n" +
+                                    "Choose another.", "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 });
@@ -836,7 +853,7 @@ public class Client extends JComponent implements Runnable {
         purchase.addActionListener(actionListener);
         checkout = new JButton("Checkout");
         checkout.addActionListener(actionListener);
-        exportToFile = new JButton("Export To File");
+        exportToFile = new JButton("Export Purchase History");
         exportToFile.addActionListener(actionListener);
 
         viewDashboard = new JButton("Dashboard");
@@ -929,7 +946,8 @@ public class Client extends JComponent implements Runnable {
                         throw new RuntimeException(ex);
                     }
                     if (response.equalsIgnoreCase("N")) {
-                        JOptionPane.showMessageDialog(null, "Invalid Username or Password." + "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "Invalid Username or Password." +
+                                "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                 } else { //logging in as seller
@@ -944,7 +962,8 @@ public class Client extends JComponent implements Runnable {
                         throw new RuntimeException(ex);
                     }
                     if (response.equalsIgnoreCase("N")) {
-                        JOptionPane.showMessageDialog(null, "Invalid Username or Password." + "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "Invalid Username or Password." +
+                                "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                 }
@@ -990,7 +1009,8 @@ public class Client extends JComponent implements Runnable {
                 String pass = password.getText();
 
                 if (!(user.contains("@") && user.contains(".com"))) {
-                    JOptionPane.showMessageDialog(null, "Enter a valid email address.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Enter a valid email address.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -1006,7 +1026,9 @@ public class Client extends JComponent implements Runnable {
                         throw new RuntimeException(ex);
                     }
                     if (response.equalsIgnoreCase("N")) {
-                        JOptionPane.showMessageDialog(null, "An account with that username " + "already exists.\n Choose a different one or sign in.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "An account with that username " +
+                                        "already exists.\n Choose a different one or sign in.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                 } else {
@@ -1021,7 +1043,9 @@ public class Client extends JComponent implements Runnable {
                         throw new RuntimeException(ex);
                     }
                     if (response.equalsIgnoreCase("N")) {
-                        JOptionPane.showMessageDialog(null, "An account with that username " + "already exists.\n Choose a different one or sign in.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "An account with that username " +
+                                        "already exists.\n Choose a different one or sign in.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                 }
@@ -1109,7 +1133,8 @@ public class Client extends JComponent implements Runnable {
                     products = getAllProducts("quantity");
                 }
 
-                if (products == null || products.isEmpty()) return;
+                if (products == null || products.isEmpty())
+                    return;
 
                 productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
                 purchaseListeners = new ArrayList<>();
@@ -1265,10 +1290,23 @@ public class Client extends JComponent implements Runnable {
         System.out.println(productName + ", " + newName + ", " + newDescription + ", " + newPrice + ", " + newQuantity);
         if (productName != null) {
             try {
-                if (newName.substring(0, 6).equals("Name: ") && newDescription.substring(0, 13).equals("Description: ") && newPrice.substring(0, 8).equals("Price: $") && newQuantity.substring(0, 10).equals("Quantity: ")) {
-                    writer.printf("4,%s,%s,%s,%s,%s\n", productName, newName.substring(6), newDescription.substring(13), newPrice.substring(8), newQuantity.substring(10));
+                if (newName.substring(0, 6).equals("Name: ") && newDescription.substring(0, 13).equals("Description: ") &&
+                        newPrice.substring(0, 8).equals("Price: $") && newQuantity.substring(0, 10).equals("Quantity: ")) {
+                    writer.printf("4,%s,%s,%s,%s,%s\n",
+                            productName,
+                            newName.substring(6),
+                            newDescription.substring(13),
+                            newPrice.substring(8),
+                            newQuantity.substring(10)
+                    );
 
-                    System.out.printf("4,%s,%s,%s,%s,%s\n", productName, newName.substring(6), newDescription.substring(13), newPrice.substring(8), newQuantity.substring(10));
+                    System.out.printf("4,%s,%s,%s,%s,%s\n",
+                            productName,
+                            newName.substring(6),
+                            newDescription.substring(13),
+                            newPrice.substring(8),
+                            newQuantity.substring(10)
+                    );
                     writer.flush();
 
                     String response = (String) reader.readObject();
@@ -1412,7 +1450,8 @@ public class Client extends JComponent implements Runnable {
 
             ArrayList<String> fileInfo = getStringArray();
 
-            if (fileInfo.isEmpty()) return false;
+            if (fileInfo.isEmpty())
+                return false;
 
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
                 PrintWriter exportWriter = new PrintWriter(bw);
@@ -1451,8 +1490,10 @@ public class Client extends JComponent implements Runnable {
 
             String successCheck = getString();
 
-            if (successCheck.equalsIgnoreCase("y")) return true;
-            else return false;
+            if (successCheck.equalsIgnoreCase("y"))
+                return true;
+            else
+                return false;
         }
     }
 
@@ -1464,6 +1505,7 @@ public class Client extends JComponent implements Runnable {
         productButtonListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println(product.getName());
                 JFrame productFrame = new JFrame(product.getName());
                 productFrame.setVisible(true);
                 productFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -1486,18 +1528,23 @@ public class Client extends JComponent implements Runnable {
                         String success;
                         try {
                             if ((Integer) quantity.getValue() < 1) {
-                                JOptionPane.showMessageDialog(null, "Cannot be 0 or negative", "Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "Cannot be 0 or negative",
+                                        "Error", JOptionPane.ERROR_MESSAGE);
                                 return;
                             }
-                            success = addToCart(product, (Integer) quantity.getValue());
+                            success = addToCart(product,
+                                    (Integer) quantity.getValue());
                         } catch (NumberFormatException ex) {
-                            JOptionPane.showMessageDialog(null, "Enter an integer.", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "Enter an integer.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
                         if (success.equalsIgnoreCase("n")) {
-                            JOptionPane.showMessageDialog(null, "Insufficient stock.", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "Insufficient stock.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
                         } else if (success.equalsIgnoreCase("y")) {
-                            JOptionPane.showMessageDialog(null, "Added to cart.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "Added to cart.",
+                                    "Success", JOptionPane.INFORMATION_MESSAGE);
                         }
 
                         productFrame.dispose();
