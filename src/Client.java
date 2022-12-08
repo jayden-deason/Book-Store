@@ -1017,15 +1017,13 @@ public class Client extends JComponent implements Runnable {
                 if (userType) {
                     writer.printf("%d,%d,%s,%s\n", 0, 1, user, pass);
                     writer.flush();
-                    String response;
+                    String response = null;
                     try {
                         response = (String) reader.readObject();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    } catch (ClassNotFoundException ex) {
-                        throw new RuntimeException(ex);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                    if (response.equalsIgnoreCase("N")) {
+                    if (response == null || response.equalsIgnoreCase("N")) {
                         JOptionPane.showMessageDialog(null, "An account with that username " +
                                         "already exists.\n Choose a different one or sign in.", "Error",
                                 JOptionPane.ERROR_MESSAGE);
@@ -1034,13 +1032,11 @@ public class Client extends JComponent implements Runnable {
                 } else {
                     writer.println(String.format("%d,%d,%s,%s", 1, 1, user, pass));
                     writer.flush();
-                    String response;
+                    String response = null;
                     try {
                         response = (String) reader.readObject();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    } catch (ClassNotFoundException ex) {
-                        throw new RuntimeException(ex);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
                     if (response.equalsIgnoreCase("N")) {
                         JOptionPane.showMessageDialog(null, "An account with that username " +
@@ -1052,11 +1048,9 @@ public class Client extends JComponent implements Runnable {
 
                 ArrayList<Product> products;
                 try {
-                    products = (ArrayList<Product>) reader.readObject();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (ClassNotFoundException ex) {
-                    throw new RuntimeException(ex);
+                    products = getAllProducts("none");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
 
                 isBuyer.setVisible(false);
