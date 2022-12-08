@@ -1,14 +1,9 @@
-import jdk.security.jarsigner.JarSigner;
-
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -124,6 +119,7 @@ public class Client extends JComponent implements Runnable {
                         panel.removeAll();
                         for (String store : stores) {
                             String[] storeInfo = store.split(":");
+                            //TODO: fix error probably caused by stores without products
                             String[] products = storeInfo[1].split(";");
 
                             JButton storeButton = new JButton(storeInfo[0]);
@@ -454,7 +450,6 @@ public class Client extends JComponent implements Runnable {
                         results.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
 
                     //todo: breaks if products.size() == 1   <----- probably fixed
-
                     setProductButton(product, results);
                 }
                 results.updateUI();
@@ -479,64 +474,122 @@ public class Client extends JComponent implements Runnable {
                 //TODO: change all the "string" stuff to stores
                 JFrame importFrame = new JFrame("Import");
                 importFrame.setVisible(true);
-                Container content = importFrame.getContentPane();
-                JTextField filePath = new JTextField();
-//                ArrayList<Store> stores = null;
-                String[] strings = {"String1", "String2", "String3", "String4"};
-//                JPanel storePanel = new JPanel(new GridLayout(stores.size() / 2, stores.size() / 4));
-                JPanel storePanel = new JPanel(new GridLayout(strings.length / 2, strings.length / 4));
+                JPanel content = new JPanel();
+                JLabel file = new JLabel("File Path");
+                JTextField filePath = new JTextField("File Path", 10);
+                JButton importFile = new JButton("Import File");
+
+                importFile.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        boolean successCheck = importSellerFile(filePath.getText());
+
+                        if (successCheck) {
+                            JOptionPane.showMessageDialog(null, "File Imported", "Import",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "A file with that name does not" +
+                                    "exist", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
 
 //                for (Store store : stores) {
-                for (String string : strings) {
+//                for (String string : strings) {
 //                    JButton storeButton = new JButton(store.getName());
-                    JButton storeButton = new JButton(string);
-                    storeButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            //TODO: when this button is clicked import the file path to the store selected
-                        }
-                    });
-                    storePanel.add(storeButton);
-                }
-                content.add(filePath, BorderLayout.PAGE_START);
-                content.add(storePanel);
+//                    JButton storeButton = new JButton(string);
+//                    storeButton.addActionListener(new ActionListener() {
+//                        @Override
+//                        public void actionPerformed(ActionEvent e) {
+//                            //TODO: when this button is clicked import the file path to the store selected
+//                        }
+//                    });
+//                    storePanel.add(storeButton);
+//                }
+                content.add(file);
+                content.add(filePath);
+                content.add(importFile);
+
+                importFrame.add(content);
                 importFrame.pack();
             } else if (e.getSource() == exportSellerFile) {
                 //TODO: change all the "string" stuff to stores
                 JFrame exportFrame = new JFrame("Export");
                 exportFrame.setVisible(true);
-                Container content = exportFrame.getContentPane();
-                JTextField filePath = new JTextField();
-//                ArrayList<Store> stores = null;
-                String[] strings = {"String1", "String2", "String3", "String4"};
-//                JPanel storePanel = new JPanel(new GridLayout(stores.size() / 2, stores.size() / 4));
-                JPanel storePanel = new JPanel(new GridLayout(strings.length / 2, strings.length / 4));
+                JPanel content = new JPanel();
+                JLabel file = new JLabel("File Path");
+                JLabel store = new JLabel("Store Name");
+                JTextField filePath = new JTextField("File Path", 10);
+                JTextField storeName = new JTextField("Store Name", 10);
+                JButton export = new JButton("Export to File");
 
-//                for (Store store : stores) {
-                for (String string : strings) {
-//                    JButton storeButton = new JButton(store.getName());
-                    JButton storeButton = new JButton(string);
-                    storeButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            //TODO: when this button is clicked export the file path to the store selected
+                export.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        boolean successCheck = exportSellerToFile(filePath.getText(), storeName.getText());
+
+                        if (successCheck) {
+                            JOptionPane.showMessageDialog(null, "File Exported", "Export",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "A file with that name already exists,\n" +
+                                    "or Store Name is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
                         }
-                    });
-                    storePanel.add(storeButton);
-                }
-                content.add(filePath, BorderLayout.PAGE_START);
-                content.add(storePanel);
+                    }
+                });
+//                ArrayList<Store> stores = null;
+//                String[] strings = {"String1", "String2", "String3", "String4"};
+//                JPanel storePanel = new JPanel(new GridLayout(stores.size() / 2, stores.size() / 4));
+//                JPanel storePanel = new JPanel(new GridLayout(strings.length / 2, strings.length / 4));
+//
+//                for (Store store : stores) {
+//                for (String string : strings) {
+//                    JButton storeButton = new JButton(store.getName());
+//                    JButton storeButton = new JButton(string);
+//                    storeButton.addActionListener(new ActionListener() {
+//                        @Override
+//                        public void actionPerformed(ActionEvent e) {
+//                            //TODO: when this button is clicked export the file path to the store selected
+//                        }
+//                    });
+//                    storePanel.add(storeButton);
+//                }
+                content.add(file);
+                content.add(filePath);
+                content.add(store);
+                content.add(storeName);
+                content.add(export);
+
+                exportFrame.add(content);
                 exportFrame.pack();
             } else if (e.getSource() == exportToFile) {
-                boolean success = exportToFile("purchases.txt");
+                JFrame exportFrame = new JFrame("Export");
+                exportFrame.setVisible(true);
+                JPanel content = new JPanel();
+                JLabel file = new JLabel("File Path");
+                JTextField filePath = new JTextField("File Path", 10);
+                JButton export = new JButton("Export to File");
 
-                if (success) {
-                    JOptionPane.showMessageDialog(null, "File Exported", "Export",
-                            JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, "A file with that name already exists. " +
-                            "Choose another", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+                export.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        boolean success = exportToBuyerFile(filePath.getText());
+
+                        if (success) {
+                            JOptionPane.showMessageDialog(null, "File Exported", "Export",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "A file with that name already exists.\n" +
+                                    "Choose another.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+                content.add(file);
+                content.add(filePath);
+                content.add(export);
+
+                exportFrame.add(content);
+                exportFrame.pack();
             }
         }
     };
@@ -1218,7 +1271,7 @@ public class Client extends JComponent implements Runnable {
         return products;
     }
 
-    private String getProductString() {
+    private String getString() {
         String response;
         try {
             response = (String) reader.readObject();
@@ -1273,11 +1326,11 @@ public class Client extends JComponent implements Runnable {
     public String addToCart(Product product, int quantity) {
         writer.println(String.format("4,%d,%d", product.getIndex(), quantity));
         writer.flush();
-        return getProductString();
+        return getString();
     }
 
-    public boolean exportToFile(String filename) {
-        File testExistence = new File("filename");
+    public boolean exportToBuyerFile(String filename) {
+        File testExistence = new File(filename);
 
         if (testExistence.exists()) {
             return false;
@@ -1285,14 +1338,8 @@ public class Client extends JComponent implements Runnable {
             writer.println("5");
             writer.flush();
 
-            ArrayList<String> fileInfo;
-            try {
-                fileInfo = (ArrayList<String>) reader.readObject();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            ArrayList<String> fileInfo = getStringArray();
+
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
                 PrintWriter exportWriter = new PrintWriter(bw);
                 for (int i = 0; i < fileInfo.size(); i++) {
@@ -1303,6 +1350,64 @@ public class Client extends JComponent implements Runnable {
                 e.printStackTrace();
             }
             return true;
+        }
+    }
+
+    public boolean exportSellerToFile(String filename, String storeName) {
+        File testExistence = new File(filename);
+
+        if (testExistence.exists()) {
+            return false;
+        } else {
+            writer.println("8," + storeName);
+            writer.flush();
+
+            ArrayList<String> fileInfo = getStringArray();
+
+            if (fileInfo.isEmpty())
+                return false;
+
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
+                PrintWriter exportWriter = new PrintWriter(bw);
+                for (int i = 0; i < fileInfo.size(); i++) {
+                    exportWriter.print(fileInfo.get(i));
+                }
+                exportWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+    }
+
+    public boolean importSellerFile(String filename) {
+        File testExistence = new File(filename);
+
+        if (!testExistence.exists()) {
+            return false;
+        } else {
+            String fileContent = "";
+            try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+                String line = br.readLine();
+                while (line != null) {
+                    fileContent += line + "\n";
+                    line = br.readLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            fileContent = fileContent.substring(0, fileContent.length() - 2);
+
+            writer.println("8," + fileContent);
+            writer.flush();
+
+            String successCheck = getString();
+
+            if (successCheck.equalsIgnoreCase("y"))
+                return true;
+            else
+                return false;
         }
     }
 
@@ -1380,7 +1485,7 @@ public class Client extends JComponent implements Runnable {
     public String makePurchase() {
         writer.println("6");
         writer.flush();
-        return getProductString();
+        return getString();
     }
 
     public HashMap<Product, Integer> getShoppingCart() {
@@ -1392,7 +1497,7 @@ public class Client extends JComponent implements Runnable {
     public String editCart(Product product, int newQuantity) {
         writer.println(String.format("8,%d,%d", product.getIndex(), newQuantity));
         writer.flush();
-        return getProductString();
+        return getString();
     }
 
     public HashMap<Product, Integer> getPurchaseHistory() {
