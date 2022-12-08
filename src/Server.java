@@ -1,4 +1,3 @@
-import javax.print.attribute.HashPrintJobAttributeSet;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -231,11 +230,11 @@ public class Server extends Thread {
                 } else if (answer[0].equals("4")) {
                     // edit product
                     this.editSellerProduct(seller,
-                            Integer.parseInt(answer[1]), // product index
-                            answer[2], // product name
-                            answer[3], // description
-                            Double.parseDouble(answer[4]), // price
-                            Integer.parseInt(answer[5]) // quantity
+                            answer[1], // current name
+                            answer[2], // new name
+                            answer[3], // new description
+                            answer[4], // new price
+                            answer[5] // new quantity
                     );
                 } else if (answer[0].equals("5")) {
                     // add store
@@ -255,7 +254,7 @@ public class Server extends Thread {
                 } else if (answer[0].equals("10")) {
                     this.sendStoreInfo(seller);
                 } else if (answer[0].equals("11")) {
-                    this.sendProductInfo(answer[1]);
+                    this.sendProduct(answer[1]);
                 } else if (answer[0].equals("12")) {
                     this.removeSellerProduct(answer[1]);
                 }
@@ -322,24 +321,35 @@ public class Server extends Thread {
         }
     }
 
-    private void editSellerProduct(Seller seller, int productIndex, String productName,
-                                   String description, double price, int quantity) throws IOException {
+    private void editSellerProduct(Seller seller, String productName, String newName,
+                                   String newDescription, String newPrice, String newQuantity) {
 
         try {
+            double price = Double.parseDouble(newPrice);
+            int quantity = Integer.parseInt(newQuantity);
+
             synchronized (obj) {
-                Product product = market.getProductByIndex(productIndex);
-                product.setName(productName);
-                product.setDescription(description);
+                Product product = market.getProductByName(productName);
+                product.setName(newName);
+                product.setDescription(newDescription);
                 product.setSalePrice(price);
                 product.setOriginalPrice(price);
                 product.setQuantity(quantity);
+
+                market.editProduct(product);
                 market.updateAllFiles();
             }
+
+            this.writer.writeObject("Y");
+            System.out.println("edited product");
+
         } catch (Exception e) {
-            this.writer.writeObject("N");
-            return;
+            try {
+                this.writer.writeObject("N");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
-        this.writer.writeObject("Y");
     }
 
     private void addSellerStore(Seller seller, String storeName) {
@@ -802,29 +812,19 @@ public class Server extends Thread {
         }
     }
 
-    private void sendProductInfo(String productName) {
-        System.out.println("got here 2");
+    private void sendProduct(String productName) {
         Product p = market.getProductByName(productName);
+        System.out.println(p);
 
         if (p == null) {
             System.out.printf("failed to get '%s'\n", productName);
         }
 
-        String info = String.format("------------------------------------------\n" +
-                        "%s\n" +
-                        "Store: %s | Price: $%.2f | Quantity: %d\n" +
-                        "Description: %s\n" +
-                        "------------------------------------------\n",
-                p.getName(), p.getStoreName(), p.getSalePrice(), p.getQuantity(), p.getDescription());
-
-
         try {
-            writer.writeObject(info);
+            writer.writeObject(p);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        System.out.println("sent product info:");
-//        System.out.println(info);
     }
 }

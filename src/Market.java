@@ -508,6 +508,15 @@ public class Market implements java.io.Serializable{
 
     }
 
+    public void editProduct(Product product) {
+        for (int i = 0; i < products.size(); i++) {
+            if (products.get(i).getIndex() == product.getIndex()) {
+                products.set(i, product);
+            }
+        }
+
+    }
+
     /**
      * Sort the list of products by price
      *

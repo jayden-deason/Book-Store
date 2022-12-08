@@ -293,12 +293,17 @@ public class Client extends JComponent implements Runnable {
             } else if (e.getSource() == confirmAddStore) {
                 String storeName = storeToAdd.getText();
                 addStore(storeName);
-                // todo: code to hide text
+                storeToAdd.setVisible(false);
+                storeToAdd.setText("Store name");
+                confirmAddStore.setVisible(false);
+                userBar.updateUI();
             } else if (e.getSource() == confirmAddProduct) {
-                //TODO: code to actually add product
                 String productInfo = productToAdd.getText();
                 addProduct(productInfo);
-                // todo: code to hide text
+                productToAdd.setVisible(false);
+                productToAdd.setText("Product name,store name,description,price,quantity");
+                confirmAddProduct.setVisible(false);
+                userBar.updateUI();
             } else if (e.getSource() == removeProduct) {
                 JFrame removeProductFrame = new JFrame("Remove Product");
                 removeProductFrame.setSize(400, 500);
@@ -325,7 +330,7 @@ public class Client extends JComponent implements Runnable {
                 removeProductFrame.pack();
             } else if (e.getSource() == editProduct) {
                 JFrame editProductFrame = new JFrame("Edit Product");
-                editProductFrame.setSize(400, 500);
+                editProductFrame.setSize(750, 500);
                 editProductFrame.setVisible(true);
 
                 ArrayList<Product> products = getSellerProducts("none");
@@ -337,11 +342,22 @@ public class Client extends JComponent implements Runnable {
                 JPanel panel = new JPanel();
                 JPanel panel2 = new JPanel();
                 panel2.setLayout(new BoxLayout(panel2, BoxLayout.PAGE_AXIS));
-                JButton edit = new JButton("Edit");
+                Product selected = getProduct(jList.getSelectedValue());
+
                 JTextField name = new JTextField("Name");
                 JTextField price = new JTextField("Price");
                 JTextField description = new JTextField("Description");
                 JTextField quantity = new JTextField("Quantity");
+
+                JButton edit = new JButton("Edit");
+                edit.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        editProduct(jList.getSelectedValue(), name.getText(), description.getText(), price.getText(), quantity.getText());
+                        updateMarket.doClick();
+                    }
+                });
+
                 edit.setVisible(false);
                 name.setVisible(false);
                 price.setVisible(false);
@@ -350,11 +366,24 @@ public class Client extends JComponent implements Runnable {
                 jList.addListSelectionListener(new ListSelectionListener() {
                     @Override
                     public void valueChanged(ListSelectionEvent e) {
+                        Product selected = getProduct(jList.getSelectedValue());
+                        System.out.println(selected);
                         edit.setVisible(true);
                         name.setVisible(true);
                         price.setVisible(true);
                         description.setVisible(true);
                         quantity.setVisible(true);
+                        if (selected != null) {
+                            name.setText("Name: " + selected.getName());
+                            price.setText(String.format("Price: $%.2f", selected.getSalePrice()));
+                            description.setText("Description: " + selected.getDescription());
+                            quantity.setText("Quantity: " + selected.getQuantity());
+                        } else {
+                            name.setText("Name");
+                            price.setText("Price");
+                            description.setText("Description");
+                            quantity.setText("Quantity");
+                        }
                     }
                 });
                 Container content = editProductFrame.getContentPane();
@@ -553,10 +582,40 @@ public class Client extends JComponent implements Runnable {
         isSeller = new JRadioButton("Seller");
         buttonGroup.add(isBuyer);
         buttonGroup.add(isSeller);
-        productToAdd = new JTextField("", 40);
-        productToAdd.setToolTipText("bookname,storename,description,price,quantity");
-        storeToAdd = new JTextField("", 40);
-        storeToAdd.setToolTipText("storename");
+        productToAdd = new JTextField("Product name,store name,description,price,quantity", 40);
+        productToAdd.addFocusListener(new FocusListener() { // Creates default text
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (productToAdd.getText().equals("Product name,store name,description,price,quantity")) {
+                    productToAdd.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (productToAdd.getText().equals("")) {
+                    productToAdd.setText("Product name,store name,description,price,quantity");
+                }
+            }
+        });
+        productToAdd.setToolTipText("Product name,store name,description,price,quantity");
+        storeToAdd = new JTextField("Store name", 40);
+        storeToAdd.addFocusListener(new FocusListener() { // Creates default text
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (storeToAdd.getText().equals("Store name")) {
+                    storeToAdd.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (storeToAdd.getText().equals("")) {
+                    storeToAdd.setText("Store name");
+                }
+            }
+        });
+        storeToAdd.setToolTipText("Store name");
         username.addFocusListener(new FocusListener() { // Creates default text
             @Override
             public void focusGained(FocusEvent e) {
@@ -626,7 +685,7 @@ public class Client extends JComponent implements Runnable {
         sortMarket.addItem("Sort By: Alphabetically");
         sortMarket.addItem("Sort By: Price");
         sortMarket.addItem("Sort By: Quantity");
-        updateMarket = new JButton("Update Market");
+        updateMarket = new JButton("↺");
         sortMarket.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -786,6 +845,7 @@ public class Client extends JComponent implements Runnable {
                                 "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
+
                 }
 
                 ArrayList<Product> products = getAllProducts("none");
@@ -810,6 +870,7 @@ public class Client extends JComponent implements Runnable {
                     viewProducts.setVisible(true);
                     addStore.setVisible(true);
                     addProduct.setVisible(true);
+                    checkout.setVisible(false);
                     removeProduct.setVisible(true);
                     editProduct.setVisible(true);
                     importSellerFile.setVisible(true);
@@ -1003,6 +1064,7 @@ public class Client extends JComponent implements Runnable {
                                     } else if (success.equalsIgnoreCase("y")) {
                                         JOptionPane.showMessageDialog(null, "Added to cart.",
                                                 "Success", JOptionPane.INFORMATION_MESSAGE);
+                                        productFrame.setVisible(false);
                                     }
                                 }
                             };
@@ -1118,19 +1180,73 @@ public class Client extends JComponent implements Runnable {
     }
 
     private String getProductInfo(String productName) {
+        Product product = getProduct(productName);
+
+        String info = String.format("------------------------------------------\n" +
+                        "%s\n" +
+                        "Store: %s | Price: $%.2f | Quantity: %d\n" +
+                        "Description: %s\n" +
+                        "------------------------------------------\n",
+                product.getName(), product.getStoreName(), product.getSalePrice(), product.getQuantity(),
+                product.getDescription());
+
+        return info;
+
+    }
+
+    private Product getProduct(String productName) {
         writer.println("11," + productName);
         writer.flush();
 
-        System.out.println("getting product info");
-
-        String info = null;
+        Product product = null;
         try {
-            info = (String) reader.readObject();
+            product = (Product) reader.readObject();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return info;
+        return product;
+    }
+
+    private void editProduct(String productName, String newName, String newDescription, String newPrice, String newQuantity) {
+        System.out.println(productName + ", " + newName + ", " + newDescription + ", " + newPrice + ", " + newQuantity);
+        if (productName != null) {
+            try {
+                if (newName.substring(0, 6).equals("Name: ") && newDescription.substring(0, 13).equals("Description: ") &&
+                        newPrice.substring(0, 8).equals("Price: $") && newQuantity.substring(0, 10).equals("Quantity: ")) {
+                    writer.printf("4,%s,%s,%s,%s,%s\n",
+                            productName,
+                            newName.substring(6),
+                            newDescription.substring(13),
+                            newPrice.substring(8),
+                            newQuantity.substring(10)
+                    );
+
+                    System.out.printf("4,%s,%s,%s,%s,%s\n",
+                            productName,
+                            newName.substring(6),
+                            newDescription.substring(13),
+                            newPrice.substring(8),
+                            newQuantity.substring(10)
+                    );
+                    writer.flush();
+
+                    String response = (String) reader.readObject();
+                    if (response.equalsIgnoreCase("n")) {
+                        JOptionPane.showMessageDialog(null, "Error editing product!", "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Edited product!", "", JOptionPane.INFORMATION_MESSAGE);
+                    }
+
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Bad formatting!", "Error", JOptionPane.ERROR_MESSAGE);
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private ArrayList<Product> getSellerProducts(String sortType) {
