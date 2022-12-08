@@ -70,7 +70,6 @@ public class Client extends JComponent implements Runnable {
                     purchases.setVisible(false);
                 }
 
-                panel.setLayout(new GridBagLayout());
                 scrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
                 products.addActionListener(new ActionListener() {
                     @Override
@@ -82,18 +81,30 @@ public class Client extends JComponent implements Runnable {
                         Collections.reverse(stores);
 
                         panel.removeAll();
+                        if (stores.size() < 4) {
+                            panel.setLayout(new GridLayout(stores.size(), 1));
+                        } else {
+                            panel.setLayout(new GridLayout(stores.size() / 4, stores.size() / 2));
+                        }
                         for (String store : stores) {
-                            String[] storeInfo = store.split(":");
-                            String[] products = storeInfo[1].split(";");
+                            String[] storeInfo;
+                            String[] products = new String[0];
+                            if (store.contains(":")) {
+                                storeInfo = store.split(":");
+                                products = storeInfo[1].split(";");
+                            } else {
+                                storeInfo = new String[]{store};
+                            }
 
                             JButton storeButton = new JButton(storeInfo[0]);
+                            String[] finalProducts = products;
                             storeButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     String storeProducts = "";
 
-                                    for (int i = 0; i < products.length; i++) {
-                                        String[] productInfo = products[i].split(",");
+                                    for (int i = 0; i < finalProducts.length; i++) {
+                                        String[] productInfo = finalProducts[i].split(",");
 
                                         storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
                                     }
@@ -116,20 +127,31 @@ public class Client extends JComponent implements Runnable {
                         Collections.reverse(stores);
 
                         panel.removeAll();
+                        if (stores.size() < 4) {
+                            panel.setLayout(new GridLayout(stores.size(), 1));
+                        } else {
+                            panel.setLayout(new GridLayout(stores.size() / 4, stores.size() / 2));
+                        }
                         for (String store : stores) {
-                            String[] storeInfo = store.split(":");
-                            //TODO: fix error probably caused by stores without products
-                            String[] products = storeInfo[1].split(";");
+                            String[] storeInfo;
+                            String[] products = new String[0];
+                            if (store.contains(":")) {
+                                storeInfo = store.split(":");
+                                products = storeInfo[1].split(";");
+                            } else {
+                                storeInfo = new String[]{store};
+                            }
 
                             JButton storeButton = new JButton(storeInfo[0]);
+                            String[] finalProducts = products;
+//                            JButton storeButton = new JButton(storeInfo[0]);
                             storeButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     String storeProducts = "";
 
-                                    for (int i = 0; i < products.length; i++) {
-                                        String[] productInfo = products[i].split(",");
-
+                                    for (int i = 0; i < finalProducts.length; i++) {
+                                        String[] productInfo = finalProducts[i].split(",");
                                         storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
                                     }
                                     JOptionPane.showMessageDialog(null, storeProducts, storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
@@ -145,19 +167,44 @@ public class Client extends JComponent implements Runnable {
                 customers.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println("By Customer Info");
-                        int item = 0;
+                        System.out.println("By products sold");
+
+                        ArrayList<String> stores = getBuyerDashboard("sales");
+
+                        Collections.reverse(stores);
+
                         panel.removeAll();
-                        ArrayList<Product> products = null;
-                        for (Product product : products) {
-                            JButton productButton = new JButton("Customer" + item++);
-                            productButton.addActionListener(new ActionListener() {
+                        if (stores.size() < 4) {
+                            panel.setLayout(new GridLayout(stores.size(), 1));
+                        } else {
+                            panel.setLayout(new GridLayout(stores.size() / 4, stores.size() / 2));
+                        }
+                        for (String store : stores) {
+                            String[] storeInfo;
+                            String[] products = new String[0];
+                            if (store.contains(":")) {
+                                storeInfo = store.split(":");
+                                products = storeInfo[1].split(";");
+                            } else {
+                                storeInfo = new String[]{store};
+                            }
+
+                            JButton storeButton = new JButton(storeInfo[0]);
+                            String[] finalProducts = products;
+                            storeButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    JOptionPane.showMessageDialog(null, productButton.getText() + " Information", "Info", JOptionPane.INFORMATION_MESSAGE);
+                                    String storeProducts = "";
+
+                                    for (int i = 0; i < finalProducts.length; i++) {
+                                        String[] productInfo = finalProducts[i].split(",");
+
+                                        storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
+                                    }
+                                    JOptionPane.showMessageDialog(null, storeProducts, storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
                                 }
                             });
-                            panel.add(productButton);
+                            panel.add(storeButton);
                         }
                         panel.updateUI();
                     }
@@ -978,6 +1025,7 @@ public class Client extends JComponent implements Runnable {
                     exportSellerFile.setVisible(true);
                     purchase.setVisible(false);
                     quantity.setVisible(false);
+                    exportToFile.setVisible(false);
                 }
                 System.out.println("Updated");
                 updateMarket.doClick();
@@ -1055,6 +1103,7 @@ public class Client extends JComponent implements Runnable {
                     addProduct.setVisible(true);
                     removeProduct.setVisible(true);
                     editProduct.setVisible(true);
+                    exportToFile.setVisible(false);
                     importSellerFile.setVisible(true);
                     exportSellerFile.setVisible(true);
                 }
