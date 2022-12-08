@@ -8,6 +8,7 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -105,12 +106,12 @@ public class Client extends JComponent implements Runnable {
                     public void actionPerformed(ActionEvent e) {
                         System.out.println("By purchase history");
 
-                        ArrayList<Product> products = getAllProducts("history"); // todo: cast to hashmap
+                        ArrayList<String> stores = getBuyerDashboard("history");
 
                         int item = 0;
                         panel.removeAll();
-                        for (Product product : products) {
-                            JButton productButton = new JButton(product.getName());
+                        for (String store : stores) {
+                            JButton productButton = new JButton();
                             productButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
@@ -399,7 +400,8 @@ public class Client extends JComponent implements Runnable {
 
                 int item = 0;
                 for (Product product : products) {
-                    productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4)); //todo: breaks if products.size() == 1
+                    productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
+                    //todo: breaks if products.size() == 1
                     JButton productButton = new JButton(product.getName());
                     productPage.add(productButton);
                     productButton.addActionListener(new ActionListener() {
@@ -969,8 +971,7 @@ public class Client extends JComponent implements Runnable {
                             productFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                             JPanel productPanel = new JPanel();
                             Container content = productFrame.getContentPane();
-//                            JTextField quantity = new JTextField();
-                            SpinnerModel value = new SpinnerNumberModel(1, 0, product.getQuantity(), 1);
+                            SpinnerModel value = new SpinnerNumberModel(0, 0, product.getQuantity(), 1);
                             quantity = new JSpinner(value);
                             quantity.setPreferredSize(new Dimension(30, 25));
                             JTextArea info = new JTextArea(String.format("Product Information\n%.2f\n%s",
@@ -984,6 +985,11 @@ public class Client extends JComponent implements Runnable {
                                     System.out.println("Sending purchase");
                                     String success;
                                     try {
+                                        if ((Integer) quantity.getValue() < 1) {
+                                            JOptionPane.showMessageDialog(null, "Cannot be 0 or negative",
+                                                    "Error", JOptionPane.ERROR_MESSAGE);
+                                            return;
+                                        }
                                         success = addToCart(product,
                                                 (Integer) quantity.getValue());
                                     } catch (NumberFormatException ex) {
@@ -1156,7 +1162,7 @@ public class Client extends JComponent implements Runnable {
         return products;
     }
 
-    private String getStringArray() {
+    private String getProductString() {
         String response;
         try {
             response = (String) reader.readObject();
@@ -1168,6 +1174,18 @@ public class Client extends JComponent implements Runnable {
         return response;
     }
 
+    private ArrayList<String> getStringArray() {
+        ArrayList<String> response;
+
+        try {
+            response = (ArrayList<String>) reader.readObject();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
     private HashMap<Product, Integer> getProductHash() {
         HashMap<Product, Integer> products;
 
@@ -1199,7 +1217,7 @@ public class Client extends JComponent implements Runnable {
     public String addToCart(Product product, int quantity) {
         writer.println(String.format("4,%d,%d", product.getIndex(), quantity));
         writer.flush();
-        return getStringArray();
+        return getProductString();
     }
 
     public boolean exportToFile(String filename) {
@@ -1235,7 +1253,7 @@ public class Client extends JComponent implements Runnable {
     public String makePurchase() {
         writer.println("6");
         writer.flush();
-        return getStringArray();
+        return getProductString();
     }
 
     public HashMap<Product, Integer> getShoppingCart() {
@@ -1247,13 +1265,19 @@ public class Client extends JComponent implements Runnable {
     public String editCart(Product product, int newQuantity) {
         writer.println(String.format("8,%d,%d", product.getIndex(), newQuantity));
         writer.flush();
-        return getStringArray();
+        return getProductString();
     }
 
     public HashMap<Product, Integer> getPurchaseHistory() {
         writer.println("9");
         writer.flush();
         return getProductHash();
+    }
+
+    public ArrayList<String> getBuyerDashboard(String condition) {
+        writer.println("10," + condition);
+        writer.flush();
+        return getStringArray();
     }
 
     public void closeSocket() {
