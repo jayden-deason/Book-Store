@@ -42,7 +42,7 @@ public class Client extends JComponent implements Runnable {
     private JSpinner quantity;
 
     private JComboBox<String> searchOptions, sortMarket;
-    private ActionListener productButtonListener;
+//    private ActionListener productButtonListener;
 
     ActionListener actionListener = new ActionListener() {
         @Override
@@ -1140,10 +1140,12 @@ public class Client extends JComponent implements Runnable {
                 purchaseListeners = new ArrayList<>();
                 ArrayList<JButton> purchaseButtons = new ArrayList<>();
 
-
+                productButtons.clear();
                 for (Product product : products) {
                     setProductButton(product, productPage);
                 }
+                productPage.setVisible(false);
+                productPage.setVisible(true);
                 productPage.updateUI();
             }
         });
@@ -1266,7 +1268,10 @@ public class Client extends JComponent implements Runnable {
     }
 
     private String getProductInfo(Product product) {
-        String info = String.format("------------------------------------------\n" + "%s\n" + "Store: %s | Price: $%.2f | Quantity: %d\n" + "Description: %s\n" + "------------------------------------------\n", product.getName(), product.getStoreName(), product.getSalePrice(), product.getQuantity(), product.getDescription());
+        String info = String.format("------------------------------------------\n" + "%s\n" + "Store: %s " +
+                "| Price: $%.2f | Quantity: %d\n" + "Description: %s\n" +
+                "------------------------------------------\n", product.getName(), product.getStoreName(),
+                product.getSalePrice(), product.getQuantity(), product.getDescription());
 
         return info;
 
@@ -1498,13 +1503,16 @@ public class Client extends JComponent implements Runnable {
     }
 
     private void setProductButton(Product product, JPanel panel) {
-        JButton productButton = new JButton(product.getName());
+        String productLabel = String.format("<html>%s<br />Store: %s<br />$%.2f</html>", product.getName(),
+                product.getStoreName(), product.getSalePrice());
+        JButton productButton = new JButton(productLabel);
         panel.add(productButton);
         productButtons.add(productButton);
 
-        productButtonListener = new ActionListener() {
+        ActionListener productButtonListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                purchaseListeners.clear();
                 System.out.println(product.getName());
                 JFrame productFrame = new JFrame(product.getName());
                 productFrame.setVisible(true);
@@ -1516,6 +1524,21 @@ public class Client extends JComponent implements Runnable {
                 quantity.setPreferredSize(new Dimension(90, 25));
                 quantity.setBackground(Color.WHITE);
                 ((JSpinner.DefaultEditor) quantity.getEditor()).getTextField().setEditable(false);
+
+                writer.println("3," + product.getIndex());
+                writer.flush();
+
+//                Product productActual = null;
+//
+//                try {
+//                    productActual = (Product) reader.readObject();
+//                } catch (IOException ex) {
+//                    throw new RuntimeException(ex);
+//                } catch (ClassNotFoundException ex) {
+//                    throw new RuntimeException(ex);
+//                }
+//                System.out.println("Received Product with q: " + productActual.getQuantity());
+//                System.out.println(productActual);
 
                 JTextArea info = new JTextArea(getProductInfo(product));
                 info.setEditable(false);
