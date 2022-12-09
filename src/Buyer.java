@@ -120,7 +120,7 @@ public class Buyer extends User implements java.io.Serializable {
      */
     public void addProductToCart(int productIndex, int quantity) {
         int currQuant = quantityInCart(productIndex);
-        if (currQuant != -1) {
+        if (currQuant != 0) {
             quantity += currQuant;
             editProductQuantity(productIndex, quantity);
             return;
@@ -136,7 +136,7 @@ public class Buyer extends User implements java.io.Serializable {
             }
         }
 
-        return -1;
+        return 0;
     }
 
     /**

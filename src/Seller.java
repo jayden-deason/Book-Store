@@ -254,11 +254,13 @@ public class Seller extends User implements java.io.Serializable{
         return stores;
     }
 
-    public ArrayList<Product> getProducts() {
+    public ArrayList<Product> getProducts(boolean nonzero) {
         ArrayList<Product> out = new ArrayList<>();
 
         for (Store s : stores) {
-            out.addAll(s.getProducts());
+            for (Product p : s.getProducts()) {
+                if (p.getQuantity() != 0) out.add(p);
+            }
         }
 
         return out;

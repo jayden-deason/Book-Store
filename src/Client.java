@@ -1123,7 +1123,7 @@ public class Client extends JComponent implements Runnable {
                     quantity.setVisible(false);
                     exportToFile.setVisible(false);
                 }
-                System.out.println("Updated");
+                System.out.println("Updated marketplace");
                 updateMarket.doClick();
             }
         });
@@ -1412,13 +1412,23 @@ public class Client extends JComponent implements Runnable {
     }
 
     private String getProductInfo(Product product) {
-        String info = String.format("------------------------------------------\n" + "%s\n" + "Store: %s " +
-                        "| Price: $%.2f | Quantity: %d\n" + "Description: %s\n" +
-                        "------------------------------------------\n", product.getName(), product.getStoreName(),
-                product.getSalePrice(), product.getQuantity(), product.getDescription());
+        String line1 = product.getName() + "\n";
+        String line2 = String.format("Store %s | Price $%.2f | Quantity: %d\n",
+                product.getStoreName(), product.getSalePrice(), product.getQuantity());
+        String line3 = "Description: " + product.getDescription();
+        String dashes = getDashes(Math.max(line1.length(), Math.max(line2.length(), line3.length())) - 5);
 
-        return info;
 
+        return dashes + "\n" + line1 + line2 + line3 + "\n" + dashes;
+
+    }
+
+    private String getDashes(int length) {
+        String out = "";
+        for (int i = 0; i < length; i++) {
+            out += "-";
+        }
+        return out;
     }
 
     private Product getProduct(int productIndex) {
@@ -1441,6 +1451,17 @@ public class Client extends JComponent implements Runnable {
                     newDescription.length() > 13 && newDescription.substring(0, 13).equals("Description: ") &&
                     newPrice.length() > 8 && newPrice.substring(0, 8).equals("Price: $") &&
                     newQuantity.length() > 10 && newQuantity.substring(0, 10).equals("Quantity: ")) {
+
+                // setting quantity to 0
+                if (Integer.parseInt(newQuantity.substring(10)) == 0) {
+                    int cont = JOptionPane.showConfirmDialog(null,
+                            "Are you sure you want to remove '" + newName.substring(6) + "'?",
+                            "", JOptionPane.YES_NO_OPTION);
+
+                    if (cont == 0) removeProduct(productIndex);
+                    return;
+                }
+
                 writer.printf("4,%d,%s,%s,%s,%s\n",
                         productIndex,
                         newName.substring(6),
