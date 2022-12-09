@@ -427,7 +427,7 @@ public class Client extends JComponent implements Runnable {
                             JTextArea savedText = new JTextArea("");
                             savedText.setEditable(false);
                             savedText.setBackground(infoPanel.getBackground());
-                            savedText.setText(getProductInfo(Integer.parseInt(productButton.getText().split("\\) ")[0])));
+                            savedText.setText(getProductInfo(product.getIndex()));
                             savedText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
                             infoPanel.add(savedText);
                             productFrame.pack();
@@ -532,7 +532,6 @@ public class Client extends JComponent implements Runnable {
                 JPanel panel = new JPanel();
                 JPanel panel2 = new JPanel();
                 panel2.setLayout(new BoxLayout(panel2, BoxLayout.PAGE_AXIS));
-//                Product selected = getProduct(Integer.parseInt(jList.getSelectedValue().split("\\) ")[0]));
 
                 JTextField name = new JTextField("Name");
                 JTextField price = new JTextField("Price");
