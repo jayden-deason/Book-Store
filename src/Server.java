@@ -650,14 +650,14 @@ public class Server extends Thread {
             String description = arr[2].strip();
             double price = Double.parseDouble(arr[3].strip());
             int quantity = Integer.parseInt(arr[4].strip());
-            if (!seller.getStoreNames().contains(storeName)) {
-                writer.writeObject("N");
-                return;
-            }
             System.out.println("adding product " + productName);
             synchronized (obj) {
                 Product product = new Product(productName, storeName, description, quantity, price, price, -1);
                 if (seller.getStoreNames().contains(storeName)) {
+                    if(seller.getStoreByName(storeName).getProductNames().contains(productName)) {
+                        this.writer.writeObject("N");
+                        return;
+                    }
                     market.addProduct(product);
                     market.updateAllFiles();
                     this.writer.writeObject("Y");
