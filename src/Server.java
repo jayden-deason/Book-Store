@@ -408,16 +408,16 @@ public class Server extends Thread {
             ArrayList<Product> products;
             if (sortType.equals("quantity")) {
                 synchronized (obj) {
-                    products = this.market.sortByQuantity();
+                    products = this.market.sortByQuantity(true);
                 }
             } else if (sortType.equals("price")) {
                 synchronized (obj) {
-                    products = this.market.sortByPrice();
+                    products = this.market.sortByPrice(true);
                 }
             } else if (sortType.equals("sales")) {
                 //TODO: fix
                 synchronized (obj) {
-                    products = this.market.sortByPrice();
+                    products = this.market.sortByPrice(true);
                 }
             } else {
                 synchronized (obj) {
@@ -444,15 +444,15 @@ public class Server extends Thread {
             ArrayList<Product> products;
             if (sortType.equals("quantity")) {
                 synchronized (obj) {
-                    products = this.market.sortByQuantity();
+                    products = this.market.sortByQuantity(true);
                 }
             } else if (sortType.equals("price")) {
                 synchronized (obj) {
-                    products = this.market.sortByPrice();
+                    products = this.market.sortByPrice(true);
                 }
             } else if (sortType.equals("sales")) {
                 synchronized (obj) {
-                    products = this.market.sortBySales();
+                    products = this.market.sortBySales(true);
                 }
             } else {
                 synchronized (obj) {
@@ -526,7 +526,7 @@ public class Server extends Thread {
             synchronized (obj) {
                 p = this.market.getAllProducts(false).get(indexOfProduct);
             }
-            if (p.getQuantity() < quantity) {
+            if (p.getQuantity() < quantity + buyer.quantityInCart(indexOfProduct)) {
                 //Error: quantity trying to add to cart is more than there are of that product
                 this.writer.writeObject((String) "N");
                 return;
@@ -642,6 +642,7 @@ public class Server extends Thread {
                     }
                     //Sends Client "N" to signify an error (Invalid Quantity)
                     if (p.getQuantity() < newQuantity) {
+                        System.out.println("tried adding too much to cart");
                         writer.writeObject((String) "N");
                         return;
                     }
@@ -804,15 +805,16 @@ public class Server extends Thread {
 
         if (stores.size() == 0) {
             out = new String[1][4];
-            out[0] = new String[]{"Name", "Sales", "Revenue", "Customer Info"};
+            out[0] = new String[]{"Name", "Sales", "Revenue"};
 
         } else {
 
             out = new String[stores.size() + 1][4];
-            out[0] = new String[]{"Name", "Sales", "Revenue", "Customer Info"};
+            out[0] = new String[]{"Name", "Sales", "Revenue"};
             for (int i = 0; i < stores.size(); i++) {
                 Store s = stores.get(i);
-                out[i + 1] = new String[]{s.getName(), String.valueOf(s.getSales(market)), String.valueOf(s.getRevenue()), "#Customer Info"};
+                out[i + 1] = new String[]{s.getName(), String.valueOf(s.getSales(market)),
+                        String.format("$%.2f", s.getRevenue())};
             }
         }
 
