@@ -650,6 +650,7 @@ public class Market implements java.io.Serializable{
         return stores;
     }
 
+
     /**
      * Get the list of products in the market
      *

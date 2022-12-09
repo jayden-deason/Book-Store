@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * Store
@@ -295,16 +296,16 @@ public class Store implements java.io.Serializable{
         }
         // General statistics
         out.add(this.storeName + " Statistics:");
-        out.add("--Total Sales: " + sales);
-        out.add("--Total Revenue: " + revenue);
+        out.add("--Total Sales: " + getSales(market));
+        out.add(String.format("--Total Revenue: $%.2f", getRevenue()));
         if (sortType == 0) { // No sort condition
             out.add("--Products by sales: ");
             for (Product product : productsForSales) {
-                out.add("\t--" + product.getName() + ": " + market.getSalesForProduct(product));
+                out.add("----" + product.getName() + ": " + market.getSalesForProduct(product));
             }
             out.add("--Sales by customer: ");
             for (String data : customerData) {
-                out.add("\t--" + data.split(":")[0] + ": " + data.split(":")[1]);
+                out.add("----" + data.split(":")[0] + ": " + data.split(":")[1]);
             }
         } else {
             ArrayList<Product> sortedProducts = new ArrayList<Product>();
@@ -321,7 +322,7 @@ public class Store implements java.io.Serializable{
             out.add("--Sales by product " + ((sortType == 1) ? "sorted alphabetically:" : "sorted by " +
                     "quantity:"));
             for (Product product : sortedProducts) {
-                out.add("\t--" + product.getName() + ": " + products.get(products.indexOf(product)));
+                out.add("----" + product.getName() + ": " + products.get(products.indexOf(product)));
             }
             //ArrayList to track all of the buyers
             ArrayList<String> sortedBuyers = new ArrayList<>();
@@ -332,7 +333,7 @@ public class Store implements java.io.Serializable{
                 sortedBuyers.sort(Comparator.comparing(q -> q.substring(0, 1)));
                 out.add("--Sales by customer sorted alphabetically:");
                 for (String buyer : sortedBuyers) {
-                    out.add("\t--" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
+                    out.add("----" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
                 }
             }
             if (sortType == 2) {
@@ -346,7 +347,7 @@ public class Store implements java.io.Serializable{
                 for (int i = maxQuantity; i > 0; i--) {
                     for (String buyer : sortedBuyers) {
                         if (Integer.parseInt(buyer.split(":")[1]) == i) {
-                            out.add("\t--" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
+                            out.add("----" + buyer.split(":")[0] + ": " + buyer.split(":")[1]);
                         }
                     }
 
@@ -434,6 +435,16 @@ public class Store implements java.io.Serializable{
      * @return revenue
      */
     public double getRevenue() {
+        double revenue = 0;
+        Market market = Market.getInstance();
+        for (Buyer buyer : market.getBuyers()) {
+            for (String item : buyer.getPurchaseHistory()) {
+                Product product = market.getProductByIndex(Integer.parseInt(item.split(":")[0]));
+                if (product.getStoreName().equals(this.getName())) {
+                    revenue += product.getSalePrice() * Integer.parseInt(item.split(":")[1]);
+                }
+            }
+        }
         return revenue;
     }
 

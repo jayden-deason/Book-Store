@@ -286,4 +286,12 @@ public class Product implements java.io.Serializable{
 
     }
 
+    /**
+     * Get the number of sales for this product
+     * @return number of sales
+     */
+    public int getSales() {
+        return Market.getInstance().getSalesForProduct(this);
+    }
+
 }
