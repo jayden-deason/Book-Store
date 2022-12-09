@@ -758,8 +758,9 @@ public class Server extends Thread {
     //Sends the seller a list of their stores
     private void sendStores(Seller seller, String sortType) {
         try {
+            ArrayList<String> stores;
             synchronized (obj) {
-                ArrayList<String> stores = seller.getStoreNamesSorted(sortType);
+                stores = seller.getStoreNamesSorted(sortType);
             }
             writer.writeObject(stores);
         } catch (Exception e) {
