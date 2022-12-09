@@ -287,7 +287,7 @@ public class Server extends Thread {
         }
     }
     //This function sends all the products in the marketplace and sorts them either by quantity available, the price,
-    // the sales
+    // the sales, or the purchase history of that buyer
     private void sendAllBuyerProducts(String sortType, Buyer buyer) {
         try {
             ArrayList<Product> products;
@@ -321,6 +321,255 @@ public class Server extends Thread {
             } catch (Exception ex) {
                 e.printStackTrace();
             }
+        }
+    }
+    //Sends the client an ArrayList of Products that align with a search the user made
+    private void sendSearch(String search) {
+        try {
+            //Format for search should be productName,storeName,Description
+            System.out.println("searching...");
+            String[] searchContents = search.split(",");
+            System.out.println(Arrays.toString(searchContents));
+            if (searchContents[0].equals("n/a")) searchContents[0] = null;
+            if (searchContents[1].equals("n/a")) searchContents[1] = null;
+            if (searchContents[2].equals("n/a")) searchContents[2] = null;
+            ArrayList<Product> searchResults = null;
+//            System.out.println("blah");
+            synchronized (obj) {
+//                System.out.println("got here 1");
+                searchResults = market.matchConditions(searchContents[0], searchContents[1],
+                        searchContents[2]);
+                System.out.println(searchResults);
+            }
+//            System.out.println("blah2");
+            this.writer.writeObject((ArrayList<Product>) searchResults);
+            System.out.println("Sent search results");
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((ArrayList<Product>) null);
+
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //Sends client up to date details of a specific product
+    private void viewProduct(int indexOfProduct) {
+        try {
+            Product product = null;
+            synchronized (obj) {
+                product = this.market.getProductByIndex(indexOfProduct);
+            }
+            this.writer.writeObject(product);
+            System.out.println("Sent Product with q: " + product.getQuantity());
+            System.out.println(product);
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((Product) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //Adds a product to a buyer's cart
+    private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
+        System.out.println("1");
+        try {
+            Product p;
+            synchronized (obj) {
+                p = this.market.getAllProducts(false).get(indexOfProduct);
+            }
+            if (p.getQuantity() < quantity + buyer.quantityInCart(indexOfProduct)) {
+                //Error: quantity trying to add to cart is more than there are of that product
+                this.writer.writeObject((String) "N");
+                return;
+            }
+            synchronized (obj) {
+                buyer.addProductToCart(p.getIndex(), quantity);
+                market.updateAllFiles();
+            }
+            this.writer.writeObject((String) "Y");
+            System.out.printf("Added product %d to cart\n", indexOfProduct);
+            //Sends new shopping cart
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((String) "N");
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //This function sends back an ArrayList of all the strings the need to be in the exported file and sends it
+    private void exportToFile(Buyer buyer) {
+        try {
+            ArrayList<String> purchaseHistory = null;
+            synchronized (obj) {
+                purchaseHistory = buyer.getPurchaseHistory();
+            }
+            ArrayList<String> fileInfo = new ArrayList<String>();
+            ;
+            for (String item : purchaseHistory) {
+                int idx = Integer.parseInt(item.split(":")[0]);
+                int quantity = Integer.parseInt(item.split(":")[1]);
+                Product p = null;
+                synchronized (obj) {
+                    p = market.getProductByIndex(idx);
+                }
+                String s = String.format("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
+                        p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
+                fileInfo.add(s);
+            }
+            this.writer.writeObject((ArrayList<String>) fileInfo);
+            System.out.println("Wrote to file");
+
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((ArrayList<String>) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+    //Checks out all of the products in a buyer's cart. Changes the buyer's purchase history, the store's inventory,
+    // and clears their cart
+    private void makePurchase(Buyer buyer) {
+        try {
+            synchronized (obj) {
+                this.market.makePurchase(buyer);
+                this.market.updateAllFiles();
+            }
+            this.writer.writeObject((String) "Y");
+            System.out.println("Made purchase");
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((String) "N");
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //Sends a current list of all the products in a buyer's shopping cart
+    private void sendShoppingCart(Buyer buyer) {
+        try {
+            ArrayList<String> shoppingCart = null;
+            synchronized (obj) {
+                shoppingCart = buyer.getShoppingCart();
+            }
+            HashMap<Product, Integer> shoppingCartProducts = new HashMap<Product, Integer>();
+            for (int i = 0; i < shoppingCart.size(); i++) {
+                Product p = null;
+                synchronized (obj) {
+                    p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
+                }
+                int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
+                if (shoppingCartProducts.containsKey(p)) {
+                    shoppingCartProducts.put(p, shoppingCartProducts.get(p) + quantity);
+                }
+                shoppingCartProducts.put(p, quantity);
+            }
+            this.writer.writeObject((HashMap<Product, Integer>) shoppingCartProducts);
+            System.out.println("Sent shopping cart");
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((HashMap<Product, Integer>) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //Changes the quantity of products in a buyer's shopping cart. If this value is zero, it removes it.
+    private void changeShoppingCartQuantity(int indexOfProduct, int newQuantity, Buyer buyer) {
+        try {
+            ArrayList<String> products = null;
+            synchronized (obj) {
+                products = buyer.getShoppingCart();
+            }
+            boolean exists = false;
+            for (int i = 0; i < products.size(); i++) {
+                if (indexOfProduct == Integer.parseInt(products.get(i).split(":")[0])) {
+                    exists = true;
+                    Product p = null;
+                    synchronized (obj) {
+                        p = market.getProductByIndex(Integer.parseInt(products.get(i).split(":")[0]));
+                    }
+                    //Sends Client "N" to signify an error (Invalid Quantity)
+                    if (p.getQuantity() < newQuantity) {
+                        System.out.println("tried adding too much to cart");
+                        writer.writeObject((String) "N");
+                        return;
+                    }
+                    synchronized (obj) {
+                        buyer.editProductQuantity(indexOfProduct, newQuantity);
+                        market.updateAllFiles();
+                    }
+                    //Success
+                    writer.writeObject((String) "Y");
+                    System.out.println("Changed cart quantity");
+                }
+            }
+            if (!(exists)) {
+                //Sends Client "N" to signify an error (Book did not exist within cart)
+                writer.writeObject((String) "N");
+            }
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((String) "N");
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //Sends the buyer a HashMap of their purchase history with key: product and value: quantity
+    private void sendPurchaseHistory(Buyer buyer) {
+        try {
+            ArrayList<String> purchaseHistory = null;
+            synchronized (obj) {
+                purchaseHistory = buyer.getPurchaseHistory();
+            }
+            HashMap<Product, Integer> previousProducts = new HashMap<Product, Integer>();
+            for (String item : purchaseHistory) {
+                int idx = Integer.parseInt(item.split(":")[0]);
+                int quantity = Integer.parseInt(item.split(":")[1]);
+                Product p = null;
+                synchronized (obj) {
+                    p = this.market.getProductByIndex(idx);
+                }
+                if (previousProducts.containsKey(p)) {
+                    previousProducts.put(p, previousProducts.get(p) + quantity);
+                } else {
+                    previousProducts.put(p, quantity);
+                }
+
+            }
+            this.writer.writeObject((HashMap<Product, Integer>) previousProducts);
+            System.out.println("Wrote purchase history");
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((HashMap<Product, Integer>) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //Sends the buyer dashboard based on several sorting factors
+    private void sendBuyerDashboard(Buyer buyer, String sortType) throws IOException {
+        ArrayList<String> out = null;
+        if (sortType.equals("sales")) {
+            ArrayList<String> dashboard = null;
+            synchronized (obj) {
+                dashboard = buyerDashboardForStoreList(market.sortStoresByProductsSold());
+            }
+            writer.writeObject(dashboard);
+        } else if (sortType.equals("history")) {
+            ArrayList<String> dashboard = null;
+            synchronized (obj) {
+                dashboard = buyerDashboardForStoreList(buyer.sortStoresByPurchaseHistory(market));
+            }
+            writer.writeObject(dashboard);
+        } else {
+            writer.writeObject(null);
         }
     }
     private void sendSellerProducts(Seller seller, String sortType) throws IOException {
@@ -469,253 +718,7 @@ public class Server extends Thread {
         }
     }
 
-    private void sendSearch(String search) {
-        try {
-            //Format for search should be productName,storeName,Description
-            System.out.println("searching...");
-            String[] searchContents = search.split(",");
-            System.out.println(Arrays.toString(searchContents));
-            if (searchContents[0].equals("n/a")) searchContents[0] = null;
-            if (searchContents[1].equals("n/a")) searchContents[1] = null;
-            if (searchContents[2].equals("n/a")) searchContents[2] = null;
-            ArrayList<Product> searchResults = null;
-//            System.out.println("blah");
-            synchronized (obj) {
-//                System.out.println("got here 1");
-                searchResults = market.matchConditions(searchContents[0], searchContents[1],
-                        searchContents[2]);
-                System.out.println(searchResults);
-            }
-//            System.out.println("blah2");
-            this.writer.writeObject((ArrayList<Product>) searchResults);
-            System.out.println("Sent search results");
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((ArrayList<Product>) null);
 
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void viewProduct(int indexOfProduct) {
-        try {
-            Product product = null;
-            synchronized (obj) {
-                product = this.market.getProductByIndex(indexOfProduct);
-            }
-            this.writer.writeObject(product);
-            System.out.println("Sent Product with q: " + product.getQuantity());
-            System.out.println(product);
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((Product) null);
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
-        System.out.println("1");
-        try {
-            Product p;
-            synchronized (obj) {
-                p = this.market.getAllProducts(false).get(indexOfProduct);
-            }
-            if (p.getQuantity() < quantity + buyer.quantityInCart(indexOfProduct)) {
-                //Error: quantity trying to add to cart is more than there are of that product
-                this.writer.writeObject((String) "N");
-                return;
-            }
-            synchronized (obj) {
-                buyer.addProductToCart(p.getIndex(), quantity);
-                market.updateAllFiles();
-            }
-            this.writer.writeObject((String) "Y");
-            System.out.printf("Added product %d to cart\n", indexOfProduct);
-            //Sends new shopping cart
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((String) "N");
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    //This function sends back an ArrayList of all the strings the need to be in the exported file and sends it
-    private void exportToFile(Buyer buyer) {
-        try {
-            ArrayList<String> purchaseHistory = null;
-            synchronized (obj) {
-                purchaseHistory = buyer.getPurchaseHistory();
-            }
-            ArrayList<String> fileInfo = new ArrayList<String>();
-            ;
-            for (String item : purchaseHistory) {
-                int idx = Integer.parseInt(item.split(":")[0]);
-                int quantity = Integer.parseInt(item.split(":")[1]);
-                Product p = null;
-                synchronized (obj) {
-                    p = market.getProductByIndex(idx);
-                }
-                String s = String.format("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
-                        p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
-                fileInfo.add(s);
-            }
-            this.writer.writeObject((ArrayList<String>) fileInfo);
-            System.out.println("Wrote to file");
-
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((ArrayList<String>) null);
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-
-    }
-
-    private void makePurchase(Buyer buyer) {
-        try {
-            synchronized (obj) {
-                this.market.makePurchase(buyer);
-                this.market.updateAllFiles();
-            }
-            this.writer.writeObject((String) "Y");
-            System.out.println("Made purchase");
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((String) "N");
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void sendShoppingCart(Buyer buyer) {
-        try {
-            ArrayList<String> shoppingCart = null;
-            synchronized (obj) {
-                shoppingCart = buyer.getShoppingCart();
-            }
-            HashMap<Product, Integer> shoppingCartProducts = new HashMap<Product, Integer>();
-            for (int i = 0; i < shoppingCart.size(); i++) {
-                Product p = null;
-                synchronized (obj) {
-                    p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
-                }
-                int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
-                if (shoppingCartProducts.containsKey(p)) {
-                    shoppingCartProducts.put(p, shoppingCartProducts.get(p) + quantity);
-                }
-                shoppingCartProducts.put(p, quantity);
-            }
-            this.writer.writeObject((HashMap<Product, Integer>) shoppingCartProducts);
-            System.out.println("Sent shopping cart");
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((HashMap<Product, Integer>) null);
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void changeShoppingCartQuantity(int indexOfProduct, int newQuantity, Buyer buyer) {
-        try {
-            ArrayList<String> products = null;
-            synchronized (obj) {
-                products = buyer.getShoppingCart();
-            }
-            boolean exists = false;
-            for (int i = 0; i < products.size(); i++) {
-                if (indexOfProduct == Integer.parseInt(products.get(i).split(":")[0])) {
-                    exists = true;
-                    Product p = null;
-                    synchronized (obj) {
-                        p = market.getProductByIndex(Integer.parseInt(products.get(i).split(":")[0]));
-                    }
-                    //Sends Client "N" to signify an error (Invalid Quantity)
-                    if (p.getQuantity() < newQuantity) {
-                        System.out.println("tried adding too much to cart");
-                        writer.writeObject((String) "N");
-                        return;
-                    }
-                    synchronized (obj) {
-                        buyer.editProductQuantity(indexOfProduct, newQuantity);
-                        market.updateAllFiles();
-                    }
-                    //Success
-                    writer.writeObject((String) "Y");
-                    System.out.println("Changed cart quantity");
-                }
-            }
-            if (!(exists)) {
-                //Sends Client "N" to signify an error (Book did not exist within cart)
-                writer.writeObject((String) "N");
-            }
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((String) "N");
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void sendPurchaseHistory(Buyer buyer) {
-        try {
-            ArrayList<String> purchaseHistory = null;
-            synchronized (obj) {
-                purchaseHistory = buyer.getPurchaseHistory();
-            }
-            HashMap<Product, Integer> previousProducts = new HashMap<Product, Integer>();
-            for (String item : purchaseHistory) {
-                int idx = Integer.parseInt(item.split(":")[0]);
-                int quantity = Integer.parseInt(item.split(":")[1]);
-                Product p = null;
-                synchronized (obj) {
-                    p = this.market.getProductByIndex(idx);
-                }
-                if (previousProducts.containsKey(p)) {
-                    previousProducts.put(p, previousProducts.get(p) + quantity);
-                } else {
-                    previousProducts.put(p, quantity);
-                }
-
-            }
-            this.writer.writeObject((HashMap<Product, Integer>) previousProducts);
-            System.out.println("Wrote purchase history");
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((HashMap<Product, Integer>) null);
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void sendBuyerDashboard(Buyer buyer, String sortType) throws IOException {
-        ArrayList<String> out = null;
-        if (sortType.equals("sales")) {
-            ArrayList<String> dashboard = null;
-            synchronized (obj) {
-                dashboard = buyerDashboardForStoreList(market.sortStoresByProductsSold());
-            }
-            writer.writeObject(dashboard);
-        } else if (sortType.equals("history")) {
-            ArrayList<String> dashboard = null;
-            synchronized (obj) {
-                dashboard = buyerDashboardForStoreList(buyer.sortStoresByPurchaseHistory(market));
-            }
-            writer.writeObject(dashboard);
-        } else {
-            writer.writeObject(null);
-        }
-    }
 
     private ArrayList<String> buyerDashboardForStoreList(ArrayList<Store> stores) {
         ArrayList<String> out = new ArrayList<>();
