@@ -721,7 +721,9 @@ public class Server extends Thread {
     //Allows the seller to remove one of their products
     private void removeSellerProduct(String productName) {
         try {
-            market.removeProduct(market.getProductByName(productName));
+            synchronized (obj) {
+                market.removeProduct(market.getProductByName(productName));
+            }
             writer.writeObject("Y");
             System.out.println("removed product: " + productName);
         } catch (Exception e) {
@@ -739,7 +741,10 @@ public class Server extends Thread {
     // quantity, and the customer email
     private void seeBuyerCarts(Seller seller) {
         try {
-            HashMap<Product, String> productsInCart = seller.sendProductsInCart(market);
+            HashMap<Product, String> productsInCart = null;
+            synchronized (obj) {
+                seller.sendProductsInCart(market);
+            }
             this.writer.writeObject((HashMap<Product, String>) productsInCart);
             System.out.println("Wrote purchase history");
         } catch (Exception e) {
@@ -753,7 +758,9 @@ public class Server extends Thread {
     //Sends the seller a list of their stores
     private void sendStores(Seller seller, String sortType) {
         try {
-            ArrayList<String> stores = seller.getStoreNamesSorted(sortType);
+            synchronized (obj) {
+                ArrayList<String> stores = seller.getStoreNamesSorted(sortType);
+            }
             writer.writeObject(stores);
         } catch (Exception e) {
             e.printStackTrace();
@@ -761,16 +768,22 @@ public class Server extends Thread {
     }
     //Sends the seller a list of their products in a store to export a file
     private void sendProductStringsForFile(Seller seller, String storeName) throws IOException {
-        if (!seller.getStoreNames().contains(storeName)) {
-            writer.writeObject(null);
-            return;
+        synchronized (obj) {
+            if (!seller.getStoreNames().contains(storeName)) {
+                writer.writeObject(null);
+                return;
+            }
         }
         Store store = null;
         synchronized (obj) {
             store = seller.getStoreByName(storeName);
         }
         ArrayList<String> out = new ArrayList<>();
-        for (Product p : store.getProducts()) {
+        ArrayList<Product> storeProducts = null;
+        synchronized (obj) {
+            storeProducts = store.getProducts();
+        }
+        for (Product p : storeProducts) {
             out.add(p.toString());
         }
 
