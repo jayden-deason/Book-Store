@@ -4,7 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-
+/**
+ * Server
+ *
+ * A class that creates new threads for each client connection and sends and updates data based on user requests.
+ *
+ * @author Visv Shah
+ * @version 12/9/22
+ */
 public class Server extends Thread {
     private final Socket socket;
     private ObjectOutputStream writer;
@@ -13,7 +20,24 @@ public class Server extends Thread {
     public static ArrayList<Socket> sockets = new ArrayList<Socket>();
     public static Market market;
     public static Object obj = new Object();
-
+    //The main method creates a new thread and Server object for each new User connection
+    public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
+        //Port Number is 1001 and host is "localhost"
+        ServerSocket serverSocket = new ServerSocket(1001);
+        market = Market.getInstance();
+        while (true) {
+            //infinite loop to create a new thread for each connection
+            //creates a new socket for each connection
+            final Socket socket = serverSocket.accept();
+            //creates a user using the socket
+            Server user = new Server(socket);
+            System.out.println("Connection Established Number: " + sockets.size());
+            user.start();
+        }
+    }
+    //The run method does the authenciation for both sellers and buyers and either logs them in or signs them up.
+    // Then it redirects the user to the runBuyer or runSeller loops which wait for read/edit requests and carry them
+    // out
     public void run() {
         System.out.println("Connection Running Number: " + sockets.size());
         while (true) {
@@ -118,34 +142,6 @@ public class Server extends Thread {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-
-    public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
-        //Port Number is 1001 and host is "localhost"
-        ServerSocket serverSocket = new ServerSocket(1001);
-        market = Market.getInstance();
-        while (true) {
-            //infinite loop to create a new thread for each connection
-            //creates a new socket for each connection
-            final Socket socket = serverSocket.accept();
-            //creates a user using the socket
-            Server user = new Server(socket);
-            System.out.println("Connection Established Number: " + sockets.size());
-            user.start();
-        }
-    }
-
-    public Server(Socket socket) {
-        this.socket = socket;
-        sockets.add(this.socket);
-        try {
-            writer = new ObjectOutputStream(socket.getOutputStream());
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            System.out.println("Streams created");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -290,7 +286,43 @@ public class Server extends Thread {
             }
         }
     }
-
+    //This function sends all the products in the marketplace and sorts them either by quantity available, the price,
+    // the sales
+    private void sendAllBuyerProducts(String sortType, Buyer buyer) {
+        try {
+            ArrayList<Product> products;
+            if (sortType.equals("quantity")) {
+                synchronized (obj) {
+                    products = this.market.sortByQuantity(true);
+                }
+            } else if (sortType.equals("price")) {
+                synchronized (obj) {
+                    products = this.market.sortByPrice(true);
+                }
+            } else if (sortType.equals("sales")) {
+                //TODO: fix
+                synchronized (obj) {
+                    products = this.market.sortByPrice(true);
+                }
+            } else {
+                synchronized (obj) {
+                    products = this.market.getAllProducts(true);
+                }
+            }
+            if (sortType.equals("history")) {
+                this.sendPurchaseHistory(buyer);
+            } else {
+                this.writer.writeObject((ArrayList<Product>) products);
+            }
+            System.out.println("Sent products, sort type = " + sortType);
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((ArrayList<Product>) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
     private void sendSellerProducts(Seller seller, String sortType) throws IOException {
         ArrayList<Product> products = null;
         synchronized (obj) {
@@ -403,41 +435,7 @@ public class Server extends Thread {
     }
 
 
-    private void sendAllBuyerProducts(String sortType, Buyer buyer) {
-        try {
-            ArrayList<Product> products;
-            if (sortType.equals("quantity")) {
-                synchronized (obj) {
-                    products = this.market.sortByQuantity(true);
-                }
-            } else if (sortType.equals("price")) {
-                synchronized (obj) {
-                    products = this.market.sortByPrice(true);
-                }
-            } else if (sortType.equals("sales")) {
-                //TODO: fix
-                synchronized (obj) {
-                    products = this.market.sortByPrice(true);
-                }
-            } else {
-                synchronized (obj) {
-                    products = this.market.getAllProducts(true);
-                }
-            }
-            if (sortType.equals("history")) {
-                this.sendPurchaseHistory(buyer);
-            } else {
-                this.writer.writeObject((ArrayList<Product>) products);
-            }
-            System.out.println("Sent products, sort type = " + sortType);
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((ArrayList<Product>) null);
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-    }
+
 
     private void sendAllSellerProducts(String sortType, Seller seller) {
         try {
@@ -864,5 +862,18 @@ public class Server extends Thread {
             e.printStackTrace();
         }
 
+    }
+    //The constructor creates a new Server object for each connected client and gives it a unique socket and a
+    // writer/reader to communicate with that client.
+    public Server(Socket socket) {
+        this.socket = socket;
+        sockets.add(this.socket);
+        try {
+            writer = new ObjectOutputStream(socket.getOutputStream());
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println("Streams created");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
