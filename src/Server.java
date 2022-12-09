@@ -4,7 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-
+/**
+ * Server
+ *
+ * A class that creates new threads for each client connection and sends and updates data based on user requests.
+ *
+ * @author Visv Shah
+ * @version 12/9/22
+ */
 public class Server extends Thread {
     private final Socket socket;
     private ObjectOutputStream writer;
@@ -13,7 +20,24 @@ public class Server extends Thread {
     public static ArrayList<Socket> sockets = new ArrayList<Socket>();
     public static Market market;
     public static Object obj = new Object();
-
+    //The main method creates a new thread and Server object for each new User connection
+    public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
+        //Port Number is 1001 and host is "localhost"
+        ServerSocket serverSocket = new ServerSocket(1001);
+        market = Market.getInstance();
+        while (true) {
+            //infinite loop to create a new thread for each connection
+            //creates a new socket for each connection
+            final Socket socket = serverSocket.accept();
+            //creates a user using the socket
+            Server user = new Server(socket);
+            System.out.println("Connection Established Number: " + sockets.size());
+            user.start();
+        }
+    }
+    //The run method does the authenciation for both sellers and buyers and either logs them in or signs them up.
+    // Then it redirects the user to the runBuyer or runSeller loops which wait for read/edit requests and carry them
+    // out
     public void run() {
         System.out.println("Connection Running Number: " + sockets.size());
         while (true) {
@@ -118,34 +142,6 @@ public class Server extends Thread {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-
-    public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
-        //Port Number is 1001 and host is "localhost"
-        ServerSocket serverSocket = new ServerSocket(1001);
-        market = Market.getInstance();
-        while (true) {
-            //infinite loop to create a new thread for each connection
-            //creates a new socket for each connection
-            final Socket socket = serverSocket.accept();
-            //creates a user using the socket
-            Server user = new Server(socket);
-            System.out.println("Connection Established Number: " + sockets.size());
-            user.start();
-        }
-    }
-
-    public Server(Socket socket) {
-        this.socket = socket;
-        sockets.add(this.socket);
-        try {
-            writer = new ObjectOutputStream(socket.getOutputStream());
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            System.out.println("Streams created");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -290,119 +286,8 @@ public class Server extends Thread {
             }
         }
     }
-
-    private void sendSellerProducts(Seller seller, String sortType) throws IOException {
-        ArrayList<Product> products = null;
-        synchronized (obj) {
-            products = seller.getProducts();
-        }
-        if (sortType.equals("sales")) {
-            synchronized (obj) {
-                products.sort(Comparator.comparingInt(s -> market.getSalesForProduct(s)));
-            }
-        } else if (sortType.equals("customers")) {
-            synchronized (obj) {
-                products.sort(Comparator.comparingInt(s -> market.getCustomersForProduct(s)));
-            }
-        }
-        this.writer.writeObject(products);
-    }
-
-    private void addSellerProduct(Seller seller, String productString) {
-        try {
-            String[] arr = productString.split(",");
-            String productName = arr[0].strip();
-            String storeName = arr[1].strip();
-            String description = arr[2].strip();
-            double price = Double.parseDouble(arr[3].strip());
-            int quantity = Integer.parseInt(arr[4].strip());
-
-            System.out.println("adding product " + productName);
-            synchronized (obj) {
-                Product product = new Product(productName, storeName, description, quantity, price, price, -1);
-                if (seller.getStoreNames().contains(storeName)) {
-                    market.addProduct(product);
-                    market.updateAllFiles();
-                    this.writer.writeObject("Y");
-                }
-            }
-
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject("N");
-            } catch (IOException ex) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void editSellerProduct(Seller seller, String productName, String newName,
-                                   String newDescription, String newPrice, String newQuantity) {
-
-        try {
-            double price = Double.parseDouble(newPrice);
-            int quantity = Integer.parseInt(newQuantity);
-
-            synchronized (obj) {
-                Product product = market.getProductByName(productName);
-                product.setName(newName);
-                product.setDescription(newDescription);
-                product.setSalePrice(price);
-                product.setOriginalPrice(price);
-                product.setQuantity(quantity);
-
-                market.editProduct(product);
-                market.updateAllFiles();
-            }
-
-            this.writer.writeObject("Y");
-            System.out.println("edited product");
-
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject("N");
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    }
-
-    private void addSellerStore(Seller seller, String storeName) {
-        try {
-            synchronized (obj) {
-                System.out.println("adding store");
-//                if (market.getStoreByName(storeName) == null) {
-                market.addStore(new Store(-1, storeName, seller.getEmail()));
-                market.updateAllFiles();
-                this.writer.writeObject("Y");
-
-
-            }
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject("N");
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    }
-
-    private void removeSellerProduct(String productName) {
-        try {
-            market.removeProduct(market.getProductByName(productName));
-            writer.writeObject("Y");
-            System.out.println("removed product: " + productName);
-        } catch (Exception e) {
-            try {
-                e.printStackTrace();
-                writer.writeObject("N");
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    }
-
-
+    //This function sends all the products in the marketplace and sorts them either by quantity available, the price,
+    // the sales, or the purchase history of that buyer
     private void sendAllBuyerProducts(String sortType, Buyer buyer) {
         try {
             ArrayList<Product> products;
@@ -438,39 +323,7 @@ public class Server extends Thread {
             }
         }
     }
-
-    private void sendAllSellerProducts(String sortType, Seller seller) {
-        try {
-            ArrayList<Product> products;
-            if (sortType.equals("quantity")) {
-                synchronized (obj) {
-                    products = this.market.sortByQuantity(true);
-                }
-            } else if (sortType.equals("price")) {
-                synchronized (obj) {
-                    products = this.market.sortByPrice(true);
-                }
-            } else if (sortType.equals("sales")) {
-                synchronized (obj) {
-                    products = this.market.sortBySales(true);
-                }
-            } else {
-                synchronized (obj) {
-                    products = this.market.getAllProducts(true);
-                }
-            }
-            this.writer.writeObject(products);
-            System.out.println("Sent products, sort type = " + sortType);
-//            System.out.println(products);
-        } catch (Exception e) {
-            try {
-                this.writer.writeObject((ArrayList<Product>) null);
-            } catch (Exception ex) {
-                e.printStackTrace();
-            }
-        }
-    }
-
+    //Sends the client an ArrayList of Products that align with a search the user made
     private void sendSearch(String search) {
         try {
             //Format for search should be productName,storeName,Description
@@ -500,7 +353,7 @@ public class Server extends Thread {
             }
         }
     }
-
+    //Sends client up to date details of a specific product
     private void viewProduct(int indexOfProduct) {
         try {
             Product product = null;
@@ -518,7 +371,7 @@ public class Server extends Thread {
             }
         }
     }
-
+    //Adds a product to a buyer's cart
     private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
         System.out.println("1");
         try {
@@ -579,7 +432,8 @@ public class Server extends Thread {
         }
 
     }
-
+    //Checks out all of the products in a buyer's cart. Changes the buyer's purchase history, the store's inventory,
+    // and clears their cart
     private void makePurchase(Buyer buyer) {
         try {
             synchronized (obj) {
@@ -596,7 +450,7 @@ public class Server extends Thread {
             }
         }
     }
-
+    //Sends a current list of all the products in a buyer's shopping cart
     private void sendShoppingCart(Buyer buyer) {
         try {
             ArrayList<String> shoppingCart = null;
@@ -625,7 +479,7 @@ public class Server extends Thread {
             }
         }
     }
-
+    //Changes the quantity of products in a buyer's shopping cart. If this value is zero, it removes it.
     private void changeShoppingCartQuantity(int indexOfProduct, int newQuantity, Buyer buyer) {
         try {
             ArrayList<String> products = null;
@@ -667,7 +521,7 @@ public class Server extends Thread {
             }
         }
     }
-
+    //Sends the buyer a HashMap of their purchase history with key: product and value: quantity
     private void sendPurchaseHistory(Buyer buyer) {
         try {
             ArrayList<String> purchaseHistory = null;
@@ -699,7 +553,7 @@ public class Server extends Thread {
             }
         }
     }
-
+    //Sends the buyer dashboard based on several sorting factors
     private void sendBuyerDashboard(Buyer buyer, String sortType) throws IOException {
         ArrayList<String> out = null;
         if (sortType.equals("sales")) {
@@ -718,7 +572,6 @@ public class Server extends Thread {
             writer.writeObject(null);
         }
     }
-
     private ArrayList<String> buyerDashboardForStoreList(ArrayList<Store> stores) {
         ArrayList<String> out = new ArrayList<>();
 
@@ -736,7 +589,155 @@ public class Server extends Thread {
         return out;
 
     }
+    //Sends a seller a list of all the products in the marketpalce to view them
+    private void sendAllSellerProducts(String sortType, Seller seller) {
+        try {
+            ArrayList<Product> products;
+            if (sortType.equals("quantity")) {
+                synchronized (obj) {
+                    products = this.market.sortByQuantity(true);
+                }
+            } else if (sortType.equals("price")) {
+                synchronized (obj) {
+                    products = this.market.sortByPrice(true);
+                }
+            } else if (sortType.equals("sales")) {
+                synchronized (obj) {
+                    products = this.market.sortBySales(true);
+                }
+            } else {
+                synchronized (obj) {
+                    products = this.market.getAllProducts(true);
+                }
+            }
+            this.writer.writeObject(products);
+            System.out.println("Sent products, sort type = " + sortType);
+//            System.out.println(products);
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject((ArrayList<Product>) null);
+            } catch (Exception ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //Sends the seller a list of all of their products across all of their stores and allows them to sort by sales or
+    // customers
+    private void sendSellerProducts(Seller seller, String sortType) throws IOException {
+        ArrayList<Product> products = null;
+        synchronized (obj) {
+            products = seller.getProducts();
+        }
+        if (sortType.equals("sales")) {
+            synchronized (obj) {
+                products.sort(Comparator.comparingInt(s -> market.getSalesForProduct(s)));
+            }
+        } else if (sortType.equals("customers")) {
+            synchronized (obj) {
+                products.sort(Comparator.comparingInt(s -> market.getCustomersForProduct(s)));
+            }
+        }
+        this.writer.writeObject(products);
+    }
+    //Allows the seller to add a product to one of their stores
+    private void addSellerProduct(Seller seller, String productString) {
+        try {
+            String[] arr = productString.split(",");
+            String productName = arr[0].strip();
+            String storeName = arr[1].strip();
+            String description = arr[2].strip();
+            double price = Double.parseDouble(arr[3].strip());
+            int quantity = Integer.parseInt(arr[4].strip());
+            //TODO: check if user has a store with that same name
+            System.out.println("adding product " + productName);
+            synchronized (obj) {
+                Product product = new Product(productName, storeName, description, quantity, price, price, -1);
+                if (seller.getStoreNames().contains(storeName)) {
+                    market.addProduct(product);
+                    market.updateAllFiles();
+                    this.writer.writeObject("Y");
+                }
+            }
 
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject("N");
+            } catch (IOException ex) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //allows the seller to edit one of the products in their store
+    private void editSellerProduct(Seller seller, String productName, String newName,
+                                   String newDescription, String newPrice, String newQuantity) {
+
+        try {
+            double price = Double.parseDouble(newPrice);
+            int quantity = Integer.parseInt(newQuantity);
+
+            synchronized (obj) {
+                Product product = market.getProductByName(productName);
+                product.setName(newName);
+                product.setDescription(newDescription);
+                product.setSalePrice(price);
+                product.setOriginalPrice(price);
+                product.setQuantity(quantity);
+
+                market.editProduct(product);
+                market.updateAllFiles();
+            }
+
+            this.writer.writeObject("Y");
+            System.out.println("edited product");
+
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject("N");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+    //Allows the seller to add a store
+    private void addSellerStore(Seller seller, String storeName) {
+        try {
+            synchronized (obj) {
+                System.out.println("adding store");
+//                if (market.getStoreByName(storeName) == null) {
+                market.addStore(new Store(-1, storeName, seller.getEmail()));
+                market.updateAllFiles();
+                this.writer.writeObject("Y");
+
+
+            }
+        } catch (Exception e) {
+            try {
+                this.writer.writeObject("N");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+    //Allows the seller to remove one of their products
+    private void removeSellerProduct(String productName) {
+        try {
+            //TODO: ensure that this product exists
+            market.removeProduct(market.getProductByName(productName));
+            writer.writeObject("Y");
+            System.out.println("removed product: " + productName);
+        } catch (Exception e) {
+            try {
+                e.printStackTrace();
+                writer.writeObject("N");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
+
+    //Shows the seller which of their products are in customer shopping carts. Shows the seller the product, the
+    // quantity, and the customer email
     private void seeBuyerCarts(Seller seller) {
         try {
             HashMap<Product, String> productsInCart = seller.sendProductsInCart(market);
@@ -750,7 +751,7 @@ public class Server extends Thread {
             }
         }
     }
-
+    //Sends the seller a list of their stores
     private void sendStores(Seller seller, String sortType) {
         try {
             ArrayList<String> stores = seller.getStoreNamesSorted(sortType);
@@ -759,7 +760,7 @@ public class Server extends Thread {
             e.printStackTrace();
         }
     }
-
+    //Sends the seller a list of their products in a store to export a file
     private void sendProductStringsForFile(Seller seller, String storeName) throws IOException {
         if (!seller.getStoreNames().contains(storeName)) {
             writer.writeObject(null);
@@ -776,7 +777,7 @@ public class Server extends Thread {
 
         writer.writeObject(out);
     }
-
+    //Add a list of products to one of the seller's store. These products are imported from a file by the seller.
     private void importProductsFromFile(Seller seller, String[] lines) throws IOException {
         try {
             for (String line : lines) {
@@ -795,7 +796,7 @@ public class Server extends Thread {
             writer.writeObject("N");
         }
     }
-
+    //Sends the information regarding how all of their stores are doing including sales and revenue
     private void sendAllStoresInfo(Seller seller) {
         ArrayList<Store> stores;
         synchronized (obj) {
@@ -824,7 +825,7 @@ public class Server extends Thread {
             e.printStackTrace();
         }
     }
-
+    //Sends stats for a specific store for the seller
     private void sendStoreStats(String storeName) {
         String info;
         try {
@@ -846,7 +847,7 @@ public class Server extends Thread {
         }
 
     }
-
+    //Lets the seller a specific product in the marketplace
     private void sendProduct(String productName) {
         Product p;
         synchronized (obj) {
@@ -864,5 +865,18 @@ public class Server extends Thread {
             e.printStackTrace();
         }
 
+    }
+    //The constructor creates a new Server object for each connected client and gives it a unique socket and a
+    // writer/reader to communicate with that client.
+    public Server(Socket socket) {
+        this.socket = socket;
+        sockets.add(this.socket);
+        try {
+            writer = new ObjectOutputStream(socket.getOutputStream());
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println("Streams created");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
