@@ -652,13 +652,28 @@ public class Client extends JComponent implements Runnable {
                 JLabel file = new JLabel("File Path");
                 JLabel store = new JLabel("Store Name");
                 JTextField filePath = new JTextField("File Path", 10);
-                JTextField storeName = new JTextField("Store Name", 10);
+                filePath.addFocusListener(new FocusListener() { // Creates default text
+                    @Override
+                    public void focusGained(FocusEvent e) {
+                        if (productToAdd.getText().equals("File Path")) {
+                            productToAdd.setText("");
+                        }
+                    }
+
+                    @Override
+                    public void focusLost(FocusEvent e) {
+                        if (productToAdd.getText().equals("")) {
+                            productToAdd.setText("File Path");
+                        }
+                    }
+                });
+                JComboBox<String> storeName = new JComboBox<>(getSellerStores("alphabet").toArray(new String[0]));
                 JButton export = new JButton("Export to File");
 
                 export.addActionListener(new ActionListener() { //runs if export is pressed in prompt
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        boolean successCheck = exportSellerToFile(filePath.getText(), storeName.getText());
+                        boolean successCheck = exportSellerToFile(filePath.getText(), (String) storeName.getSelectedItem());
 
                         if (successCheck) { //success message
                             JOptionPane.showMessageDialog(null, "File Exported", "Export",
@@ -685,6 +700,21 @@ public class Client extends JComponent implements Runnable {
                 JPanel content = new JPanel();
                 JLabel file = new JLabel("File Path");
                 JTextField filePath = new JTextField("", 10);
+                filePath.addFocusListener(new FocusListener() { // Creates default text
+                    @Override
+                    public void focusGained(FocusEvent e) {
+                        if (productToAdd.getText().equals("File Path")) {
+                            productToAdd.setText("");
+                        }
+                    }
+
+                    @Override
+                    public void focusLost(FocusEvent e) {
+                        if (productToAdd.getText().equals("")) {
+                            productToAdd.setText("File Path");
+                        }
+                    }
+                });
                 JButton export = new JButton("Export to File");
 
                 export.addActionListener(new ActionListener() { //runs when export is pressed in prompt
@@ -695,6 +725,7 @@ public class Client extends JComponent implements Runnable {
                         if (success) { //success message
                             JOptionPane.showMessageDialog(null, "File Exported", "Export",
                                     JOptionPane.INFORMATION_MESSAGE);
+                            exportFrame.dispose();
                         } else { //error message for file name already existing
                             JOptionPane.showMessageDialog(null, "A file with that name already exists.\n" +
                                     "Choose another.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1560,6 +1591,11 @@ public class Client extends JComponent implements Runnable {
     public boolean exportSellerToFile(String filename, String storeName) {
         File testExistence = new File(filename);
 
+        // check regex invalid chars in filename
+        if (filename.matches(".*[/\n\r\t\0\f`?*\\<>|\":].*")) {
+            return false;
+        }
+
         if (testExistence.exists()) {
             return false;
         } else {
@@ -1574,7 +1610,7 @@ public class Client extends JComponent implements Runnable {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
                 PrintWriter exportWriter = new PrintWriter(bw);
                 for (int i = 0; i < fileInfo.size(); i++) {
-                    exportWriter.print(fileInfo.get(i));
+                    exportWriter.println(fileInfo.get(i));
                 }
                 exportWriter.close();
             } catch (IOException e) {
