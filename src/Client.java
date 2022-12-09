@@ -385,6 +385,10 @@ public class Client extends JComponent implements Runnable {
                 infoText.setBackground(infoPanel.getBackground());
                 infoText.setEditable(false);
                 infoText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
+                JTextArea savedText = new JTextArea("");
+                savedText.setEditable(false);
+                savedText.setBackground(infoPanel.getBackground());
+                savedText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
                 infoPanel.add(infoText);
                 ArrayList<Product> products = getSellerProducts("none");
                 infoPanel.setLayout(new GridLayout(products.size(), 1));
@@ -423,7 +427,7 @@ public class Client extends JComponent implements Runnable {
                             JTextArea savedText = new JTextArea("");
                             savedText.setEditable(false);
                             savedText.setBackground(infoPanel.getBackground());
-                            savedText.setText(getProductInfo(Integer.parseInt(productButton.getText().split("\\) ")[0])));
+                            savedText.setText(getProductInfo(product.getIndex()));
                             savedText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
                             infoPanel.add(savedText);
                             productFrame.pack();
@@ -528,7 +532,6 @@ public class Client extends JComponent implements Runnable {
                 JPanel panel = new JPanel();
                 JPanel panel2 = new JPanel();
                 panel2.setLayout(new BoxLayout(panel2, BoxLayout.PAGE_AXIS));
-//                Product selected = getProduct(Integer.parseInt(jList.getSelectedValue().split("\\) ")[0]));
 
                 JTextField name = new JTextField("Name");
                 JTextField price = new JTextField("Price");
@@ -741,7 +744,7 @@ public class Client extends JComponent implements Runnable {
         frame.setSize(new Dimension((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() - 600,
                 (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 300));
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.addWindowListener(new WindowListener() {
             @Override
@@ -908,6 +911,23 @@ public class Client extends JComponent implements Runnable {
             }
         });
         searchOptions.setSelectedIndex(0);
+        searchText.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    search.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
 
         viewStores = new JButton("View Stores");
         viewStores.addActionListener(actionListener);
@@ -996,6 +1016,12 @@ public class Client extends JComponent implements Runnable {
         importSellerFile.setVisible(false);
         exportSellerFile.setVisible(false);
 
+        sortMarket.setVisible(false);
+        search.setVisible(false);
+        searchOptions.setVisible(false);
+        searchText.setVisible(false);
+        updateMarket.setVisible(false);
+
         viewShoppingCart.setVisible(false);
         viewPurchaseHistory.setVisible(false);
         checkout.setVisible(false);
@@ -1059,6 +1085,12 @@ public class Client extends JComponent implements Runnable {
                 userBar.setVisible(true);
                 viewDashboard.setVisible(true);
                 scrollPane.setVisible(true);
+
+                sortMarket.setVisible(true);
+                search.setVisible(true);
+                searchOptions.setVisible(true);
+                searchText.setVisible(true);
+                updateMarket.setVisible(true);
                 if (status) {
                     viewShoppingCart.setVisible(true);
                     viewPurchaseHistory.setVisible(true);
@@ -1147,6 +1179,12 @@ public class Client extends JComponent implements Runnable {
                 userBar.setVisible(true);
                 viewDashboard.setVisible(true);
                 scrollPane.setVisible(true);
+
+                sortMarket.setVisible(true);
+                search.setVisible(true);
+                searchOptions.setVisible(true);
+                searchText.setVisible(true);
+                updateMarket.setVisible(true);
                 if (status) {
                     viewShoppingCart.setVisible(true);
                     viewPurchaseHistory.setVisible(true);
@@ -1189,6 +1227,12 @@ public class Client extends JComponent implements Runnable {
                 editProduct.setVisible(false);
                 importSellerFile.setVisible(false);
                 exportSellerFile.setVisible(false);
+
+                sortMarket.setVisible(false);
+                search.setVisible(false);
+                searchOptions.setVisible(false);
+                searchText.setVisible(false);
+                updateMarket.setVisible(false);
 
                 viewShoppingCart.setVisible(false);
                 viewPurchaseHistory.setVisible(false);
