@@ -652,7 +652,6 @@ public class Server extends Thread {
                 writer.writeObject("N");
                 return;
             }
-            //TODO: check if user has a store with that same name
             System.out.println("adding product " + productName);
             synchronized (obj) {
                 Product product = new Product(productName, storeName, description, quantity, price, price, -1);
@@ -706,14 +705,11 @@ public class Server extends Thread {
     private void addSellerStore(Seller seller, String storeName) {
         try {
             synchronized (obj) {
-                System.out.println("adding store");
 //                if (market.getStoreByName(storeName) == null) {
                 market.addStore(new Store(-1, storeName, seller.getEmail()));
                 market.updateAllFiles();
-                this.writer.writeObject("Y");
-
-
             }
+                this.writer.writeObject("Y");
         } catch (Exception e) {
             try {
                 this.writer.writeObject("N");
@@ -725,7 +721,6 @@ public class Server extends Thread {
     //Allows the seller to remove one of their products
     private void removeSellerProduct(String productName) {
         try {
-            //TODO: ensure that this product exists
             market.removeProduct(market.getProductByName(productName));
             writer.writeObject("Y");
             System.out.println("removed product: " + productName);
