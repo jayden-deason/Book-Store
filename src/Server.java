@@ -268,6 +268,8 @@ public class Server extends Thread {
                     this.removeSellerProduct(answer[1]);
                 } else if (answer[0].equals("13")) {
                     this.sendStoreStats(answer[1]);
+                } else if (answer[0].equals("14")) {
+                    this.sendSearch(answer[1]);
                 }
                 else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
@@ -719,13 +721,13 @@ public class Server extends Thread {
         }
     }
     //Allows the seller to remove one of their products
-    private void removeSellerProduct(String productName) {
+    private void removeSellerProduct(String productIndex) {
         try {
             synchronized (obj) {
-                market.removeProduct(market.getProductByName(productName));
+                market.removeProduct(market.getProductByIndex(Integer.parseInt(productIndex)));
             }
             writer.writeObject("Y");
-            System.out.println("removed product: " + productName);
+            System.out.println("removed product: " + productIndex);
         } catch (Exception e) {
             try {
                 e.printStackTrace();
@@ -862,15 +864,15 @@ public class Server extends Thread {
 
     }
     //Lets the seller a specific product in the marketplace
-    private void sendProduct(String productName) {
+    private void sendProduct(String productIndex) {
         Product p;
         synchronized (obj) {
-            p = market.getProductByName(productName);
+            p = market.getProductByIndex(Integer.parseInt(productIndex));
         }
         System.out.println(p);
 
         if (p == null) {
-            System.out.printf("failed to get '%s'\n", productName);
+            System.out.printf("failed to get '%s'\n", productIndex);
         }
 
         try {

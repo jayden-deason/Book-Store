@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.UIManager;
@@ -356,12 +357,10 @@ public class Client extends JComponent implements Runnable {
                 JPanel panel = new JPanel();
                 String[][] storeInfo = getStoreInfo();
                 JTable table = new JTable(storeInfo, new String[]{"Store Name", "Sales", "Revenue", "Products in Carts"});
-                for (int row = 0; row < table.getRowCount(); row++)
-                {
+                for (int row = 0; row < table.getRowCount(); row++) {
                     int rowHeight = table.getRowHeight();
 
-                    for (int column = 0; column < table.getColumnCount(); column++)
-                    {
+                    for (int column = 0; column < table.getColumnCount(); column++) {
                         Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
                         rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
                     }
@@ -409,7 +408,7 @@ public class Client extends JComponent implements Runnable {
 
                         @Override
                         public void mouseEntered(MouseEvent e) {
-                            infoText.setText(getProductInfo(productButton.getText()));
+                            infoText.setText(getProductInfo(product));
                             infoPanel.updateUI();
                         }
 
@@ -424,7 +423,7 @@ public class Client extends JComponent implements Runnable {
                             JTextArea savedText = new JTextArea("");
                             savedText.setEditable(false);
                             savedText.setBackground(infoPanel.getBackground());
-                            savedText.setText(getProductInfo(productButton.getText()));
+                            savedText.setText(getProductInfo(Integer.parseInt(productButton.getText().split("\\) ")[0])));
                             savedText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
                             infoPanel.add(savedText);
                             productFrame.pack();
@@ -472,23 +471,31 @@ public class Client extends JComponent implements Runnable {
                 JFrame removeProductFrame = new JFrame("Remove Product");
                 removeProductFrame.setSize(400, 500);
                 removeProductFrame.setVisible(true);
-                final DefaultListModel<String> list = new DefaultListModel<>();
 
                 ArrayList<Product> products = getSellerProducts("none");
-                for (Product p : products) {
-                    list.addElement(p.getName());
-                }
-                final JList<String> jList = new JList<>(list);
+
+                final JList<Product> jList = new JList(new Vector<Product>(products));
+                jList.setCellRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                        Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                        if (renderer instanceof JLabel && value instanceof Product) {
+                            // Here value will be of the Type 'CD'
+                            ((JLabel) renderer).setText(((Product) value).getName());
+                        }
+                        return renderer;
+                    }
+                });
                 JPanel panel = new JPanel();
                 JButton remove = new JButton("Remove");
                 remove.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         int cont = JOptionPane.showConfirmDialog(null,
-                                String.format("Are you sure you want to remove '%s'?", jList.getSelectedValue()),
+                                String.format("Are you sure you want to remove '%s'?", jList.getSelectedValue().getName()),
                                 "Remove Product", JOptionPane.YES_NO_OPTION);
                         if (cont == 0) {
-                            removeProduct(jList.getSelectedValue());
+                            removeProduct(jList.getSelectedValue().getIndex());
                             removeProductFrame.dispose();
                             removeProduct.doClick();
                             updateMarket.doClick();
@@ -506,15 +513,22 @@ public class Client extends JComponent implements Runnable {
                 editProductFrame.setVisible(true);
 
                 ArrayList<Product> products = getSellerProducts("none");
-                final DefaultListModel<String> list = new DefaultListModel<>();
-                for (Product p : products) {
-                    list.addElement(p.getName());
-                }
-                final JList<String> jList = new JList<>(list);
+                final JList<Product> jList = new JList(new Vector<Product>(products));
+                jList.setCellRenderer(new DefaultListCellRenderer() {
+                    @Override
+                    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                        Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                        if (renderer instanceof JLabel && value instanceof Product) {
+                            // Here value will be of the Type 'CD'
+                            ((JLabel) renderer).setText(((Product) value).getName());
+                        }
+                        return renderer;
+                    }
+                });
                 JPanel panel = new JPanel();
                 JPanel panel2 = new JPanel();
                 panel2.setLayout(new BoxLayout(panel2, BoxLayout.PAGE_AXIS));
-                Product selected = getProduct(jList.getSelectedValue());
+//                Product selected = getProduct(Integer.parseInt(jList.getSelectedValue().split("\\) ")[0]));
 
                 JTextField name = new JTextField("Name");
                 JTextField price = new JTextField("Price");
@@ -525,7 +539,7 @@ public class Client extends JComponent implements Runnable {
                 edit.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        editProduct(jList.getSelectedValue(), name.getText(), description.getText(), price.getText(), quantity.getText());
+                        editProduct(jList.getSelectedValue().getIndex(), name.getText(), description.getText(), price.getText(), quantity.getText());
                         updateMarket.doClick();
                     }
                 });
@@ -538,18 +552,17 @@ public class Client extends JComponent implements Runnable {
                 jList.addListSelectionListener(new ListSelectionListener() {
                     @Override
                     public void valueChanged(ListSelectionEvent e) {
-                        Product selected = getProduct(jList.getSelectedValue());
-                        System.out.println(selected);
+//                        System.out.println(jList.getSelectedValue());
                         edit.setVisible(true);
                         name.setVisible(true);
                         price.setVisible(true);
                         description.setVisible(true);
                         quantity.setVisible(true);
-                        if (selected != null) {
-                            name.setText("Name: " + selected.getName());
-                            price.setText(String.format("Price: $%.2f", selected.getSalePrice()));
-                            description.setText("Description: " + selected.getDescription());
-                            quantity.setText("Quantity: " + selected.getQuantity());
+                        if (jList.getSelectedValue() != null) {
+                            name.setText("Name: " + jList.getSelectedValue().getName());
+                            price.setText(String.format("Price: $%.2f", jList.getSelectedValue().getSalePrice()));
+                            description.setText("Description: " + jList.getSelectedValue().getDescription());
+                            quantity.setText("Quantity: " + jList.getSelectedValue().getQuantity());
                         } else {
                             name.setText("Name");
                             price.setText("Price");
@@ -575,11 +588,11 @@ public class Client extends JComponent implements Runnable {
 
                 if (searchType.equalsIgnoreCase("name")) { //searching by product name
                     System.out.println("name search");
-                    products = search(searchText.getText() + ",n/a,n/a");
+                    products = search(searchText.getText() + ",n/a,n/a", status);
                 } else if (searchType.equalsIgnoreCase("store")) { //searching by store name
-                    products = search("n/a," + searchText.getText() + ",n/a");
+                    products = search("n/a," + searchText.getText() + ",n/a", status);
                 } else if (searchType.equalsIgnoreCase("description")) { //searching by product description
-                    products = search("n/a,n/a," + searchText.getText());
+                    products = search("n/a,n/a," + searchText.getText(), status);
                 } else { //initializes error value for invalid search results
                     System.out.println("dead");
                     products = null;
@@ -1271,11 +1284,11 @@ public class Client extends JComponent implements Runnable {
         }
     }
 
-    private void removeProduct(String productName) {
+    private void removeProduct(int productIndex) {
         try {
-            writer.println("12," + productName);
+            writer.println("12," + productIndex);
             writer.flush();
-            System.out.println("removing " + productName);
+            System.out.println("removing " + productIndex);
 
             String response = (String) reader.readObject();
             if (response.equalsIgnoreCase("n")) {
@@ -1336,8 +1349,8 @@ public class Client extends JComponent implements Runnable {
         return stores;
     }
 
-    private String getProductInfo(String productName) {
-        Product product = getProduct(productName);
+    private String getProductInfo(int productIndex) {
+        Product product = getProduct(productIndex);
 
         return getProductInfo(product);
 
@@ -1353,8 +1366,8 @@ public class Client extends JComponent implements Runnable {
 
     }
 
-    private Product getProduct(String productName) {
-        writer.println("11," + productName);
+    private Product getProduct(int productIndex) {
+        writer.println("11," + productIndex);
         writer.flush();
 
         Product product = null;
@@ -1367,47 +1380,46 @@ public class Client extends JComponent implements Runnable {
         return product;
     }
 
-    private void editProduct(String productName, String newName, String newDescription, String newPrice, String newQuantity) {
-        System.out.println(productName + ", " + newName + ", " + newDescription + ", " + newPrice + ", " + newQuantity);
-        if (productName != null) {
-            try {
-                if (newName.length() > 6 && newName.substring(0, 6).equals("Name: ") &&
-                        newDescription.length() > 13 && newDescription.substring(0, 13).equals("Description: ") &&
-                        newPrice.length() > 8 && newPrice.substring(0, 8).equals("Price: $") &&
-                        newQuantity.length() > 10 && newQuantity.substring(0, 10).equals("Quantity: ")) {
-                    writer.printf("4,%s,%s,%s,%s,%s\n",
-                            productName,
-                            newName.substring(6),
-                            newDescription.substring(13),
-                            newPrice.substring(8),
-                            newQuantity.substring(10)
-                    );
+    private void editProduct(int productIndex, String newName, String newDescription, String newPrice, String newQuantity) {
+        System.out.println("EDITING: " + productIndex + ", " + newName + ", " + newDescription + ", " + newPrice + ", " + newQuantity);
+        try {
+            if (newName.length() > 6 && newName.substring(0, 6).equals("Name: ") &&
+                    newDescription.length() > 13 && newDescription.substring(0, 13).equals("Description: ") &&
+                    newPrice.length() > 8 && newPrice.substring(0, 8).equals("Price: $") &&
+                    newQuantity.length() > 10 && newQuantity.substring(0, 10).equals("Quantity: ")) {
+                writer.printf("4,%d,%s,%s,%s,%s\n",
+                        productIndex,
+                        newName.substring(6),
+                        newDescription.substring(13),
+                        newPrice.substring(8),
+                        newQuantity.substring(10)
+                );
 
-                    System.out.printf("4,%s,%s,%s,%s,%s\n",
-                            productName,
-                            newName.substring(6),
-                            newDescription.substring(13),
-                            newPrice.substring(8),
-                            newQuantity.substring(10)
-                    );
-                    writer.flush();
+                System.out.printf("4,%d,%s,%s,%s,%s\n",
+                        productIndex,
+                        newName.substring(6),
+                        newDescription.substring(13),
+                        newPrice.substring(8),
+                        newQuantity.substring(10)
+                );
+                writer.flush();
 
-                    String response = (String) reader.readObject();
-                    if (response.equalsIgnoreCase("n")) {
-                        JOptionPane.showMessageDialog(null, "Error editing product!", "Error", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Edited product!", "", JOptionPane.INFORMATION_MESSAGE);
-                    }
-
-
+                String response = (String) reader.readObject();
+                if (response.equalsIgnoreCase("n")) {
+                    JOptionPane.showMessageDialog(null, "Error editing product!", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(null, "Bad formatting!", "Error", JOptionPane.ERROR_MESSAGE);
-
+                    JOptionPane.showMessageDialog(null, "Edited product!", "", JOptionPane.INFORMATION_MESSAGE);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+
+
+            } else {
+                JOptionPane.showMessageDialog(null, "Bad formatting!", "Error", JOptionPane.ERROR_MESSAGE);
+
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     private ArrayList<Product> getSellerProducts(String sortType) {
@@ -1511,9 +1523,13 @@ public class Client extends JComponent implements Runnable {
      * @param query
      * @return ArrayList of search results
      */
-    public ArrayList<Product> search(String query) {
+    public ArrayList<Product> search(String query, boolean status) {
+        if (status) { // buyer
+            writer.println("2," + query);
+        } else { // seller
+            writer.println("14," + query);
+        }
         System.out.println(query);
-        writer.println("2," + query);
         writer.flush();
         return getProductsArray();
     }
@@ -1750,6 +1766,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Edits the quantity of 'product' in the cart to be 'newQuantity'
+     *
      * @param product
      * @param newQuantity
      * @return String indicating success
