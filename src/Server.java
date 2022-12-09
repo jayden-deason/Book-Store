@@ -269,7 +269,7 @@ public class Server extends Thread {
                 } else if (answer[0].equals("13")) {
                     this.sendStoreStats(answer[1]);
                 } else if (answer[0].equals("14")) {
-                    this.sendSearch(answer[1]);
+                    this.sendSearch(userChoice.substring(3));
                 }
                 else {
                     //Sends Client "!" to signify a special error (Invalid choice at high level of program)
@@ -341,7 +341,7 @@ public class Server extends Thread {
 //                System.out.println("got here 1");
                 searchResults = market.matchConditions(searchContents[0], searchContents[1],
                         searchContents[2]);
-                System.out.println(searchResults);
+//                System.out.println(searchResults);
             }
 //            System.out.println("blah2");
             this.writer.writeObject((ArrayList<Product>) searchResults);
@@ -673,7 +673,7 @@ public class Server extends Thread {
         }
     }
     //allows the seller to edit one of the products in their store
-    private void editSellerProduct(Seller seller, String productName, String newName,
+    private void editSellerProduct(Seller seller, String productIndex, String newName,
                                    String newDescription, String newPrice, String newQuantity) {
 
         try {
@@ -681,7 +681,7 @@ public class Server extends Thread {
             int quantity = Integer.parseInt(newQuantity);
 
             synchronized (obj) {
-                Product product = market.getProductByName(productName);
+                Product product = market.getProductByIndex(Integer.parseInt(productIndex));
                 product.setName(newName);
                 product.setDescription(newDescription);
                 product.setSalePrice(price);
@@ -696,6 +696,7 @@ public class Server extends Thread {
             System.out.println("edited product");
 
         } catch (Exception e) {
+            e.printStackTrace();
             try {
                 this.writer.writeObject("N");
             } catch (IOException ex) {
