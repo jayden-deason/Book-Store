@@ -504,4 +504,24 @@ public class Seller extends User implements java.io.Serializable{
         System.out.println("Actual: \"" + "Error: You already have a store with the same name!" + "\"" + " == Expected: \"Error: You already have a store with the same name!\"");
     }
 
+    public ArrayList<String> getStoreNamesSorted(String sortType) {
+        ArrayList<Store> temp = new ArrayList<>(getStores());
+        if (sortType.equals("sales")) {
+            temp.sort((s1, s2) -> {
+                return s1.getSales(Market.getInstance()) - s2.getSales(Market.getInstance());
+            });
+        } else if (sortType.equals("alphabet")) {
+            temp.sort((s1,s2) -> {
+                return s1.getName().compareTo(s2.getName());
+            });
+        }
+
+        ArrayList<String> out = new ArrayList<>();
+        for (Store store : temp) {
+            out.add(store.getName());
+        }
+
+        return out;
+    }
+
 }

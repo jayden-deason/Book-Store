@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import javax.swing.UIManager;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 public class Client extends JComponent implements Runnable {
     private Client client;
@@ -61,14 +59,14 @@ public class Client extends JComponent implements Runnable {
                 bar.add(menu);
                 JMenuItem products = new JMenuItem("By Products Sold");
                 JMenuItem purchases = new JMenuItem("By Purchase History");
-                JMenuItem customers = new JMenuItem("By Customer");
+                JMenuItem alphabet = new JMenuItem("By Alphabet");
                 menu.add(products);
                 menu.add(purchases);
-                menu.add(customers);
+                menu.add(alphabet);
                 root.setJMenuBar(bar);
-                if (status) {
-                    customers.setVisible(false);
-                } else {
+                if (status) { // buyer
+                    alphabet.setVisible(false);
+                } else { // seller
                     purchases.setVisible(false);
                 }
 
@@ -78,7 +76,14 @@ public class Client extends JComponent implements Runnable {
                     public void actionPerformed(ActionEvent e) {
                         System.out.println("By products sold");
 
-                        ArrayList<String> stores = getBuyerDashboard("sales");
+                        ArrayList<String> stores = null;
+                        if (status) {
+                            stores = getBuyerDashboard("sales");
+                        } else {
+                            stores = getSellerStores("sales");
+                            System.out.println("getting seller stores");
+                            System.out.println(stores);
+                        }
 
                         Collections.reverse(stores);
 
@@ -88,33 +93,49 @@ public class Client extends JComponent implements Runnable {
                         } else {
                             panel.setLayout(new GridLayout(stores.size() / 4, stores.size() / 2));
                         }
-                        for (String store : stores) {
-                            String[] storeInfo;
-                            String[] products = new String[0];
-                            if (store.contains(":")) {
-                                storeInfo = store.split(":");
-                                products = storeInfo[1].split(";");
-                            } else {
-                                storeInfo = new String[]{store};
-                            }
 
-                            JButton storeButton = new JButton(storeInfo[0]);
-                            String[] finalProducts = products;
-                            storeButton.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    String storeProducts = "";
-
-                                    for (int i = 0; i < finalProducts.length; i++) {
-                                        String[] productInfo = finalProducts[i].split(",");
-
-                                        storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
-                                    }
-                                    JOptionPane.showMessageDialog(null, storeProducts,
-                                            storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
+                        if (status) { // buyer
+                            for (String store : stores) {
+                                String[] storeInfo;
+                                String[] products = new String[0];
+                                if (store.contains(":")) {
+                                    storeInfo = store.split(":");
+                                    products = storeInfo[1].split(";");
+                                } else {
+                                    storeInfo = new String[]{store};
                                 }
-                            });
-                            panel.add(storeButton);
+
+                                JButton storeButton = new JButton(storeInfo[0]);
+                                String[] finalProducts = products;
+                                storeButton.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        String storeProducts = "";
+
+                                        for (int i = 0; i < finalProducts.length; i++) {
+                                            String[] productInfo = finalProducts[i].split(",");
+
+                                            storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
+                                        }
+                                        JOptionPane.showMessageDialog(null, storeProducts,
+                                                storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
+                                    }
+                                });
+                                panel.add(storeButton);
+                            }
+                        } else {
+                            for (String store : stores) {
+                                JButton storeButton = new JButton(store);
+                                storeButton.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        String storeInfo = getSellerStoreInfo(store);
+                                        JOptionPane.showMessageDialog(null, storeInfo,
+                                                store, JOptionPane.INFORMATION_MESSAGE);
+                                    }
+                                });
+                                panel.add(storeButton);
+                            }
                         }
                         panel.updateUI();
                     }
@@ -167,13 +188,12 @@ public class Client extends JComponent implements Runnable {
                     }
                 });
 
-                //TODO: add seller implementation
-                customers.addActionListener(new ActionListener() {
+                alphabet.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println("By products sold");
+                        System.out.println("By alphabet");
 
-                        ArrayList<String> stores = getBuyerDashboard("sales");
+                        ArrayList<String> stores = getSellerStores("alphabet");
 
                         Collections.reverse(stores);
 
@@ -183,34 +203,19 @@ public class Client extends JComponent implements Runnable {
                         } else {
                             panel.setLayout(new GridLayout(stores.size() / 4, stores.size() / 2));
                         }
-                        for (String store : stores) {
-                            String[] storeInfo;
-                            String[] products = new String[0];
-                            if (store.contains(":")) {
-                                storeInfo = store.split(":");
-                                products = storeInfo[1].split(";");
-                            } else {
-                                storeInfo = new String[]{store};
-                            }
 
-                            JButton storeButton = new JButton(storeInfo[0]);
-                            String[] finalProducts = products;
+                        for (String store : stores) {
+                            JButton storeButton = new JButton(store);
                             storeButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-
-                                    String storeProducts = "";
-
-                                    for (int i = 0; i < finalProducts.length; i++) {
-                                        String[] productInfo = finalProducts[i].split(",");
-
-                                        storeProducts += productInfo[0] + ": " + productInfo[1] + " available\n";
-                                    }
-                                    JOptionPane.showMessageDialog(null, storeProducts, storeInfo[0] + " Products", JOptionPane.INFORMATION_MESSAGE);
-
+                                    String storeInfo = getSellerStoreInfo(store);
+                                    JOptionPane.showMessageDialog(null, storeInfo,
+                                            store, JOptionPane.INFORMATION_MESSAGE);
                                 }
                             });
                             panel.add(storeButton);
+
                         }
                         panel.updateUI();
                     }
@@ -1265,6 +1270,36 @@ public class Client extends JComponent implements Runnable {
         }
     }
 
+    private ArrayList<String> getSellerStores(String sortType) {
+        writer.println("7," + sortType);
+        writer.flush();
+
+        ArrayList<String> out = null;
+
+        try {
+            out = (ArrayList<String>) reader.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return out;
+
+    }
+
+    private String getSellerStoreInfo(String storeName) {
+        writer.println("13," + storeName);
+        writer.flush();
+
+        String out = "";
+        try {
+            out = (String) reader.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return out;
+    }
+
     private String[][] getStoreInfo() {
         String[][] stores = null;
 
@@ -1282,28 +1317,6 @@ public class Client extends JComponent implements Runnable {
         return stores;
     }
 
-    /**
-     * Get a string for the seller dashboard from the server
-     *
-     * @param sortType either "none", "alphabet", or "sales"
-     * @return a string with store stats
-     */
-    private String getSellerDashboard(String sortType) {
-        String dashboard = "";
-        try {
-            // TODO: figure out how to use/display dashboard
-            writer.println("7," + sortType);
-            writer.flush();
-
-            dashboard = (String) reader.readObject();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error", "Error loading dashboard!", JOptionPane.ERROR_MESSAGE);
-        }
-
-        return dashboard;
-
-    }
-
     private String getProductInfo(String productName) {
         Product product = getProduct(productName);
 
@@ -1313,8 +1326,8 @@ public class Client extends JComponent implements Runnable {
 
     private String getProductInfo(Product product) {
         String info = String.format("------------------------------------------\n" + "%s\n" + "Store: %s " +
-                "| Price: $%.2f | Quantity: %d\n" + "Description: %s\n" +
-                "------------------------------------------\n", product.getName(), product.getStoreName(),
+                        "| Price: $%.2f | Quantity: %d\n" + "Description: %s\n" +
+                        "------------------------------------------\n", product.getName(), product.getStoreName(),
                 product.getSalePrice(), product.getQuantity(), product.getDescription());
 
         return info;
@@ -1388,57 +1401,51 @@ public class Client extends JComponent implements Runnable {
             e.printStackTrace();
         }
 
-        System.out.println(products);
+//        System.out.println(products);
         return products;
     }
 
     private ArrayList<Product> getProductsArray() {
-        ArrayList<Product> products;
+        ArrayList<Product> products = new ArrayList<>();
 
         try {
             products = (ArrayList<Product>) reader.readObject();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        System.out.println(products);
         return products;
     }
 
     private String getString() {
-        String response;
+        String response = "";
         try {
             response = (String) reader.readObject();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return response;
     }
 
     private ArrayList<String> getStringArray() {
-        ArrayList<String> response;
+        ArrayList<String> response = new ArrayList<>();
 
         try {
             response = (ArrayList<String>) reader.readObject();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return response;
     }
 
     private HashMap<Product, Integer> getProductHash() {
-        HashMap<Product, Integer> products;
+        HashMap<Product, Integer> products = new HashMap<>();
 
         try {
             products = (HashMap<Product, Integer>) reader.readObject();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return products;
@@ -1446,6 +1453,7 @@ public class Client extends JComponent implements Runnable {
 
     public ArrayList<Product> getAllProducts(String condition) {
         writer.println("1," + condition);
+        System.out.println("1," + condition);
         writer.flush();
         return getProductsArray();
     }
@@ -1460,6 +1468,8 @@ public class Client extends JComponent implements Runnable {
     //TODO: fix visv being silly and sending null
     public String addToCart(Product product, int quantity) {
         writer.println(String.format("4,%d,%d", product.getIndex(), quantity));
+        System.out.println(String.format("4,%d,%d", product.getIndex(), quantity));
+
         writer.flush();
         return getString();
     }
@@ -1547,8 +1557,10 @@ public class Client extends JComponent implements Runnable {
     }
 
     private void setProductButton(Product product, JPanel panel) {
-        String productLabel = String.format("<html>%s<br />Store: %s<br />$%.2f</html>", product.getName(),
-                product.getStoreName(), product.getSalePrice());
+        String productLabel = String.format(
+                "<html><h1 style=\"text-align:center\">%s</h1>" +
+                        "<p style=\"text-align:center\">Store: %s<br />$%.2f</p></html>",
+                product.getName(), product.getStoreName(), product.getSalePrice());
         JButton productButton = new JButton(productLabel);
         panel.add(productButton);
         productButtons.add(productButton);
@@ -1569,8 +1581,8 @@ public class Client extends JComponent implements Runnable {
                 quantity.setBackground(Color.WHITE);
                 ((JSpinner.DefaultEditor) quantity.getEditor()).getTextField().setEditable(false);
 
-                writer.println("3," + product.getIndex());
-                writer.flush();
+//                writer.println("3," + product.getIndex());
+//                writer.flush();
 
 //                Product productActual = null;
 //
@@ -1591,7 +1603,7 @@ public class Client extends JComponent implements Runnable {
                 ActionListener purchaseListener = new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println("Sending purchase");
+                        System.out.println("Adding to cart");
                         String success;
                         try {
                             if ((Integer) quantity.getValue() < 1) {
