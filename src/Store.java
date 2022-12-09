@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
@@ -11,7 +12,7 @@ import java.util.HashMap;
  * @author Griffin Chittenden, section 001
  * @version 11-09-2022
  */
-public class Store implements java.io.Serializable{
+public class Store implements java.io.Serializable {
     private int index; // Index of the store in the csv file
     private String storeName; // Name of the store
     private String sellerName; // Name of the seller who owns the store
@@ -300,12 +301,22 @@ public class Store implements java.io.Serializable{
         out.add(String.format("--Total Revenue: $%.2f", getRevenue()));
         if (sortType == 0) { // No sort condition
             out.add("--Products by sales: ");
+            if (productsForSales.size() == 0) {
+                out.add("----No products!");
+            }
             for (Product product : productsForSales) {
                 out.add("----" + product.getName() + ": " + market.getSalesForProduct(product));
             }
             out.add("--Sales by customer: ");
+            if (customerData.length == 0 || (customerData.length == 1 && customerData[0].equals(""))) {
+                out.add("----No customer purchase data!");
+            }
             for (String data : customerData) {
-                out.add("----" + data.split(":")[0] + ": " + data.split(":")[1]);
+                try {
+                    out.add("----" + data.split(":")[0] + ": " + data.split(":")[1]);
+                } catch (ArrayIndexOutOfBoundsException ignored) {
+
+                }
             }
         } else {
             ArrayList<Product> sortedProducts = new ArrayList<Product>();

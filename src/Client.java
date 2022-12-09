@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.UIManager;
 
 public class Client extends JComponent implements Runnable {
@@ -1062,7 +1064,7 @@ public class Client extends JComponent implements Runnable {
                 String user = username.getText();
                 String pass = password.getText();
 
-                if (!(user.contains("@") && user.contains(".com"))) {
+                if (!isValidEmail(user)) {
                     JOptionPane.showMessageDialog(null, "Enter a valid email address.", "Error",
                             JOptionPane.ERROR_MESSAGE);
                     return;
@@ -1581,21 +1583,6 @@ public class Client extends JComponent implements Runnable {
                 quantity.setBackground(Color.WHITE);
                 ((JSpinner.DefaultEditor) quantity.getEditor()).getTextField().setEditable(false);
 
-//                writer.println("3," + product.getIndex());
-//                writer.flush();
-
-//                Product productActual = null;
-//
-//                try {
-//                    productActual = (Product) reader.readObject();
-//                } catch (IOException ex) {
-//                    throw new RuntimeException(ex);
-//                } catch (ClassNotFoundException ex) {
-//                    throw new RuntimeException(ex);
-//                }
-//                System.out.println("Received Product with q: " + productActual.getQuantity());
-//                System.out.println(productActual);
-
                 JTextArea info = new JTextArea(getProductInfo(product));
                 info.setEditable(false);
                 JButton addToCart = new JButton("Add to Cart");
@@ -1706,5 +1693,14 @@ public class Client extends JComponent implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isValidEmail(String user) {
+        Pattern VALID_EMAIL_ADDRESS_REGEX =
+                Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(user);
+        return matcher.find();
+
     }
 }

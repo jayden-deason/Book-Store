@@ -23,7 +23,15 @@ public class Server extends Thread {
                 String loginString = reader.readLine();
                 String[] userDetails = loginString.split(",");
                 //Seller
-                if (userDetails[0].equals("0")) {
+                if (userDetails[0].equals("-1")) {
+                    System.out.println("Closing socket!");
+                    reader.close();
+                    writer.close();
+                    //Make concurrent
+                    Server.sockets.remove(this.socket);
+                    this.socket.close();
+                    return;
+                } else if (userDetails[0].equals("0")) {
                     if (userDetails[1].equals("0")) {
                         System.out.println("In Buyer Login");
                         Buyer b = null;
@@ -64,9 +72,10 @@ public class Server extends Thread {
                         }
                     }
                 }
-                //Buyer
+                //Seller
                 else if (userDetails[0].equals("1")) {
                     if (userDetails[1].equals("0")) {
+                        System.out.println("In seller login");
                         Seller s = null;
                         synchronized (obj) {
                             s = market.getSellerByEmail(userDetails[2]);
@@ -85,6 +94,7 @@ public class Server extends Thread {
                         }
                     }
                     if (userDetails[1].equals("1")) {
+                        System.out.println("In seller sign up");
                         //checks if email already exists in marketplace
                         Seller s = market.getSellerByEmail(userDetails[2]);
                         if (s == null) {
@@ -146,7 +156,7 @@ public class Server extends Thread {
                 writer.reset();
                 String userChoice = reader.readLine().strip();
                 String[] answer = userChoice.split(",");
-                System.out.println(answer[0]);
+                System.out.println(userChoice);
                 if (answer[0].equals("-1")) {
                     System.out.println("Closing socket!");
                     reader.close();
@@ -211,8 +221,9 @@ public class Server extends Thread {
                 writer.reset();
                 String userChoice = reader.readLine();
                 String[] answer = userChoice.split(",");
-                System.out.println(answer[0]);
+                System.out.println(userChoice);
                 if (answer[0].equals("-1")) {
+                    System.out.println("Closing socket!");
                     reader.close();
                     writer.close();
                     //Make concurrent
@@ -824,6 +835,7 @@ public class Server extends Thread {
 
 
         } catch (Exception e) {
+            e.printStackTrace();
             try {
                 writer.writeObject("No statistics available!");
             } catch (Exception ex) {
