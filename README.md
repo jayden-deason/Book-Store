@@ -16,16 +16,20 @@ CS 18000, section 001
 
 * How to run the program
 * From the project directory:
-* Compile the Main class
+* Compile the Server and Client classes
 
 ```
-javac -cp src src/Main.java
+javac -cp src src/Server.java
+
+javac -cp src src/Client.java
 ```
 
-* Run the main method
+* Run the Server class then run the Client class
 
 ```
-java -cp src src/Main.java
+java -cp src src/Server.java
+
+java -cp src src/Client.java
 ```
 
 * The same can be repeated for any test file, just replace "Main.java" with the appropriate
@@ -73,3 +77,7 @@ java -cp src src/Main.java
     * The Main class is what is actually ran when the application is started. It contains a menu that a user can go
       through to complete actions such as logging in, buying items, creating stores, editing products, etc. If the
       program is ever ended prematurely the data that was changed persists through csv files.
+* [Client.java](src/Client.java)
+    * The Client class replaces the Main class from project 4 and adds the GUI implementation. It connects to the Server class when it is ran. The GUI handles all of 
+      the actions a Buyer or Seller can take including logging in or out, purchasing a product, adding a product, viewing the dashboard, etc. Each action the user
+      performs queries the Server for data regarding the input. Multiple Clients can be ran at the same time.
