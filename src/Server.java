@@ -648,6 +648,10 @@ public class Server extends Thread {
             String description = arr[2].strip();
             double price = Double.parseDouble(arr[3].strip());
             int quantity = Integer.parseInt(arr[4].strip());
+            if (!seller.getStoreNames().contains(storeName)) {
+                writer.writeObject("N");
+                return;
+            }
             //TODO: check if user has a store with that same name
             System.out.println("adding product " + productName);
             synchronized (obj) {
@@ -796,6 +800,7 @@ public class Server extends Thread {
             writer.writeObject("N");
         }
     }
+
     //Sends the information regarding how all of their stores are doing including sales and revenue
     private void sendAllStoresInfo(Seller seller) {
         ArrayList<Store> stores;
