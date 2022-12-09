@@ -648,7 +648,10 @@ public class Server extends Thread {
             String description = arr[2].strip();
             double price = Double.parseDouble(arr[3].strip());
             int quantity = Integer.parseInt(arr[4].strip());
-            //TODO: check if user has a store with that same name
+            if (!seller.getStoreNames().contains(storeName)) {
+                writer.writeObject("N");
+                return;
+            }
             System.out.println("adding product " + productName);
             synchronized (obj) {
                 Product product = new Product(productName, storeName, description, quantity, price, price, -1);
@@ -702,14 +705,11 @@ public class Server extends Thread {
     private void addSellerStore(Seller seller, String storeName) {
         try {
             synchronized (obj) {
-                System.out.println("adding store");
 //                if (market.getStoreByName(storeName) == null) {
                 market.addStore(new Store(-1, storeName, seller.getEmail()));
                 market.updateAllFiles();
-                this.writer.writeObject("Y");
-
-
             }
+                this.writer.writeObject("Y");
         } catch (Exception e) {
             try {
                 this.writer.writeObject("N");
@@ -721,8 +721,9 @@ public class Server extends Thread {
     //Allows the seller to remove one of their products
     private void removeSellerProduct(String productName) {
         try {
-            //TODO: ensure that this product exists
-            market.removeProduct(market.getProductByName(productName));
+            synchronized (obj) {
+                market.removeProduct(market.getProductByName(productName));
+            }
             writer.writeObject("Y");
             System.out.println("removed product: " + productName);
         } catch (Exception e) {
@@ -740,7 +741,10 @@ public class Server extends Thread {
     // quantity, and the customer email
     private void seeBuyerCarts(Seller seller) {
         try {
-            HashMap<Product, String> productsInCart = seller.sendProductsInCart(market);
+            HashMap<Product, String> productsInCart = null;
+            synchronized (obj) {
+                seller.sendProductsInCart(market);
+            }
             this.writer.writeObject((HashMap<Product, String>) productsInCart);
             System.out.println("Wrote purchase history");
         } catch (Exception e) {
@@ -754,7 +758,9 @@ public class Server extends Thread {
     //Sends the seller a list of their stores
     private void sendStores(Seller seller, String sortType) {
         try {
-            ArrayList<String> stores = seller.getStoreNamesSorted(sortType);
+            synchronized (obj) {
+                ArrayList<String> stores = seller.getStoreNamesSorted(sortType);
+            }
             writer.writeObject(stores);
         } catch (Exception e) {
             e.printStackTrace();
@@ -762,16 +768,22 @@ public class Server extends Thread {
     }
     //Sends the seller a list of their products in a store to export a file
     private void sendProductStringsForFile(Seller seller, String storeName) throws IOException {
-        if (!seller.getStoreNames().contains(storeName)) {
-            writer.writeObject(null);
-            return;
+        synchronized (obj) {
+            if (!seller.getStoreNames().contains(storeName)) {
+                writer.writeObject(null);
+                return;
+            }
         }
         Store store = null;
         synchronized (obj) {
             store = seller.getStoreByName(storeName);
         }
         ArrayList<String> out = new ArrayList<>();
-        for (Product p : store.getProducts()) {
+        ArrayList<Product> storeProducts = null;
+        synchronized (obj) {
+            storeProducts = store.getProducts();
+        }
+        for (Product p : storeProducts) {
             out.add(p.toString());
         }
 
@@ -796,6 +808,7 @@ public class Server extends Thread {
             writer.writeObject("N");
         }
     }
+
     //Sends the information regarding how all of their stores are doing including sales and revenue
     private void sendAllStoresInfo(Seller seller) {
         ArrayList<Store> stores;
