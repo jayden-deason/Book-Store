@@ -567,7 +567,7 @@ public class Store implements java.io.Serializable {
         String out = "";
         for (Buyer buyer : market.getBuyers()) {
             String buyerStr = "";
-            for (String item : buyer.getPurchaseHistory()) {
+            for (String item : buyer.getShoppingCart()) {
                 int idx = Integer.parseInt(item.split(":")[0]);
                 if (sellingItem(idx)) {
                     buyerStr += market.getProductByIndex(idx).getName() + ": " + item.split(":")[1] + "<br />";
