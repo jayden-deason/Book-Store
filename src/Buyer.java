@@ -119,12 +119,17 @@ public class Buyer extends User implements java.io.Serializable {
      * @param quantity     quantity to add to cart
      */
     public void addProductToCart(int productIndex, int quantity) {
-
+        int currQuant = quantityInCart(productIndex);
+        if (currQuant != -1) {
+            quantity += currQuant;
+            editProductQuantity(productIndex, quantity);
+            return;
+        }
         shoppingCart.add(productIndex + ":" + quantity);
 
     }
 
-    private int quantityInCart(int productIndex) {
+    public int quantityInCart(int productIndex) {
         for (String item : shoppingCart) {
             if (Integer.parseInt(item.split(":")[0]) == productIndex) {
                 return Integer.parseInt(item.split(":")[1]);

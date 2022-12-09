@@ -349,6 +349,8 @@ public class Market implements java.io.Serializable{
         s.removeProduct(p);
         products.remove(p);
 
+        updateAllFiles();
+
     }
 
 
@@ -522,8 +524,8 @@ public class Market implements java.io.Serializable{
      *
      * @return the list of products, sorted
      */
-    public ArrayList<Product> sortByPrice() {
-        ArrayList<Product> temp = new ArrayList<>(products);
+    public ArrayList<Product> sortByPrice(boolean nonzero) {
+        ArrayList<Product> temp = new ArrayList<>(getAllProducts(nonzero));
         temp.sort((s1, s2) -> {
             return (int) (100 * (s1.getSalePrice() - s2.getSalePrice()));
             // multiply by 100 so integer cast doesn't truncate down to 0 if < 1
@@ -532,8 +534,8 @@ public class Market implements java.io.Serializable{
         return temp;
     }
 
-    public ArrayList<Product> sortBySales() {
-        ArrayList<Product> temp = new ArrayList<>(products);
+    public ArrayList<Product> sortBySales(boolean nonzero) {
+        ArrayList<Product> temp = new ArrayList<>(getAllProducts(nonzero));
 
         temp.sort((s1, s2) -> {
             return getSalesForProduct(s1) - getSalesForProduct(s2);
@@ -547,8 +549,8 @@ public class Market implements java.io.Serializable{
      *
      * @return the list of products, sorted
      */
-    public ArrayList<Product> sortByQuantity() {
-        ArrayList<Product> temp = new ArrayList<>(products);
+    public ArrayList<Product> sortByQuantity(boolean nonzero) {
+        ArrayList<Product> temp = new ArrayList<>(getAllProducts(nonzero));
 
         temp.sort((s1, s2) -> s1.getQuantity() - s2.getQuantity());
 
