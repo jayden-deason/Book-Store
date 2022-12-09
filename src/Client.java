@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
@@ -359,7 +361,7 @@ public class Client extends JComponent implements Runnable {
                 storesFrame.pack();
             } else if (e.getSource() == viewProducts) {
                 JFrame productFrame = new JFrame("Products");
-                productFrame.setSize(750, 500);
+                productFrame.setSize(900, JFrame.MAXIMIZED_VERT);
                 productFrame.setVisible(true);
                 Container content = productFrame.getContentPane();
                 JPanel panel = new JPanel();
@@ -374,6 +376,7 @@ public class Client extends JComponent implements Runnable {
                 infoText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
                 infoPanel.add(infoText);
                 ArrayList<Product> products = getSellerProducts("none");
+                infoPanel.setLayout(new GridLayout(products.size(), 1));
                 int item = 0;
                 for (Product product : products) {
                     JButton productButton = new JButton(product.getName());
@@ -395,11 +398,24 @@ public class Client extends JComponent implements Runnable {
                         @Override
                         public void mouseEntered(MouseEvent e) {
                             infoText.setText(getProductInfo(productButton.getText()));
+                            infoPanel.updateUI();
                         }
 
                         @Override
                         public void mouseExited(MouseEvent e) {
                             infoText.setText("");
+                        }
+                    });
+                    productButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            JTextArea savedText = new JTextArea("");
+                            savedText.setEditable(false);
+                            savedText.setBackground(infoPanel.getBackground());
+                            savedText.setText(getProductInfo(productButton.getText()));
+                            savedText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
+                            infoPanel.add(savedText);
+                            productFrame.pack();
                         }
                     });
                 }
@@ -528,6 +544,8 @@ public class Client extends JComponent implements Runnable {
                             description.setText("Description");
                             quantity.setText("Quantity");
                         }
+                        panel2.updateUI();
+                        editProductFrame.pack();
                     }
                 });
                 Container content = editProductFrame.getContentPane();
@@ -686,7 +704,6 @@ public class Client extends JComponent implements Runnable {
                 content.add(file);
                 content.add(filePath);
                 content.add(export);
-
                 exportFrame.add(content);
                 exportFrame.pack();
             }
@@ -695,8 +712,11 @@ public class Client extends JComponent implements Runnable {
 
     public void run() {
         JFrame frame = new JFrame("Online Bookstore");
+        frame.setSize(new Dimension((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() - 600,
+                (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 300));
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
         frame.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
@@ -1634,6 +1654,7 @@ public class Client extends JComponent implements Runnable {
 
                 JTextArea info = new JTextArea(getProductInfo(product));
                 info.setEditable(false);
+                info.setBackground(productFrame.getBackground());
                 JButton addToCart = new JButton("Add to Cart");
 
                 ActionListener purchaseListener = new ActionListener() {
