@@ -355,7 +355,19 @@ public class Client extends JComponent implements Runnable {
                 Container content = storesFrame.getContentPane();
                 JPanel panel = new JPanel();
                 String[][] storeInfo = getStoreInfo();
-                JTable table = new JTable(storeInfo, new String[]{"Store Name", "Sales", "Revenue"});
+                JTable table = new JTable(storeInfo, new String[]{"Store Name", "Sales", "Revenue", "Products in Carts"});
+                for (int row = 0; row < table.getRowCount(); row++)
+                {
+                    int rowHeight = table.getRowHeight();
+
+                    for (int column = 0; column < table.getColumnCount(); column++)
+                    {
+                        Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
+                        rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+                    }
+
+                    table.setRowHeight(row, rowHeight);
+                }
                 table.setEnabled(false);
                 content.add(table);
                 storesFrame.pack();
@@ -651,22 +663,7 @@ public class Client extends JComponent implements Runnable {
                 JPanel content = new JPanel();
                 JLabel file = new JLabel("File Path");
                 JLabel store = new JLabel("Store Name");
-                JTextField filePath = new JTextField("File Path", 10);
-                filePath.addFocusListener(new FocusListener() { // Creates default text
-                    @Override
-                    public void focusGained(FocusEvent e) {
-                        if (productToAdd.getText().equals("File Path")) {
-                            productToAdd.setText("");
-                        }
-                    }
-
-                    @Override
-                    public void focusLost(FocusEvent e) {
-                        if (productToAdd.getText().equals("")) {
-                            productToAdd.setText("File Path");
-                        }
-                    }
-                });
+                JTextField filePath = new JTextField("", 10);
                 JComboBox<String> storeName = new JComboBox<>(getSellerStores("alphabet").toArray(new String[0]));
                 JButton export = new JButton("Export to File");
 
@@ -700,21 +697,6 @@ public class Client extends JComponent implements Runnable {
                 JPanel content = new JPanel();
                 JLabel file = new JLabel("File Path");
                 JTextField filePath = new JTextField("", 10);
-                filePath.addFocusListener(new FocusListener() { // Creates default text
-                    @Override
-                    public void focusGained(FocusEvent e) {
-                        if (productToAdd.getText().equals("File Path")) {
-                            productToAdd.setText("");
-                        }
-                    }
-
-                    @Override
-                    public void focusLost(FocusEvent e) {
-                        if (productToAdd.getText().equals("")) {
-                            productToAdd.setText("File Path");
-                        }
-                    }
-                });
                 JButton export = new JButton("Export to File");
 
                 export.addActionListener(new ActionListener() { //runs when export is pressed in prompt

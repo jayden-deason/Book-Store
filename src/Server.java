@@ -805,16 +805,16 @@ public class Server extends Thread {
 
         if (stores.size() == 0) {
             out = new String[1][4];
-            out[0] = new String[]{"Name", "Sales", "Revenue"};
+            out[0] = new String[]{"Name", "Sales", "Revenue", "Products in Carts"};
 
         } else {
 
             out = new String[stores.size() + 1][4];
-            out[0] = new String[]{"Name", "Sales", "Revenue"};
+            out[0] = new String[]{"Name", "Sales", "Revenue", "Products in Carts"};
             for (int i = 0; i < stores.size(); i++) {
                 Store s = stores.get(i);
                 out[i + 1] = new String[]{s.getName(), String.valueOf(s.getSales(market)),
-                        String.format("$%.2f", s.getRevenue())};
+                        String.format("$%.2f", s.getRevenue()), s.getProductsInCarts()};
             }
         }
 

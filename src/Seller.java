@@ -498,8 +498,6 @@ public class Seller extends User implements java.io.Serializable{
                 }
             }
         }
-        System.out.println("Test 5 - Testing edge case of creating a store with the same name as an existing store: " +
-                "true");
 //        s1.addStore("testStore");
         System.out.println("Actual: \"" + "Error: You already have a store with the same name!" + "\"" + " == Expected: \"Error: You already have a store with the same name!\"");
     }

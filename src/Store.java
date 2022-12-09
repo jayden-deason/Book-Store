@@ -562,6 +562,36 @@ public class Store implements java.io.Serializable {
         return null;
     }
 
+    public String getProductsInCarts() {
+        Market market = Market.getInstance();
+        String out = "";
+        for (Buyer buyer : market.getBuyers()) {
+            String buyerStr = "";
+            for (String item : buyer.getPurchaseHistory()) {
+                int idx = Integer.parseInt(item.split(":")[0]);
+                if (sellingItem(idx)) {
+                    buyerStr += market.getProductByIndex(idx).getName() + ": " + item.split(":")[1] + "<br />";
+
+                }
+            }
+
+            if (!buyerStr.equals("")) {
+                out += buyer.getEmail() + ":<br />" + buyerStr;
+            }
+        }
+
+        return "<html>" + out + "</html>";
+    }
+
+    private boolean sellingItem(int productIndex) {
+        for (Product p : getProducts()) {
+            if (p.getIndex() == productIndex) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Return a string representation of the store
      *
