@@ -259,7 +259,7 @@ public class Server extends Thread {
                     this.sendProductStringsForFile(seller, answer[1]);
                 } else if (answer[0].equals("9")) {
                     // import from file
-                    this.importProductsFromFile(seller, userChoice.substring(2).split("\n"));
+                    this.importProductsFromFile(seller, userChoice.substring(2).split(",,,"));
                 } else if (answer[0].equals("10")) {
                     this.sendAllStoresInfo(seller);
                 } else if (answer[0].equals("11")) {
@@ -816,12 +816,14 @@ public class Server extends Thread {
     }
 
     //Add a list of products to one of the seller's store. These products are imported from a file by the seller.
-    private void importProductsFromFile(Seller seller, String[] lines) throws IOException {
+    private void importProductsFromFile(Seller seller, String[] lines) {
+        System.out.println("got here");
         try {
             for (String line : lines) {
                 synchronized (obj) {
                     Product newProduct = new Product(line);
                     newProduct.setIndex(-1);
+                    System.out.println(newProduct);
                     if (seller.getStoreNames().contains(newProduct.getStoreName())) {
                         market.addProduct(newProduct);
                     }
@@ -831,8 +833,14 @@ public class Server extends Thread {
                 market.updateAllFiles();
             }
             writer.writeObject("Y");
+            System.out.println("sent y");
+
         } catch (Exception e) {
-            writer.writeObject("N");
+            try {
+                writer.writeObject("N");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

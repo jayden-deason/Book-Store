@@ -668,6 +668,8 @@ public class Client extends JComponent implements Runnable {
                         if (successCheck) { //success message
                             JOptionPane.showMessageDialog(null, "File Imported", "Import",
                                     JOptionPane.INFORMATION_MESSAGE);
+                            importFrame.dispose();
+                            updateMarket.doClick();
                         } else { //error message for file name not existing
                             JOptionPane.showMessageDialog(null, "A file with that name does not" +
                                     "exist", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1707,16 +1709,16 @@ public class Client extends JComponent implements Runnable {
             try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
                 String line = br.readLine();
                 while (line != null) {
-                    fileContent += line + "\n";
+                    fileContent += line + ",,,";
                     line = br.readLine();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            fileContent = fileContent.substring(0, fileContent.length() - 2);
+            fileContent = fileContent.substring(0, fileContent.length() - 3);
 
-            writer.println("8," + fileContent);
+            writer.println("9," + fileContent);
             writer.flush();
 
             String successCheck = getString();
