@@ -129,6 +129,12 @@ public class Buyer extends User implements java.io.Serializable {
 
     }
 
+    /**
+     * Get the quantity of an item in the cart
+     *
+     * @param productIndex the index of the product to find
+     * @return the quantity in cart, 0 if none
+     */
     public int quantityInCart(int productIndex) {
         for (String item : shoppingCart) {
             if (Integer.parseInt(item.split(":")[0]) == productIndex) {
@@ -320,6 +326,12 @@ public class Buyer extends User implements java.io.Serializable {
         return false;
     }
 
+    /**
+     * Sort the market's stores by this buyer's purchase history
+     *
+     * @param market the marketplace of stores to sort
+     * @return a sorted ArrayList of Store objects
+     */
     public ArrayList<Store> sortStoresByPurchaseHistory(Market market) {
         ArrayList<Store> stores = new ArrayList<>(market.getStores());
         stores.sort((s1, s2) -> {
@@ -329,6 +341,13 @@ public class Buyer extends User implements java.io.Serializable {
         return stores;
     }
 
+    /**
+     * Get this buyer's number of purchases for a particular store
+     *
+     * @param store  the store to check purchases for
+     * @param market the overall marketplace
+     * @return the number of purchases made at that store
+     */
     public int getPurchasesForStore(Store store, Market market) {
         int sum = 0;
         for (String item : purchaseHistory) {
@@ -341,6 +360,12 @@ public class Buyer extends User implements java.io.Serializable {
         return sum;
     }
 
+    /**
+     * Whether this product is in the customer's previous purchases
+     *
+     * @param product the product to check
+     * @return true if previously purchased, false if not
+     */
     public boolean previouslyPurchasedItem(Product product) {
         return previouslyPurchasedItem(product.getIndex());
     }

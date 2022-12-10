@@ -4,7 +4,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * Store Test
+ * <p>
+ * A main method to test store functionality
+ *
+ * @author Griffin Chittenden
+ * @version 11-09-2022
+ */
 public class StoreTest {
+    /**
+     * Use to test basic store functions
+     */
     public static void main(String[] args) {
         ArrayList<String> storeLines = new ArrayList<>();
         ArrayList<Store> stores = new ArrayList<>();
@@ -36,7 +47,6 @@ public class StoreTest {
         }
 
 
-
         System.out.println("TESTING REMOVAL OF A PRODUCT");
         storeOne.removeProduct(product);
         System.out.println(storeOne.getProducts());
@@ -59,31 +69,6 @@ public class StoreTest {
         storeOne.modifyProduct(product);
         System.out.println(storeOne.getProducts());
         System.out.println("Products by Index: " + storeOne.productsByIndexToString());
-//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
 
-        // purchase testing moved to main
-
-//        System.out.println("TESTING PURCHASING A PRODUCT");
-        // Need this since the product object here is not linked to the Products.csv file
-//        storeOne.makePurchase(buyer, 1, product);
-//        product.setQuantity(product.getQuantity() - 1);
-//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
-//        System.out.println("Total Sales: " + storeOne.getSales());
-//        System.out.println("Total Revenue: " + storeOne.getRevenue());
-//        System.out.println(product);
-//
-//        System.out.println("TESTING PURCHASING A PRODUCT");
-//        storeOne.makePurchase(buyer, 1, storeOne.getProducts().get(0));
-        // Need this since the product object here is not linked to the Products.csv file
-//        storeOne.getProducts().get(0).setQuantity(product.getQuantity() - 1);
-//        System.out.println("Products by Sales: " + storeOne.productsBySalesToString());
-//        System.out.println("Total Sales: " + storeOne.getSales());
-//        System.out.println("Total Revenue: " + storeOne.getRevenue());
-//        System.out.println(product);
-
-//        System.out.println("TESTING PRINTING STATISTICS FOR SELLER BASED ON DIFFERENT SORTS");
-//        storeOne.statisticsForSeller(0);
-//        storeOne.statisticsForSeller(1);
-//        storeOne.statisticsForSeller(2);
     }
 }

@@ -9,7 +9,7 @@ import java.util.Objects;
  * @author Katya Teodorovich, section 001
  * @version November 4, 2022
  */
-public class Product implements java.io.Serializable{
+public class Product implements java.io.Serializable {
     private String name; // the name of the product
     private String storeName; // the store associated with the product
     private String description; // a text description of the product
@@ -238,6 +238,7 @@ public class Product implements java.io.Serializable{
 
     /**
      * Return the list of reviews
+     *
      * @return list of product reviews
      */
     public ArrayList<Review> getReviews() {
@@ -270,6 +271,7 @@ public class Product implements java.io.Serializable{
 
     /**
      * Get the average customer rating for the product
+     *
      * @return average rating, -1 if no reviews
      */
     public double getAverageRating() {
@@ -288,6 +290,7 @@ public class Product implements java.io.Serializable{
 
     /**
      * Get the number of sales for this product
+     *
      * @return number of sales
      */
     public int getSales() {

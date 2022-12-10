@@ -882,6 +882,11 @@ public class Main {
 
     }
 
+    /**
+     * Print the product page for every product in a list
+     *
+     * @param products a list of product objects
+     */
     public static void printListings(ArrayList<Product> products) {
         System.out.println("------------------------------------------");
         if (products.size() == 0) {

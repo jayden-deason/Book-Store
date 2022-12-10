@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 /**
  * Main Test Cases
- *
+ * <p>
  * Testing market functionality with all the internal objects
  *
  * @author Katya Teodorovich, section 001
@@ -18,6 +18,9 @@ public class MainTestCases {
 //        creatingSellerTest();
     }
 
+    /**
+     * Testing all the project 4 requirements
+     */
     public static void testRequirements() {
         Market market = Market.getInstance();
 
@@ -68,7 +71,9 @@ public class MainTestCases {
 
     }
 
-
+    /**
+     * Running all the print methods for everything in the marketplace
+     */
     public static void printAllInfo() {
         Market market = Market.getInstance();
 
@@ -91,6 +96,9 @@ public class MainTestCases {
         }
     }
 
+    /**
+     * Testing creating a new seller
+     */
     public static void creatingSellerTest() {
         Market market = Market.getInstance();
         printFileContents("Sellers.csv");
@@ -125,6 +133,7 @@ public class MainTestCases {
 
     /**
      * Helper method to print contents of file
+     *
      * @param fileName path to file
      */
     public static void printFileContents(String fileName) {

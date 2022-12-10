@@ -15,7 +15,7 @@ import java.util.HashMap;
  * @author Visv Shah
  * @version 11/13/22
  */
-public class Seller extends User implements java.io.Serializable{
+public class Seller extends User implements java.io.Serializable {
     private ArrayList<Store> stores; // the seller's products
     private int index; // the index of the Seller in the Seller.csv file
 
@@ -53,207 +53,21 @@ public class Seller extends User implements java.io.Serializable{
         this.stores = new ArrayList<>();
     }
 
-//    public Seller(String line) {
-//        super(line.split(",")[1], line.split(",")[2]);
-//        String[] parts = line.split(",");
-//        this.index = Integer.parseInt(parts[0]);
-//        String[] storesIndex = parts[3].substring(1, parts[3].length() - 1).split("/");
-//        this.stores = new ArrayList<Store>();
-//        int i = 0;
-//        BufferedReader br = null;
-//        try {
-//            br = new BufferedReader(new FileReader("Stores.csv"));
-//            String l = br.readLine();
-//            while (l != null) {
-//                for (String n : storesIndex) {
-//                    if (Integer.parseInt(n) == i) {
-//                        Store s = new Store(l);
-//                        this.stores.add(s);
-//                        break;
-//                    }
-//                }
-//                l = br.readLine();
-//                i++;
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (br != null) {
-//                try {
-//                    br.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
-
     /**
-     * Adds a new store to Stores.csv. First reads Stores.csv and stores the lines and then writes Stores.csv including
-     * the new store
+     * Get a list of the seller's stores
      *
-     * @return the index of the store
+     * @return the list of stores
      */
-    public int writeStoresFile(String fileName, Store s) {
-        ArrayList<String> lines = new ArrayList<String>();
-        //Reading Stores.csv
-        File f = new File(fileName);
-        if (f.exists()) {
-            BufferedReader br = null;
-            try {
-                br = new BufferedReader(new FileReader(fileName));
-                String line = br.readLine();
-                while (line != null) {
-                    lines.add(line);
-                    line = br.readLine();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                return -1;
-            } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return -1;
-                    }
-                }
-            }
-        }
-
-        FileWriter fw = null;
-        try {
-            fw = new FileWriter(fileName);
-            for (String str : lines) {
-                fw.write(str + "\n");
-            }
-            int lastIndex = 0;
-            if (lines.size() != 1) {
-                lastIndex = Integer.parseInt(lines.get(lines.size() - 1).split(",")[0]) + 1;
-            }
-
-            s.setIndex(lastIndex);
-            //Calls the updateSellerFile() with the index of the new store to add a reference to the Seller.csv file
-
-            int updateSellerFile = updateSellerFile(lastIndex);
-            if (updateSellerFile == -1) {
-                System.out.println("Something went wrong with updating your profile!");
-                return -1;
-            }
-
-            fw.write(s.toString() + "\n");
-            return lastIndex;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        } finally {
-            if (fw != null) {
-                try {
-                    fw.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return -1;
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates Seller.csv when a new store is added, by storing a reference to that store in the seller's row.
-     *
-     * @params indexToAdd : states the index of the new store in the Store.csv file
-     */
-    public int updateSellerFile(int indexToAdd) {
-        ArrayList<String> lines = new ArrayList<String>();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader("Sellers.csv"));
-            String line = br.readLine();
-            while (line != null) {
-                if (line.split(",")[1].equals(this.getEmail())) {
-                    String[] parts = line.split(",");
-                    String storesStringArray = parts[3].substring(1, parts[3].length() - 1) + "/" + indexToAdd;
-                    String newLine = String.format("%s,%s,%s,<%s>", parts[0], parts[1], parts[2], storesStringArray);
-                    lines.add(newLine);
-                } else {
-                    lines.add(line);
-                }
-
-                line = br.readLine();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return -1;
-                }
-            }
-        }
-        FileWriter fw = null;
-        try {
-            fw = new FileWriter("Sellers.csv");
-            for (String str : lines) {
-                fw.write(str + "\n");
-            }
-            return 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        } finally {
-            if (fw != null) {
-                try {
-                    fw.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return -1;
-                }
-            }
-        }
-    }
-
-    /**
-     * Exports a csv of all the products in a store that a seller has.
-     *
-     * @param fileName  the fileName that the user wants to write a new file to
-     * @param storeName the store that the user wants to export products from
-     * @return the index of the store
-     */
-    public void exportProducts(String fileName, String storeName) {
-        for (Store s : stores) {
-            if (s.getName().equals(storeName)) {
-                FileWriter fw = null;
-                try {
-                    fw = new FileWriter(fileName);
-
-                    for (Product product : s.getProducts()) {
-                        fw.write(product.toString() + "\n");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (fw != null) {
-                        try {
-                            fw.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-
     public ArrayList<Store> getStores() {
         return stores;
     }
 
+    /**
+     * Get a combined list of all the seller's products
+     *
+     * @param nonzero whether to include products with 0 quantity
+     * @return a list of all this seller's products
+     */
     public ArrayList<Product> getProducts(boolean nonzero) {
         ArrayList<Product> out = new ArrayList<>();
 
@@ -266,37 +80,20 @@ public class Seller extends User implements java.io.Serializable{
         return out;
     }
 
+    /**
+     * Set the list of stores
+     *
+     * @param stores new store list
+     */
     public void setStores(ArrayList<Store> stores) {
         this.stores = stores;
     }
 
     /**
-     * This function is used to create a new store. It makes no store with the same name exists already for that
-     * seller. Then, It will call the functions to save that store in the Stores.csv and update the Sellers.csv row
-     * with a reference to the new store.
+     * Add a new store
+     *
+     * @param s store to add
      */
-    public int addStore(String storeName, Market market) {
-        for (Store store : stores) {
-            if (store.getName().equals(storeName)) {
-                System.out.println("Error: You already have a store with the same name!");
-                return -1;
-            }
-        }
-        Store s = new Store(0, storeName, this.getEmail(), 0, 0, "", "");
-        //int index, String storeName, String sellerName, int sales, double revenue, String productIndices,
-        //                 String productSales
-        stores.add(s);
-        int index = writeStoresFile("Stores.csv", s);
-        if (index == -1) {
-            System.out.println("Something went wrong with adding your store!");
-            return -1;
-        } else {
-            s.setIndex(index);
-        }
-
-        return 0;
-    }
-
     public void addStore(Store s) {
         stores.add(s);
     }
@@ -321,6 +118,13 @@ public class Seller extends User implements java.io.Serializable{
 
     }
 
+    /**
+     * Get a string representation of the entire dashboard
+     *
+     * @param sortType see params for statisticsForSeller()
+     * @param market   the marketplace
+     * @return a string with all the dashboard stats
+     */
     public String getDashboardString(int sortType, Market market) {
         ArrayList<String> out = new ArrayList<>();
         out.add("------------------------------------------");
@@ -355,6 +159,11 @@ public class Seller extends User implements java.io.Serializable{
 
     }
 
+    /**
+     * Get the index of the seller in the marketplace
+     *
+     * @return the seller's index
+     */
     public int getIndex() {
         return index;
     }
@@ -382,6 +191,13 @@ public class Seller extends User implements java.io.Serializable{
 
         }
     }
+
+    /**
+     * Send all the products currently in people's carts
+     *
+     * @param market the marketplace
+     * @return a hashmap of products --> user + quantity string
+     */
     public HashMap<Product, String> sendProductsInCart(Market market) {
         HashMap<Product, String> productsInCart = new HashMap<Product, String>();
         for (Buyer b : market.getBuyers()) {
@@ -396,10 +212,22 @@ public class Seller extends User implements java.io.Serializable{
         }
         return productsInCart;
     }
+
+    /**
+     * Set this seller's index
+     *
+     * @param index new index
+     */
     public void setIndex(int index) {
         this.index = index;
     }
 
+    /**
+     * Get a store matching a given name
+     *
+     * @param storeName the store name
+     * @return the matching store, null if none found
+     */
     public Store getStoreByName(String storeName) {
         for (Store s : stores) {
             if (s.getName().equals(storeName)) {
@@ -410,6 +238,11 @@ public class Seller extends User implements java.io.Serializable{
         return null;
     }
 
+    /**
+     * Get a list of all this seller's store names
+     *
+     * @return an arraylist of every store name
+     */
     public ArrayList<String> getStoreNames() {
         ArrayList<String> out = new ArrayList<>();
         for (Store s : stores) {
@@ -504,6 +337,12 @@ public class Seller extends User implements java.io.Serializable{
         System.out.println("Actual: \"" + "Error: You already have a store with the same name!" + "\"" + " == Expected: \"Error: You already have a store with the same name!\"");
     }
 
+    /**
+     * Get a list of store names, sorted by a particular parameter
+     *
+     * @param sortType either "sales" or "alphabet"
+     * @return a sorted list of store names
+     */
     public ArrayList<String> getStoreNamesSorted(String sortType) {
         ArrayList<Store> temp = new ArrayList<>(getStores());
         if (sortType.equals("sales")) {
@@ -511,7 +350,7 @@ public class Seller extends User implements java.io.Serializable{
                 return s1.getSales(Market.getInstance()) - s2.getSales(Market.getInstance());
             });
         } else if (sortType.equals("alphabet")) {
-            temp.sort((s1,s2) -> {
+            temp.sort((s1, s2) -> {
                 return s1.getName().compareTo(s2.getName());
             });
         }

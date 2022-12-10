@@ -564,6 +564,11 @@ public class Store implements java.io.Serializable {
         return null;
     }
 
+    /**
+     * Get a string of products in user's carts from this user's stores
+     *
+     * @return a string of products in user's carts
+     */
     public String getProductsInCarts() {
         Market market = Market.getInstance();
         String out = "";
@@ -585,6 +590,12 @@ public class Store implements java.io.Serializable {
         return "<html>" + out + "</html>";
     }
 
+    /**
+     * Whether this seller is selling a specific product in one of their stores
+     *
+     * @param productIndex the index of the product
+     * @return true if this seller sells the product, false if not
+     */
     private boolean sellingItem(int productIndex) {
         for (Product p : getProducts()) {
             if (p.getIndex() == productIndex) {

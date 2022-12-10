@@ -7,9 +7,9 @@ import java.util.ArrayList;
  * An object representing a marketplace consisting of buyers and sellers
  *
  * @author Katya Teodorovich, section 001
- * @version November 14, 2022
+ * @version December 10, 2022
  */
-public class Market implements java.io.Serializable{
+public class Market implements java.io.Serializable {
     private ArrayList<Buyer> buyers; // the list of buyers in the marketplace
     private ArrayList<Seller> sellers; // the list of sellers
     private ArrayList<Store> stores; // the list of stores in the marketplace
@@ -112,7 +112,11 @@ public class Market implements java.io.Serializable{
         }
     }
 
-
+    /**
+     * Get the next available index in the list of products
+     *
+     * @return the next available index
+     */
     private int getNextIndex() {
         int maxIdx = -1;
         for (Product p : products) {
@@ -479,6 +483,12 @@ public class Market implements java.io.Serializable{
 
     }
 
+    /**
+     * Get the number of customers that have purchased a product
+     *
+     * @param p a product
+     * @return number of customers with the product in their purchase history
+     */
     public int getCustomersForProduct(Product p) {
         int customers = 0;
 
@@ -515,6 +525,11 @@ public class Market implements java.io.Serializable{
 
     }
 
+    /**
+     * Edit the product with the matching index to match the rest of this product's fields
+     *
+     * @param product the product to edit
+     */
     public void editProduct(Product product) {
         for (int i = 0; i < products.size(); i++) {
             if (products.get(i).getIndex() == product.getIndex()) {
@@ -527,6 +542,7 @@ public class Market implements java.io.Serializable{
     /**
      * Sort the list of products by price
      *
+     * @param nonzero whether to include products with a quantity of 0
      * @return the list of products, sorted
      */
     public ArrayList<Product> sortByPrice(boolean nonzero) {
@@ -539,6 +555,12 @@ public class Market implements java.io.Serializable{
         return temp;
     }
 
+    /**
+     * Sort the list of products by sales
+     *
+     * @param nonzero whether to include products with a quantity of 0
+     * @return the sorted list of products
+     */
     public ArrayList<Product> sortBySales(boolean nonzero) {
         ArrayList<Product> temp = new ArrayList<>(getAllProducts(nonzero));
 
@@ -562,6 +584,11 @@ public class Market implements java.io.Serializable{
         return temp;
     }
 
+    /**
+     * Get a sorted list of stores by overall sales
+     *
+     * @return an ArrayList of sorted stores
+     */
     public ArrayList<Store> sortStoresByProductsSold() {
         ArrayList<Store> out = new ArrayList<>(stores);
         out.sort((s1, s2) -> {
