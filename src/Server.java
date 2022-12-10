@@ -136,7 +136,7 @@ public class Server extends Thread {
                         }
                     }
                 }
-            } catch (SocketException e) {
+            } catch (SocketException | NullPointerException e) {
                 System.out.println("Socket Exception! Closing connection.");
                 break;
             } catch (Exception e) {
