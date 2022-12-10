@@ -821,6 +821,7 @@ public class Server extends Thread {
             for (String line : lines) {
                 synchronized (obj) {
                     Product newProduct = new Product(line);
+                    newProduct.setIndex(-1);
                     if (seller.getStoreNames().contains(newProduct.getStoreName())) {
                         market.addProduct(newProduct);
                     }
