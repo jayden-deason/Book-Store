@@ -7,19 +7,28 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.UIManager;
 
+/**
+ * Client
+ *
+ *A class that shows the client GUI & communicates requests to the server
+ *
+ * @author Griffin Chittenden & Jayden Deason
+ * @version 12-10-2022
+ *
+ */
 public class Client extends JComponent implements Runnable {
+    // server i/o
     private Client client;
     private Socket socket;
     private ObjectInputStream reader;
     private PrintWriter writer;
+
+    // GUI elements
     private boolean loggedIn;
     private boolean status = true;
     private String searchType;
@@ -46,6 +55,9 @@ public class Client extends JComponent implements Runnable {
 
     private JComboBox<String> searchOptions, sortMarket;
 
+    /**
+     * main action listener used for handling button clicks
+     */
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -749,7 +761,13 @@ public class Client extends JComponent implements Runnable {
         }
     };
 
+    /**
+     * The main GUI thread
+     */
     public void run() {
+        /*
+        Main frame stuff
+         */
         JFrame frame = new JFrame("Online Bookstore");
         frame.setSize(new Dimension((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() - 600,
                 (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 300));
@@ -789,6 +807,10 @@ public class Client extends JComponent implements Runnable {
         frame.setVisible(true);
         Container container = frame.getContentPane();
         container.setLayout(new BorderLayout());
+
+        /*
+        Top bar
+         */
         username = new JTextField("Email", 20);
         password = new JTextField("Password", 20);
         buttonGroup = new ButtonGroup();
@@ -797,40 +819,7 @@ public class Client extends JComponent implements Runnable {
         isSeller = new JRadioButton("Seller");
         buttonGroup.add(isBuyer);
         buttonGroup.add(isSeller);
-        productToAdd = new JTextField("Product name,store name,description,price,quantity", 40);
-        productToAdd.addFocusListener(new FocusListener() { // Creates default text
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (productToAdd.getText().equals("Product name,store name,description,price,quantity")) {
-                    productToAdd.setText("");
-                }
-            }
 
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (productToAdd.getText().equals("")) {
-                    productToAdd.setText("Product name,store name,description,price,quantity");
-                }
-            }
-        });
-        productToAdd.setToolTipText("Product name,store name,description,price,quantity");
-        storeToAdd = new JTextField("Store name", 40);
-        storeToAdd.addFocusListener(new FocusListener() { // Creates default text
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (storeToAdd.getText().equals("Store name")) {
-                    storeToAdd.setText("");
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (storeToAdd.getText().equals("")) {
-                    storeToAdd.setText("Store name");
-                }
-            }
-        });
-        storeToAdd.setToolTipText("Store name");
         username.addFocusListener(new FocusListener() { // Creates default text
             @Override
             public void focusGained(FocusEvent e) {
@@ -939,6 +928,47 @@ public class Client extends JComponent implements Runnable {
             }
         });
 
+        viewDashboard = new JButton("Dashboard");
+        viewDashboard.addActionListener(actionListener);
+
+        /*
+        Bottom bar
+         */
+        productToAdd = new JTextField("Product name,store name,description,price,quantity", 40);
+        productToAdd.addFocusListener(new FocusListener() { // Creates default text
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (productToAdd.getText().equals("Product name,store name,description,price,quantity")) {
+                    productToAdd.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (productToAdd.getText().equals("")) {
+                    productToAdd.setText("Product name,store name,description,price,quantity");
+                }
+            }
+        });
+        productToAdd.setToolTipText("Product name,store name,description,price,quantity");
+        storeToAdd = new JTextField("Store name", 40);
+        storeToAdd.addFocusListener(new FocusListener() { // Creates default text
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (storeToAdd.getText().equals("Store name")) {
+                    storeToAdd.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (storeToAdd.getText().equals("")) {
+                    storeToAdd.setText("Store name");
+                }
+            }
+        });
+        storeToAdd.setToolTipText("Store name");
+
         viewStores = new JButton("View Stores");
         viewStores.addActionListener(actionListener);
         viewProducts = new JButton("View Products");
@@ -967,8 +997,6 @@ public class Client extends JComponent implements Runnable {
         exportToFile = new JButton("Export Purchase History");
         exportToFile.addActionListener(actionListener);
 
-        viewDashboard = new JButton("Dashboard");
-        viewDashboard.addActionListener(actionListener);
 
         confirmAddProduct = new JButton("\u2713");
         confirmAddProduct.setPreferredSize(new Dimension(45, 25));
@@ -1290,6 +1318,9 @@ public class Client extends JComponent implements Runnable {
         container.add(scrollPane, BorderLayout.CENTER);
     }
 
+    /**
+     * Main method that runs the GUI
+     */
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
@@ -1299,10 +1330,17 @@ public class Client extends JComponent implements Runnable {
         SwingUtilities.invokeLater(new Client());
     }
 
+    /**
+     * Creates a new Client & connects the socket
+     */
     public Client() { //initializes a client by starting a connection and reader/writer
         connectSocket();
     }
 
+    /**
+     * Sends a request to add a new store for the seller
+     * @param storeName new store name
+     */
     private void addStore(String storeName) {
         try {
             writer.println("5," + storeName);
@@ -1321,6 +1359,10 @@ public class Client extends JComponent implements Runnable {
         }
     }
 
+    /**
+     * Sends a request to add a new product
+     * @param productString string with new product description
+     */
     private void addProduct(String productString) {
         try {
             writer.println("3," + productString);
@@ -1339,6 +1381,10 @@ public class Client extends JComponent implements Runnable {
         }
     }
 
+    /**
+     * Sends request to remove a product from the market
+     * @param productIndex index of product to remove
+     */
     private void removeProduct(int productIndex) {
         try {
             writer.println("12," + productIndex);
@@ -1357,6 +1403,11 @@ public class Client extends JComponent implements Runnable {
         }
     }
 
+    /**
+     * Sends request to get a list of store names for a seller
+     * @param sortType how to sort the list of stores
+     * @return a list of store names
+     */
     private ArrayList<String> getSellerStores(String sortType) {
         writer.println("7," + sortType);
         writer.flush();
@@ -1373,6 +1424,11 @@ public class Client extends JComponent implements Runnable {
 
     }
 
+    /**
+     * Get info for one particular store from the seller POV
+     * @param storeName the name of the store
+     * @return info for that store
+     */
     private String getSellerStoreInfo(String storeName) {
         writer.println("13," + storeName);
         writer.flush();
@@ -1387,6 +1443,10 @@ public class Client extends JComponent implements Runnable {
         return out;
     }
 
+    /**
+     * An array of store information for the store stats page
+     * @return an array of store info including name, revenue, sales, and products in carts
+     */
     private String[][] getStoreInfo() {
         String[][] stores = null;
 
@@ -1404,6 +1464,11 @@ public class Client extends JComponent implements Runnable {
         return stores;
     }
 
+    /**
+     * Get information for a specific product
+     * @param productIndex index of the product
+     * @return a string with that product's page
+     */
     private String getProductInfo(int productIndex) {
         Product product = getProduct(productIndex);
 
@@ -1411,6 +1476,11 @@ public class Client extends JComponent implements Runnable {
 
     }
 
+    /**
+     * Nicely formats the description of the product
+     * @param product a product to format
+     * @return a string with that product's page
+     */
     private String getProductInfo(Product product) {
         String line1 = product.getName() + "\n";
         String line2 = String.format("Store %s | Price $%.2f | Quantity: %d\n",
@@ -1423,6 +1493,11 @@ public class Client extends JComponent implements Runnable {
 
     }
 
+    /**
+     * Helper method to pad a product's page with the appropriate length of dashes
+     * @param length the length of dashes to inclue
+     * @return a string of length * "-"
+     */
     private String getDashes(int length) {
         String out = "";
         for (int i = 0; i < length; i++) {
@@ -1431,6 +1506,11 @@ public class Client extends JComponent implements Runnable {
         return out;
     }
 
+    /**
+     * Get a specific product from the market
+     * @param productIndex the index of the product
+     * @return the up to date product from the market
+     */
     private Product getProduct(int productIndex) {
         writer.println("11," + productIndex);
         writer.flush();
@@ -1445,6 +1525,14 @@ public class Client extends JComponent implements Runnable {
         return product;
     }
 
+    /**
+     * Sends request to edit a product in the market
+     * @param productIndex the index of the product
+     * @param newName "Name: " + the new name
+     * @param newDescription "Description: " + the new description
+     * @param newPrice "Price: $" + the new price
+     * @param newQuantity "Quantity: " + the new quantity
+     */
     private void editProduct(int productIndex, String newName, String newDescription, String newPrice, String newQuantity) {
         try {
             if (newName.length() > 6 && newName.substring(0, 6).equals("Name: ") &&
@@ -1497,6 +1585,11 @@ public class Client extends JComponent implements Runnable {
 
     }
 
+    /**
+     * Request a list of the seller's products
+     * @param sortType what to sort the products by
+     * @return a list of seller products
+     */
     private ArrayList<Product> getSellerProducts(String sortType) {
         writer.println("2," + sortType);
         writer.flush();
@@ -1875,6 +1968,9 @@ public class Client extends JComponent implements Runnable {
         return getStringArray();
     }
 
+    /**
+     * Disconnect the socket
+     */
     public void closeSocket() {
         try {
             System.out.println("Send -1");
@@ -1890,6 +1986,9 @@ public class Client extends JComponent implements Runnable {
         }
     }
 
+    /**
+     * Connect to the server
+     */
     public void connectSocket() {
         try {
             socket = new Socket("localhost", 1001);
@@ -1902,11 +2001,17 @@ public class Client extends JComponent implements Runnable {
         }
     }
 
-    private boolean isValidEmail(String user) {
+    /**
+     * Checks if an email has valid formatting
+     * xxxx@xxxx.xxxx
+     * @param str the string to check for email formatting
+     * @return true if the string is an email, false if not
+     */
+    private boolean isValidEmail(String str) {
         Pattern VALID_EMAIL_ADDRESS_REGEX =
                 Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
-        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(user);
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(str);
         return matcher.find();
 
     }
