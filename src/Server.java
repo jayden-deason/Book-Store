@@ -1,9 +1,6 @@
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Server
@@ -11,7 +8,7 @@ import java.util.HashMap;
  * A class that creates new threads for each client connection and sends and updates data based on user requests.
  *
  * @author Visv Shah & Katya Teodorovich
- * @version 12/9/22
+ * @version 12/10/22
  */
 public class Server extends Thread {
     private final Socket socket; // socket connection for a particular server thread
@@ -20,24 +17,28 @@ public class Server extends Thread {
 
     public static ArrayList<Socket> sockets = new ArrayList<Socket>(); // list of sockets for all current threads
     public static Market market; // overall marketplace
-    public static Object obj = new Object(); // concurrency gatekeeper
+    public static final Object obj = new Object(); // concurrency gatekeeper
 
     /**
      * The main method creates a new thread and Server object for each new User connection
      */
-    public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
+    public static void main(String[] args) {
         //Port Number is 1001 and host is "localhost"
-        ServerSocket serverSocket = new ServerSocket(1001);
-        market = Market.getInstance();
-        while (true) {
-            //infinite loop to create a new thread for each connection
-            //creates a new socket for each connection
-            final Socket socket = serverSocket.accept();
-            //creates a user using the socket
-            Server user = new Server(socket);
-            System.out.println("Connection Established Number: " + sockets.size());
-            user.start();
+        try (ServerSocket serverSocket = new ServerSocket(1001)) {
+            market = Market.getInstance();
+            while (true) {
+                //infinite loop to create a new thread for each connection
+                //creates a new socket for each connection
+                final Socket socket = serverSocket.accept();
+                //creates a user using the socket
+                Server user = new Server(socket);
+                System.out.println("Connection Established Number: " + sockets.size());
+                user.start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
     }
 
     /**
@@ -127,8 +128,8 @@ public class Server extends Thread {
                             Seller seller = null;
                             synchronized (obj) {
                                 seller = new Seller(userDetails[2], userDetails[3]);
-                                this.market.addSeller(seller);
-                                this.market.updateAllFiles();
+                                market.addSeller(seller);
+                                market.updateAllFiles();
                             }
                             writer.writeObject("Y");
                             runSeller(seller);
@@ -153,6 +154,7 @@ public class Server extends Thread {
 
     /**
      * Infinite loop handling client requests for all buyer operations
+     *
      * @param buyer the buyer user selected/created during the login menu
      * @throws SocketException if the socket abruptly disconnects, throw that to be handled in the run() method
      */
@@ -165,42 +167,34 @@ public class Server extends Thread {
                 String[] answer = userChoice.split(",");
                 System.out.println(userChoice);
 
-                if (answer[0].equals("-1")) { // logout
-                    closeSocket();
-                    return;
-                } else if (answer[0].equals("1")) { // view entire marketplace
-                    this.sendAllBuyerProducts(answer[1], buyer);
-
-                } else if (answer[0].equals("2")) { // view search results
-                    this.sendSearch(userChoice.substring(2));
-
-                } else if (answer[0].equals("3")) { // view product info
-                    this.viewProduct(Integer.parseInt(answer[1]));
-
-                } else if (answer[0].equals("4")) { // add product to cart
-                    this.addToCart(buyer, Integer.parseInt(answer[1]), Integer.parseInt(answer[2]));
-
-                } else if (answer[0].equals("5")) { // export purchase history to file
-                    this.exportToFile(buyer);
-
-                } else if (answer[0].equals("6")) { // checkout shopping cart
-                    this.makePurchase(buyer);
-
-                } else if (answer[0].equals("7")) { // view shopping cart contents
-                    this.sendShoppingCart(buyer);
-
-                } else if (answer[0].equals("8")) { // edit quantity in cart
-                    this.changeShoppingCartQuantity(Integer.parseInt(answer[1]), Integer.parseInt(answer[2]), buyer);
-
-                } else if (answer[0].equals("9")) { // view purchase history
-                    this.sendPurchaseHistory(buyer);
-
-                } else if (answer[0].equals("10")) { // view dashboard
-                    this.sendBuyerDashboard(buyer, answer[1]);
-
-                } else {
-                    //Sends Client "!" to signify a special error (Invalid choice at high level of program)
-                    writer.writeObject((String) "!");
+                switch (answer[0]) {
+                    case "-1" -> {  // logout
+                        closeSocket();
+                        return;
+                    }
+                    case "1" ->  // view entire marketplace
+                            this.sendAllBuyerProducts(answer[1], buyer);
+                    case "2" ->  // view search results
+                            this.sendSearch(userChoice.substring(2));
+                    case "3" ->  // view product info
+                            this.viewProduct(Integer.parseInt(answer[1]));
+                    case "4" ->  // add product to cart
+                            this.addToCart(buyer, Integer.parseInt(answer[1]), Integer.parseInt(answer[2]));
+                    case "5" ->  // export purchase history to file
+                            this.exportToFile(buyer);
+                    case "6" ->  // checkout shopping cart
+                            this.makePurchase(buyer);
+                    case "7" ->  // view shopping cart contents
+                            this.sendShoppingCart(buyer);
+                    case "8" ->  // edit quantity in cart
+                            this.changeShoppingCartQuantity(Integer.parseInt(answer[1]), Integer.parseInt(answer[2]), buyer);
+                    case "9" ->  // view purchase history
+                            this.sendPurchaseHistory(buyer);
+                    case "10" ->  // view dashboard
+                            this.sendBuyerDashboard(buyer, answer[1]);
+                    default ->
+                        //Sends Client "!" to signify a special error (Invalid choice at high level of program)
+                            writer.writeObject((String) "!");
                 }
             } catch (SocketException e) {
                 throw e;
@@ -219,6 +213,7 @@ public class Server extends Thread {
 
     /**
      * The infinite loop handling the client's requests, for all options in the seller menu
+     *
      * @param seller the seller user that is currently logged in
      * @throws SocketException if the socket abruptly disconnects
      */
@@ -231,40 +226,42 @@ public class Server extends Thread {
                 String[] answer = userChoice.split(",");
                 System.out.println(userChoice);
 
-                if (answer[0].equals("-1")) { // logout
-                    closeSocket();
-                    return;
-                } else if (answer[0].equals("1")) { // view marketplace
-                    this.sendAllSellerProducts(answer[1]);
-                } else if (answer[0].equals("2")) { // view this seller's products
-                    this.sendSellerProducts(seller, answer[1]);
-                } else if (answer[0].equals("3")) { // add new product
-                    this.addSellerProduct(seller, userChoice.substring(2));
-                } else if (answer[0].equals("4")) { // edit product
-                    this.editSellerProduct(seller, answer[1], answer[2], answer[3], answer[4], answer[5]);
-                } else if (answer[0].equals("5")) {  // add new store
-                    this.addSellerStore(seller, answer[1]);
-                } else if (answer[0].equals("6")) { // view dashboard
-                    this.seeBuyerCarts(seller);
-                } else if (answer[0].equals("7")) { // show store names
-                    this.sendStores(seller, answer[1]);
-                } else if (answer[0].equals("8")) { // export products to file
-                    this.sendProductStringsForFile(seller, answer[1]);
-                } else if (answer[0].equals("9")) { // import from file
-                    this.importProductsFromFile(seller, userChoice.substring(2).split(",,,"));
-                } else if (answer[0].equals("10")) { // show all store stats
-                    this.sendAllStoresInfo(seller);
-                } else if (answer[0].equals("11")) { // send one product
-                    this.sendProduct(answer[1]);
-                } else if (answer[0].equals("12")) { // remove product from market
-                    this.removeSellerProduct(answer[1]);
-                } else if (answer[0].equals("13")) { // send stats for one store (within dashboard)
-                    this.sendStoreStats(answer[1]);
-                } else if (answer[0].equals("14")) { // send search results
-                    this.sendSearch(userChoice.substring(3));
-                } else {
-                    //Sends Client "!" to signify a special error (Invalid choice at high level of program)
-                    writer.writeObject((String) "!");
+                switch (answer[0]) {
+                    case "-1" -> {  // logout
+                        closeSocket();
+                        return;
+                    }
+                    case "1" ->  // view marketplace
+                            this.sendAllSellerProducts(answer[1]);
+                    case "2" ->  // view this seller's products
+                            this.sendSellerProducts(seller, answer[1]);
+                    case "3" ->  // add new product
+                            this.addSellerProduct(seller, userChoice.substring(2));
+                    case "4" ->  // edit product
+                            this.editSellerProduct(seller, answer[1], answer[2], answer[3], answer[4], answer[5]);
+                    case "5" ->   // add new store
+                            this.addSellerStore(seller, answer[1]);
+                    case "6" ->  // view dashboard
+                            this.seeBuyerCarts(seller);
+                    case "7" ->  // show store names
+                            this.sendStores(seller, answer[1]);
+                    case "8" ->  // export products to file
+                            this.sendProductStringsForFile(seller, answer[1]);
+                    case "9" ->  // import from file
+                            this.importProductsFromFile(seller, userChoice.substring(2).split(",,,"));
+                    case "10" ->  // show all store stats
+                            this.sendAllStoresInfo(seller);
+                    case "11" ->  // send one product
+                            this.sendProduct(answer[1]);
+                    case "12" ->  // remove product from market
+                            this.removeSellerProduct(answer[1]);
+                    case "13" ->  // send stats for one store (within dashboard)
+                            this.sendStoreStats(answer[1]);
+                    case "14" ->  // send search results
+                            this.sendSearch(userChoice.substring(3));
+                    default ->
+                        //Sends Client "!" to signify a special error (Invalid choice at high level of program)
+                            writer.writeObject((String) "!");
                 }
             } catch (SocketException e) {
                 throw e;
@@ -284,8 +281,9 @@ public class Server extends Thread {
     /**
      * This function sends all the products in the marketplace and sorts them either by quantity available, the price,
      * the sales, or the purchase history of that buyer
+     *
      * @param sortType either "quantity", "price", "sales", or "history"
-     * @param buyer the specific buyer if sorting by purchase history
+     * @param buyer    the specific buyer if sorting by purchase history
      */
     private void sendAllBuyerProducts(String sortType, Buyer buyer) {
         try {
@@ -325,6 +323,7 @@ public class Server extends Thread {
 
     /**
      * Sends the client an ArrayList of Products that align with a search the user made
+     *
      * @param search the search query
      */
     private void sendSearch(String search) {
@@ -355,6 +354,7 @@ public class Server extends Thread {
 
     /**
      * Sends client up to date details of a specific product
+     *
      * @param indexOfProduct index of product to get
      */
     private void viewProduct(int indexOfProduct) {
@@ -377,9 +377,10 @@ public class Server extends Thread {
 
     /**
      * Adds a product to a buyer's cart
-     * @param buyer the buyer
+     *
+     * @param buyer          the buyer
      * @param indexOfProduct index of product to add
-     * @param quantity quantity to add
+     * @param quantity       quantity to add
      */
     private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
         try {
@@ -412,6 +413,7 @@ public class Server extends Thread {
     /**
      * This function sends back an ArrayList of all the strings that need to be in the exported purchase history file
      * and sends it
+     *
      * @param buyer buyer to read purchase history from
      */
     private void exportToFile(Buyer buyer) {
@@ -449,13 +451,14 @@ public class Server extends Thread {
     /**
      * Checks out all of the products in a buyer's cart. Changes the buyer's purchase history, the store's inventory,
      * and clears their cart
+     *
      * @param buyer the buyer making the purchase
      */
     private void makePurchase(Buyer buyer) {
         try {
             synchronized (obj) {
-                this.market.makePurchase(buyer);
-                this.market.updateAllFiles();
+                market.makePurchase(buyer);
+                market.updateAllFiles();
             }
             this.writer.writeObject((String) "Y");
             System.out.println("Made purchase");
@@ -470,6 +473,7 @@ public class Server extends Thread {
 
     /**
      * Sends a current list of all the products in a buyer's shopping cart
+     *
      * @param buyer the buyer
      */
     private void sendShoppingCart(Buyer buyer) {
@@ -479,12 +483,12 @@ public class Server extends Thread {
                 shoppingCart = buyer.getShoppingCart();
             }
             HashMap<Product, Integer> shoppingCartProducts = new HashMap<Product, Integer>();
-            for (int i = 0; i < shoppingCart.size(); i++) {
+            for (String s : shoppingCart) {
                 Product p = null;
                 synchronized (obj) {
-                    p = market.getProductByIndex(Integer.parseInt(shoppingCart.get(i).split(":")[0]));
+                    p = market.getProductByIndex(Integer.parseInt(s.split(":")[0]));
                 }
-                int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
+                int quantity = Integer.parseInt(s.split(":")[1]);
                 if (shoppingCartProducts.containsKey(p)) {
                     shoppingCartProducts.put(p, shoppingCartProducts.get(p) + quantity);
                 }
@@ -503,9 +507,10 @@ public class Server extends Thread {
 
     /**
      * Changes the quantity of products in a buyer's shopping cart. If this value is zero, it removes it.
+     *
      * @param indexOfProduct index of product whose quantity is being changed
-     * @param newQuantity new quantity
-     * @param buyer buyer that is changing cart
+     * @param newQuantity    new quantity
+     * @param buyer          buyer that is changing cart
      */
     private void changeShoppingCartQuantity(int indexOfProduct, int newQuantity, Buyer buyer) {
         try {
@@ -514,12 +519,12 @@ public class Server extends Thread {
                 products = buyer.getShoppingCart();
             }
             boolean exists = false;
-            for (int i = 0; i < products.size(); i++) {
-                if (indexOfProduct == Integer.parseInt(products.get(i).split(":")[0])) {
+            for (String product : products) {
+                if (indexOfProduct == Integer.parseInt(product.split(":")[0])) {
                     exists = true;
                     Product p = null;
                     synchronized (obj) {
-                        p = market.getProductByIndex(Integer.parseInt(products.get(i).split(":")[0]));
+                        p = market.getProductByIndex(Integer.parseInt(product.split(":")[0]));
                     }
                     //Sends Client "N" to signify an error (Invalid Quantity)
                     if (p.getQuantity() < newQuantity) {
@@ -551,6 +556,7 @@ public class Server extends Thread {
 
     /**
      * Sends the buyer a HashMap of their purchase history with key: product and value: quantity
+     *
      * @param buyer the buyer to read purchase history from
      */
     private void sendPurchaseHistory(Buyer buyer) {
@@ -565,7 +571,7 @@ public class Server extends Thread {
                 int quantity = Integer.parseInt(item.split(":")[1]);
                 Product p = null;
                 synchronized (obj) {
-                    p = this.market.getProductByIndex(idx);
+                    p = market.getProductByIndex(idx);
                 }
                 if (previousProducts.containsKey(p)) {
                     previousProducts.put(p, previousProducts.get(p) + quantity);
@@ -587,10 +593,11 @@ public class Server extends Thread {
 
     /**
      * Sends the buyer dashboard based on several sorting factors
-     * @param buyer the buyer
+     *
+     * @param buyer    the buyer
      * @param sortType either "sales" or "history"
      */
-    private void sendBuyerDashboard(Buyer buyer, String sortType)  {
+    private void sendBuyerDashboard(Buyer buyer, String sortType) {
         try {
             ArrayList<String> out = null;
             if (sortType.equals("sales")) {
@@ -615,6 +622,7 @@ public class Server extends Thread {
 
     /**
      * Returns a list of all product availabilities in a given store
+     *
      * @param stores stores to read products for
      * @return a list of strings for each product
      */
@@ -639,6 +647,7 @@ public class Server extends Thread {
 
     /**
      * Sends a seller a list of all the products in the marketplace to view them
+     *
      * @param sortType either "quantity", "price", "sales", or "none"
      */
     private void sendAllSellerProducts(String sortType) {
@@ -676,7 +685,8 @@ public class Server extends Thread {
     /**
      * Sends the seller a list of all of their products across all of their stores and allows them to sort by sales or
      * customers
-     * @param seller the seller requesting their product
+     *
+     * @param seller   the seller requesting their product
      * @param sortType either "sales" or "customers"
      */
     private void sendSellerProducts(Seller seller, String sortType) {
@@ -703,7 +713,8 @@ public class Server extends Thread {
 
     /**
      * Allows the seller to add a product to one of their stores
-     * @param seller the seller adding a product
+     *
+     * @param seller        the seller adding a product
      * @param productString the string with a product description
      */
     private void addSellerProduct(Seller seller, String productString) {
@@ -739,7 +750,16 @@ public class Server extends Thread {
         }
     }
 
-    //allows the seller to edit one of the products in their store
+    /**
+     * allows the seller to edit one of the products in their store
+     *
+     * @param seller         the logged-in seller
+     * @param productIndex   the index of the product to change
+     * @param newName        the new name for the product
+     * @param newDescription the new description for the product
+     * @param newPrice       the new price for the product
+     * @param newQuantity    the new quantity for the product
+     */
     private void editSellerProduct(Seller seller, String productIndex, String newName,
                                    String newDescription, String newPrice, String newQuantity) {
 
@@ -772,7 +792,12 @@ public class Server extends Thread {
         }
     }
 
-    //Allows the seller to add a store
+    /**
+     * Allows the seller to add a store
+     *
+     * @param seller    the logged-in seller
+     * @param storeName the name for the new store
+     */
     private void addSellerStore(Seller seller, String storeName) {
         try {
             synchronized (obj) {
@@ -790,7 +815,11 @@ public class Server extends Thread {
         }
     }
 
-    //Allows the seller to remove one of their products
+    /**
+     * Allows the seller to remove one of their products
+     *
+     * @param productIndex the index of the product to remove from the market
+     */
     private void removeSellerProduct(String productIndex) {
         try {
             synchronized (obj) {
@@ -809,13 +838,17 @@ public class Server extends Thread {
     }
 
 
-    //Shows the seller which of their products are in customer shopping carts. Shows the seller the product, the
-    // quantity, and the customer email
+    /**
+     * Shows the seller which of their products are in customer shopping carts. Shows the seller the product, the
+     * quantity, and the customer email
+     *
+     * @param seller the seller requesting data for products in carts
+     */
     private void seeBuyerCarts(Seller seller) {
         try {
             HashMap<Product, String> productsInCart = null;
             synchronized (obj) {
-                seller.sendProductsInCart(market);
+                productsInCart = seller.sendProductsInCart(market);
             }
             this.writer.writeObject((HashMap<Product, String>) productsInCart);
             System.out.println("Wrote purchase history");
@@ -828,7 +861,12 @@ public class Server extends Thread {
         }
     }
 
-    //Sends the seller a list of their stores
+    /**
+     * Sends the seller a list of their stores
+     *
+     * @param seller   the logged-in seller
+     * @param sortType either sorting by "sales" or "alphabet"
+     */
     private void sendStores(Seller seller, String sortType) {
         try {
             ArrayList<String> stores;
@@ -841,31 +879,45 @@ public class Server extends Thread {
         }
     }
 
-    //Sends the seller a list of their products in a store to export a file
-    private void sendProductStringsForFile(Seller seller, String storeName) throws IOException {
-        synchronized (obj) {
-            if (!seller.getStoreNames().contains(storeName)) {
-                writer.writeObject(null);
-                return;
+    /**
+     * Sends the seller a list of their products in a store to export a file
+     *
+     * @param seller    the seller making the request
+     * @param storeName the name of the store to export
+     */
+    private void sendProductStringsForFile(Seller seller, String storeName) {
+        try {
+            synchronized (obj) {
+                if (!seller.getStoreNames().contains(storeName)) {
+                    writer.writeObject(null);
+                    return;
+                }
             }
-        }
-        Store store = null;
-        synchronized (obj) {
-            store = seller.getStoreByName(storeName);
-        }
-        ArrayList<String> out = new ArrayList<>();
-        ArrayList<Product> storeProducts = null;
-        synchronized (obj) {
-            storeProducts = store.getProducts();
-        }
-        for (Product p : storeProducts) {
-            out.add(p.toString());
-        }
+            Store store = null;
+            synchronized (obj) {
+                store = seller.getStoreByName(storeName);
+            }
+            ArrayList<String> out = new ArrayList<>();
+            ArrayList<Product> storeProducts = null;
+            synchronized (obj) {
+                storeProducts = store.getProducts();
+            }
+            for (Product p : storeProducts) {
+                out.add(p.toString());
+            }
 
-        writer.writeObject(out);
+            writer.writeObject(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    //Add a list of products to one of the seller's store. These products are imported from a file by the seller.
+    /**
+     * Add a list of products to one of the seller's store. These products are imported from a file by the seller.
+     *
+     * @param seller the seller making the request
+     * @param lines  a list of lines from the imported file, in the product.toString() format
+     */
     private void importProductsFromFile(Seller seller, String[] lines) {
         System.out.println("got here");
         try {
@@ -894,7 +946,11 @@ public class Server extends Thread {
         }
     }
 
-    //Sends the information regarding how all of their stores are doing including sales and revenue
+    /**
+     * Sends the information regarding how all of their stores are doing including sales and revenue
+     *
+     * @param seller the seller making the request
+     */
     private void sendAllStoresInfo(Seller seller) {
         ArrayList<Store> stores;
         synchronized (obj) {
@@ -924,7 +980,11 @@ public class Server extends Thread {
         }
     }
 
-    //Sends stats for a specific store for the seller
+    /**
+     * Sends stats for a specific store for the seller
+     *
+     * @param storeName the store to get stats for
+     */
     private void sendStoreStats(String storeName) {
         String info;
         try {
@@ -947,7 +1007,11 @@ public class Server extends Thread {
 
     }
 
-    //Lets the seller a specific product in the marketplace
+    /**
+     * Lets the seller a specific product in the marketplace
+     *
+     * @param productIndex the index of the selected product
+     */
     private void sendProduct(String productIndex) {
         Product p;
         synchronized (obj) {
@@ -967,8 +1031,12 @@ public class Server extends Thread {
 
     }
 
-    //The constructor creates a new Server object for each connected client and gives it a unique socket and a
-    // writer/reader to communicate with that client.
+    /**
+     * The constructor creates a new Server object for each connected client and gives it a unique socket and a
+     * writer/reader to communicate with that client.
+     *
+     * @param socket the socket connecting the server and client
+     */
     public Server(Socket socket) {
         this.socket = socket;
         sockets.add(this.socket);
@@ -981,6 +1049,9 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * Closes all the writers/readers and the overall socket connection
+     */
     private void closeSocket() {
         try {
             System.out.println("Closing socket!!");
