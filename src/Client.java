@@ -45,7 +45,6 @@ public class Client extends JComponent implements Runnable {
     private JSpinner quantity;
 
     private JComboBox<String> searchOptions, sortMarket;
-//    private ActionListener productButtonListener;
 
     ActionListener actionListener = new ActionListener() {
         @Override
@@ -173,7 +172,7 @@ public class Client extends JComponent implements Runnable {
 
                             JButton storeButton = new JButton(storeInfo[0]);
                             String[] finalProducts = products;
-//                            JButton storeButton = new JButton(storeInfo[0]);
+
                             storeButton.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
@@ -396,7 +395,6 @@ public class Client extends JComponent implements Runnable {
                 for (Product product : products) {
                     JButton productButton = new JButton(product.getName());
                     panel.add(productButton);
-                    //TODO:change to a focus listener
                     productButton.addMouseListener(new MouseListener() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
@@ -555,7 +553,6 @@ public class Client extends JComponent implements Runnable {
                 jList.addListSelectionListener(new ListSelectionListener() {
                     @Override
                     public void valueChanged(ListSelectionEvent e) {
-//                        System.out.println(jList.getSelectedValue());
                         edit.setVisible(true);
                         name.setVisible(true);
                         price.setVisible(true);
@@ -1251,7 +1248,6 @@ public class Client extends JComponent implements Runnable {
                 if (choice.equalsIgnoreCase("Sort By: Alphabetically")) { //sorting alphabetically
                     products = getAllProducts("none");
                     Collections.sort(products, (p1, p2) -> p1.getName().compareToIgnoreCase(p2.getName()));
-                    //TODO:fix sorting issue
                 } else if (choice.equalsIgnoreCase("Sort By: Price")) { //sorting by price
                     products = getAllProducts("price");
                 } else if (choice.equalsIgnoreCase("Sort By: Quantity")) { //sorting by quantity
@@ -1478,7 +1474,6 @@ public class Client extends JComponent implements Runnable {
             e.printStackTrace();
         }
 
-//        System.out.println(products);
         return products;
     }
 
