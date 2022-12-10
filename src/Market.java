@@ -229,6 +229,8 @@ public class Market implements java.io.Serializable{
      * @return product at that index, null if no matches
      */
     public Product getProductByIndex(int idx) {
+        if (products.get(idx).getIndex() == idx) return products.get(idx);
+
         for (Product p : products) {
             if (p.getIndex() == idx) {
                 return p;
