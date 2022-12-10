@@ -1,3 +1,9 @@
+package testing;
+
+import project4.Buyer;
+import project4.Product;
+import project4.Store;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

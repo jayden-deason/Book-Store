@@ -1,3 +1,9 @@
+package testing;
+
+import project4.BadNamingException;
+import project4.Buyer;
+import project4.Product;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
