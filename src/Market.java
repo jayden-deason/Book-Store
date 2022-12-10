@@ -345,9 +345,12 @@ public class Market implements java.io.Serializable{
      * @param p product to remove
      */
     public void removeProduct(Product p) {
-        Store s = getStoreByName(p.getStoreName());
-        s.removeProduct(p);
-        products.remove(p);
+        p.setQuantity(0);
+        editProduct(p);
+
+        for (Buyer b : getBuyers()) {
+            b.editProductQuantity(p.getIndex(), 0);
+        }
 
         updateAllFiles();
 
@@ -590,7 +593,7 @@ public class Market implements java.io.Serializable{
         if (storeName != null) storeName = storeName.toLowerCase();
         if (description != null) description = description.toLowerCase();
 
-        for (Product p : products) {
+        for (Product p : getAllProducts(true)) {
             if (name == null || p.getName().toLowerCase().contains(name)) {
                 if (storeName == null || p.getStoreName().toLowerCase().contains(storeName)) {
                     // decided to do .contains() for description instead of equals...

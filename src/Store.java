@@ -141,7 +141,9 @@ public class Store implements java.io.Serializable {
      */
     public void makePurchase(Buyer buyer, int quantity, Product product) {
         if (product.getQuantity() < quantity) {
-            System.out.printf("Store only have %d %s left in stock\n", product.getQuantity(), product.getName());
+            throw new RuntimeException(String.format("Store only have %d %s left in stock\n", product.getQuantity(),
+                    product.getName()));
+//            System.out.printf("Store only have %d %s left in stock\n", product.getQuantity(), product.getName());
         } else {
             this.reReadProducts();
             if (productsForSales.indexOf(product) != -1) {

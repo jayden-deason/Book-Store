@@ -675,6 +675,8 @@ public class Server extends Thread {
                     market.addProduct(product);
                     market.updateAllFiles();
                     this.writer.writeObject("Y");
+                } else {
+                    this.writer.writeObject("N");
                 }
             }
 

@@ -248,7 +248,7 @@ public class Client extends JComponent implements Runnable {
                     int quant = cart.get(product);
 
 
-                    SpinnerModel qSpinModel = new SpinnerNumberModel(quant, 0, product.getQuantity(), 1);
+                    SpinnerModel qSpinModel = new SpinnerNumberModel(quant, 0, Integer.MAX_VALUE, 1);
                     JSpinner quantity = new JSpinner(qSpinModel);
                     quantity.setPreferredSize(new Dimension(90, 25));
                     quantity.setBackground(Color.WHITE);
@@ -790,7 +790,7 @@ public class Client extends JComponent implements Runnable {
         frame.setVisible(true);
         Container container = frame.getContentPane();
         container.setLayout(new BorderLayout());
-        username = new JTextField("Username", 20);
+        username = new JTextField("Email", 20);
         password = new JTextField("Password", 20);
         buttonGroup = new ButtonGroup();
         isBuyer = new JRadioButton("Buyer");
@@ -835,7 +835,7 @@ public class Client extends JComponent implements Runnable {
         username.addFocusListener(new FocusListener() { // Creates default text
             @Override
             public void focusGained(FocusEvent e) {
-                if (username.getText().equals("Username")) {
+                if (username.getText().equals("Email")) {
                     username.setText("");
                 }
             }
@@ -843,7 +843,7 @@ public class Client extends JComponent implements Runnable {
             @Override
             public void focusLost(FocusEvent e) {
                 if (username.getText().equals("")) {
-                    username.setText("Username");
+                    username.setText("Email");
                 }
             }
         });
@@ -1064,7 +1064,7 @@ public class Client extends JComponent implements Runnable {
                         throw new RuntimeException(ex);
                     }
                     if (response.equalsIgnoreCase("N")) { //error message for invalid account info
-                        JOptionPane.showMessageDialog(null, "Invalid Username or Password." +
+                        JOptionPane.showMessageDialog(null, "Invalid Email or Password." +
                                 "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
@@ -1080,7 +1080,7 @@ public class Client extends JComponent implements Runnable {
                         throw new RuntimeException(ex);
                     }
                     if (response.equalsIgnoreCase("N")) { //error message for invalid account info
-                        JOptionPane.showMessageDialog(null, "Invalid Username or Password." +
+                        JOptionPane.showMessageDialog(null, "Invalid Email or Password." +
                                 "\nEnter correct info or create an account.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
@@ -1153,7 +1153,7 @@ public class Client extends JComponent implements Runnable {
                         ex.printStackTrace();
                     }
                     if (response == null || response.equalsIgnoreCase("N")) { //error message for pre-existing account info
-                        JOptionPane.showMessageDialog(null, "An account with that username " +
+                        JOptionPane.showMessageDialog(null, "An account with that email " +
                                         "already exists.\n Choose a different one or sign in.", "Error",
                                 JOptionPane.ERROR_MESSAGE);
                         return;
@@ -1168,7 +1168,7 @@ public class Client extends JComponent implements Runnable {
                         ex.printStackTrace();
                     }
                     if (response.equalsIgnoreCase("N")) { //error message for pre-existing account info
-                        JOptionPane.showMessageDialog(null, "An account with that username " +
+                        JOptionPane.showMessageDialog(null, "An account with that email " +
                                         "already exists.\n Choose a different one or sign in.", "Error",
                                 JOptionPane.ERROR_MESSAGE);
                         return;
@@ -1273,6 +1273,8 @@ public class Client extends JComponent implements Runnable {
                     return;
 
                 productPage.setLayout(new GridLayout(products.size() / 2, products.size() / 4));
+
+
                 purchaseListeners = new ArrayList<>();
                 ArrayList<JButton> purchaseButtons = new ArrayList<>();
 
