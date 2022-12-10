@@ -540,8 +540,18 @@ public class Client extends JComponent implements Runnable {
                 edit.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        editProduct(jList.getSelectedValue().getIndex(), name.getText(), description.getText(), price.getText(), quantity.getText());
+                        Product p = jList.getSelectedValue();
+                        int idx = jList.getSelectedIndex();
+                        editProduct(p.getIndex(), name.getText(), description.getText(), price.getText(), quantity.getText());
                         updateMarket.doClick();
+                        jList.setSelectedValue(getProduct(p.getIndex()), false);
+                        DefaultListModel<Product> list = new DefaultListModel<>();
+                        list.addAll(getSellerProducts("none"));
+
+                        // reset view of all products to match name
+                        jList.setModel(list);
+                        jList.updateUI();
+                        jList.setSelectedIndex(idx);
                     }
                 });
 
@@ -559,10 +569,11 @@ public class Client extends JComponent implements Runnable {
                         description.setVisible(true);
                         quantity.setVisible(true);
                         if (jList.getSelectedValue() != null) {
-                            name.setText("Name: " + jList.getSelectedValue().getName());
-                            price.setText(String.format("Price: $%.2f", jList.getSelectedValue().getSalePrice()));
-                            description.setText("Description: " + jList.getSelectedValue().getDescription());
-                            quantity.setText("Quantity: " + jList.getSelectedValue().getQuantity());
+                            Product product = getProduct(jList.getSelectedValue().getIndex());
+                            name.setText("Name: " + product.getName());
+                            price.setText(String.format("Price: $%.2f", product.getSalePrice()));
+                            description.setText("Description: " + product.getDescription());
+                            quantity.setText("Quantity: " + product.getQuantity());
                         } else {
                             name.setText("Name");
                             price.setText("Price");
@@ -1109,7 +1120,7 @@ public class Client extends JComponent implements Runnable {
                     quantity.setVisible(false);
                     exportToFile.setVisible(false);
                 }
-                System.out.println("Updated");
+                System.out.println("Updated marketplace");
                 updateMarket.doClick();
             }
         });
@@ -1397,13 +1408,23 @@ public class Client extends JComponent implements Runnable {
     }
 
     private String getProductInfo(Product product) {
-        String info = String.format("------------------------------------------\n" + "%s\n" + "Store: %s " +
-                        "| Price: $%.2f | Quantity: %d\n" + "Description: %s\n" +
-                        "------------------------------------------\n", product.getName(), product.getStoreName(),
-                product.getSalePrice(), product.getQuantity(), product.getDescription());
+        String line1 = product.getName() + "\n";
+        String line2 = String.format("Store %s | Price $%.2f | Quantity: %d\n",
+                product.getStoreName(), product.getSalePrice(), product.getQuantity());
+        String line3 = "Description: " + product.getDescription();
+        String dashes = getDashes(Math.max(line1.length(), Math.max(line2.length(), line3.length())) - 5);
 
-        return info;
 
+        return dashes + "\n" + line1 + line2 + line3 + "\n" + dashes;
+
+    }
+
+    private String getDashes(int length) {
+        String out = "";
+        for (int i = 0; i < length; i++) {
+            out += "-";
+        }
+        return out;
     }
 
     private Product getProduct(int productIndex) {
@@ -1421,12 +1442,22 @@ public class Client extends JComponent implements Runnable {
     }
 
     private void editProduct(int productIndex, String newName, String newDescription, String newPrice, String newQuantity) {
-        System.out.println("EDITING: " + productIndex + ", " + newName + ", " + newDescription + ", " + newPrice + ", " + newQuantity);
         try {
             if (newName.length() > 6 && newName.substring(0, 6).equals("Name: ") &&
                     newDescription.length() > 13 && newDescription.substring(0, 13).equals("Description: ") &&
                     newPrice.length() > 8 && newPrice.substring(0, 8).equals("Price: $") &&
                     newQuantity.length() > 10 && newQuantity.substring(0, 10).equals("Quantity: ")) {
+
+                // setting quantity to 0
+                if (Integer.parseInt(newQuantity.substring(10)) == 0) {
+                    int cont = JOptionPane.showConfirmDialog(null,
+                            "Are you sure you want to remove '" + newName.substring(6) + "'?",
+                            "", JOptionPane.YES_NO_OPTION);
+
+                    if (cont == 0) removeProduct(productIndex);
+                    return;
+                }
+
                 writer.printf("4,%d,%s,%s,%s,%s\n",
                         productIndex,
                         newName.substring(6),
@@ -1491,7 +1522,7 @@ public class Client extends JComponent implements Runnable {
             e.printStackTrace();
         }
 
-        System.out.println(products);
+//        System.out.println(products);
         return products;
     }
 
@@ -1565,10 +1596,11 @@ public class Client extends JComponent implements Runnable {
     public ArrayList<Product> search(String query, boolean status) {
         if (status) { // buyer
             writer.println("2," + query);
+            System.out.println("2," + query);
         } else { // seller
             writer.println("14," + query);
+            System.out.println("14," + query);
         }
-        System.out.println(query);
         writer.flush();
         return getProductsArray();
     }
