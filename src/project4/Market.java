@@ -539,6 +539,8 @@ public class Market implements java.io.Serializable {
             }
         }
 
+        getStoreByName(product.getStoreName()).updateProduct(product);
+
     }
 
     /**

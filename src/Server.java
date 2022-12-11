@@ -634,9 +634,11 @@ public class Server extends Thread {
         for (Store store : stores) {
             String string = "";
             string += store.getName() + ":";
+            System.out.println(store.getProducts());
             for (Product p : store.getProducts()) {
                 string += p.getName() + ",";
                 string += p.getQuantity() + ";";
+//                System.out.println(p.getName() + "," + p.getQuantity() + ";");
             }
             out.add(string.substring(0, string.length() - 1));
         }

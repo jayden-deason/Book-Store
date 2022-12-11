@@ -145,7 +145,7 @@ public class Store implements java.io.Serializable {
                     product.getName()));
 //            System.out.printf("Store only have %d %s left in stock\n", product.getQuantity(), product.getName());
         } else {
-            this.reReadProducts();
+//            this.reReadProducts();
             if (productsForSales.indexOf(product) != -1) {
                 salesForProducts.add(productsForSales.indexOf(product),
                         salesForProducts.get(productsForSales.indexOf(product)) + quantity);
@@ -153,6 +153,7 @@ public class Store implements java.io.Serializable {
             sales += quantity;
             revenue += quantity * product.getSalePrice();
             product.setQuantity(product.getQuantity() - quantity);
+            updateProduct(product);
 //            this.updateProducts();
 //            this.updateStores();
         }
@@ -419,6 +420,28 @@ public class Store implements java.io.Serializable {
         return products;
     }
 
+    /**
+     * Updates the status of a product in the store
+     * @param p new product
+     */
+    public void updateProduct(Product p) {
+        Product currProd = getProductByIndex(p.getIndex());
+        products.remove(currProd);
+        products.add(p);
+    }
+
+    /**
+     * Gets a product with a given index
+     * @param idx index
+     * @return product if it exists, else null
+     */
+    private Product getProductByIndex(int idx) {
+        for (Product p : products) {
+            if (p.getIndex() == idx) return p;
+        }
+
+        return null;
+    }
     /**
      * Get the total number of sales for products from this store
      *
