@@ -198,7 +198,7 @@ public class Client extends JComponent implements Runnable {
                                 storeInfo = new String[]{store};
                             }
 
-                            JButton storeButton = new JButton(storeInfo[0]); //store buttons dispaly their products
+                            JButton storeButton = new JButton(storeInfo[0]); //store buttons display their products
                             String[] finalProducts = products;
 
                             storeButton.addActionListener(new ActionListener() {
@@ -1534,7 +1534,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Helper method to pad a product's page with the appropriate length of dashes
-     * @param length the length of dashes to inclue
+     * @param length the length of dashes to include
      * @return a string of length * "-"
      */
     private String getDashes(int length) {
@@ -1548,7 +1548,7 @@ public class Client extends JComponent implements Runnable {
     /**
      * Get a specific product from the market
      * @param productIndex the index of the product
-     * @return the up to date product from the market
+     * @return the up-to-date product from the market
      */
     private Product getProduct(int productIndex) {
         writer.println("11," + productIndex);
