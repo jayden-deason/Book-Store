@@ -383,7 +383,6 @@ public class Client extends JComponent implements Runnable {
                 storesFrame.pack();
             } else if (e.getSource() == viewProducts) {
                 JFrame productFrame = new JFrame("Products");
-                productFrame.setSize(900, JFrame.MAXIMIZED_VERT);
                 productFrame.setVisible(true);
                 Container content = productFrame.getContentPane();
                 JPanel panel = new JPanel();
@@ -401,6 +400,7 @@ public class Client extends JComponent implements Runnable {
                 savedText.setBackground(infoPanel.getBackground());
                 savedText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
                 infoPanel.add(infoText);
+                infoPanel.add(savedText);
                 ArrayList<Product> products = getSellerProducts("none");
                 infoPanel.setLayout(new GridLayout(products.size(), 1));
                 int item = 0;
@@ -434,18 +434,17 @@ public class Client extends JComponent implements Runnable {
                     productButton.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            JTextArea savedText = new JTextArea("");
                             savedText.setEditable(false);
                             savedText.setBackground(infoPanel.getBackground());
                             savedText.setText(getProductInfo(product.getIndex()));
                             savedText.setFont(new Font(infoText.getFont().getName(), Font.PLAIN, 16));
-                            infoPanel.add(savedText);
                             productFrame.pack();
                         }
                     });
                 }
                 content.add(scrollPane, BorderLayout.EAST);
                 content.add(infoPanel, BorderLayout.WEST);
+                productFrame.pack();
             } else if (e.getSource() == addProduct) {
                 if (productToAdd.isVisible()) {
                     productToAdd.setVisible(false);
@@ -854,15 +853,19 @@ public class Client extends JComponent implements Runnable {
         isBuyer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                status = !status;
-                userType = true;
+                if (!status) {
+                    status = true;
+                    userType = true;
+                }
             }
         });
         isSeller.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                status = !status;
-                userType = false;
+                if (status) {
+                    status = false;
+                    userType = false;
+                }
             }
         });
 
