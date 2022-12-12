@@ -14,12 +14,11 @@ import javax.swing.UIManager;
 
 /**
  * Client
- *
- *A class that shows the client GUI & communicates requests to the server
+ * <p>
+ * A class that shows the client GUI & communicates requests to the server
  *
  * @author Griffin Chittenden & Jayden Deason
  * @version 12-10-2022
- *
  */
 public class Client extends JComponent implements Runnable {
     // server i/o
@@ -258,8 +257,8 @@ public class Client extends JComponent implements Runnable {
                 HashMap<Product, Integer> cart = getShoppingCart();
 
                 if (cart.isEmpty()) { //error message for empty cart
-                    JOptionPane.showMessageDialog(null, "Cart is empty.", "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Cart is empty.", "Shopping Cart",
+                            JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
 
@@ -320,10 +319,11 @@ public class Client extends JComponent implements Runnable {
                                         "Decrease the amount in your cart.", "Error", JOptionPane.ERROR_MESSAGE);
                                 quantitySpinner.setValue(oldQuantity);
 
-                            } else if (!quantitySpinner.getValue().equals(oldQuantity)) { //confirmation message
-                                JOptionPane.showMessageDialog(null, "Changed quantity!",
-                                        "", JOptionPane.INFORMATION_MESSAGE);
                             }
+                            //confirmation message
+                            JOptionPane.showMessageDialog(null, "Changed quantity!",
+                                    "", JOptionPane.INFORMATION_MESSAGE);
+
 
                             if ((Integer) quantitySpinner.getValue() == 0) {
                                 shoppingCartFrame.dispose();
@@ -373,6 +373,9 @@ public class Client extends JComponent implements Runnable {
                 HashMap<Product, Integer> products = getPurchaseHistory();
 
                 String history = "";
+                if (products.keySet().size() == 0) {
+                    history = "No previous purchases!";
+                }
                 for (Product product : products.keySet()) { //sets string of purchased products
                     history += product.getName() + ": " + products.get(product) + "\n";
                 }
@@ -387,8 +390,8 @@ public class Client extends JComponent implements Runnable {
                 JPanel panel = new JPanel();
                 String[][] storeInfo = getStoreInfo();
                 JTable table = new JTable(storeInfo, new String[]
-                    {"Store Name", "Sales", "Revenue",
-                     "Products in Carts"});
+                        {"Store Name", "Sales", "Revenue",
+                                "Products in Carts"});
                 for (int row = 0; row < table.getRowCount(); row++) {
                     int rowHeight = table.getRowHeight();
 
@@ -1212,7 +1215,7 @@ public class Client extends JComponent implements Runnable {
                         ex.printStackTrace();
                     }
                     if (response == null || response.equalsIgnoreCase("N")) { //error message for
-                                                                                         //pre-existing account info
+                        //pre-existing account info
                         JOptionPane.showMessageDialog(null, "An account with that email " +
                                         "already exists.\n Choose a different one or sign in.", "Error",
                                 JOptionPane.ERROR_MESSAGE);
@@ -1372,10 +1375,16 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Sends a request to add a new store for the seller
+     *
      * @param storeName new store name
      */
     private void addStore(String storeName) {
         try {
+            if (storeName.contains(",")) {
+                JOptionPane.showMessageDialog(null, "No commas allowed in store name!", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             writer.println("5," + storeName);
             System.out.println("adding store");
             System.out.println("5," + storeName);
@@ -1396,6 +1405,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Sends a request to add a new product
+     *
      * @param productString string with new product description
      */
     private void addProduct(String productString) {
@@ -1420,6 +1430,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Sends request to remove a product from the market
+     *
      * @param productIndex index of product to remove
      */
     private void removeProduct(int productIndex) {
@@ -1444,6 +1455,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Sends request to get a list of store names for a seller
+     *
      * @param sortType how to sort the list of stores
      * @return a list of store names
      */
@@ -1465,6 +1477,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Get info for one particular store from the seller POV
+     *
      * @param storeName the name of the store
      * @return info for that store
      */
@@ -1484,6 +1497,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * An array of store information for the store stats page
+     *
      * @return an array of store info including name, revenue, sales, and products in carts
      */
     private String[][] getStoreInfo() {
@@ -1505,6 +1519,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Get information for a specific product
+     *
      * @param productIndex index of the product
      * @return a string with that product's page
      */
@@ -1517,6 +1532,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Nicely formats the description of the product
+     *
      * @param product a product to format
      * @return a string with that product's page
      */
@@ -1534,6 +1550,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Helper method to pad a product's page with the appropriate length of dashes
+     *
      * @param length the length of dashes to include
      * @return a string of length * "-"
      */
@@ -1547,6 +1564,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Get a specific product from the market
+     *
      * @param productIndex the index of the product
      * @return the up-to-date product from the market
      */
@@ -1566,11 +1584,12 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Sends request to edit a product in the market
-     * @param productIndex the index of the product
-     * @param newName "Name: " + the new name
+     *
+     * @param productIndex   the index of the product
+     * @param newName        "Name: " + the new name
      * @param newDescription "Description: " + the new description
-     * @param newPrice "Price: $" + the new price
-     * @param newQuantity "Quantity: " + the new quantity
+     * @param newPrice       "Price: $" + the new price
+     * @param newQuantity    "Quantity: " + the new quantity
      */
     private void editProduct(int productIndex, String newName, String newDescription, String newPrice,
                              String newQuantity) {
@@ -1630,6 +1649,7 @@ public class Client extends JComponent implements Runnable {
 
     /**
      * Request a list of the seller's products
+     *
      * @param sortType what to sort the products by
      * @return a list of seller products
      */
@@ -1800,8 +1820,9 @@ public class Client extends JComponent implements Runnable {
     public boolean exportSellerToFile(String filename, String storeName) {
         File testExistence = new File(filename);
 
-        // check regex invalid chars in filename
-        if (filename.matches(".*[/\n\r\t\0\f`?*\\<>|\":].*")) {
+        // check regex invalid chars in filename or bad suffix
+        if (filename.matches(".*[/\n\r\t\0\f`?*\\<>|\":].*") ||
+                !(filename.endsWith(".csv") || filename.endsWith(".txt"))) {
             return false;
         }
 
@@ -2044,6 +2065,7 @@ public class Client extends JComponent implements Runnable {
     /**
      * Checks if an email has valid formatting
      * xxxx@xxxx.xxxx
+     *
      * @param str the string to check for email formatting
      * @return true if the string is an email, false if not
      */

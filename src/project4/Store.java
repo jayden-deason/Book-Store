@@ -422,6 +422,7 @@ public class Store implements java.io.Serializable {
 
     /**
      * Updates the status of a product in the store
+     *
      * @param p new product
      */
     public void updateProduct(Product p) {
@@ -432,6 +433,7 @@ public class Store implements java.io.Serializable {
 
     /**
      * Gets a product with a given index
+     *
      * @param idx index
      * @return product if it exists, else null
      */
@@ -442,6 +444,7 @@ public class Store implements java.io.Serializable {
 
         return null;
     }
+
     /**
      * Get the total number of sales for products from this store
      *
@@ -600,7 +603,7 @@ public class Store implements java.io.Serializable {
             for (String item : buyer.getShoppingCart()) {
                 int idx = Integer.parseInt(item.split(":")[0]);
                 if (sellingItem(idx)) {
-                    buyerStr += market.getProductByIndex(idx).getName() + ": " + item.split(":")[1] + "<br />";
+                    buyerStr += "--" + market.getProductByIndex(idx).getName() + ": " + item.split(":")[1] + "<br />";
 
                 }
             }

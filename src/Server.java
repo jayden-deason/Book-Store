@@ -426,15 +426,16 @@ public class Server extends Thread {
             }
             ArrayList<String> fileInfo = new ArrayList<String>();
             ;
-            for (String item : purchaseHistory) {
+            for (int i = 0; i < purchaseHistory.size(); i++) {
+                String item = purchaseHistory.get(i);
                 int idx = Integer.parseInt(item.split(":")[0]);
                 int quantity = Integer.parseInt(item.split(":")[1]);
                 Product p = null;
                 synchronized (obj) {
                     p = market.getProductByIndex(idx);
                 }
-                String s = String.format("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
-                        p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
+                String s = String.format("%d,%s,%s,%.2f,%d\n",
+                        i + 1, p.getName(), p.getStoreName(), p.getSalePrice() * quantity, quantity);
                 fileInfo.add(s);
             }
             this.writer.writeObject((ArrayList<String>) fileInfo);
@@ -541,6 +542,7 @@ public class Server extends Thread {
                     //Success
                     writer.writeObject((String) "Y");
                     System.out.println("Changed cart quantity");
+                    return;
                 }
             }
             if (!(exists)) {

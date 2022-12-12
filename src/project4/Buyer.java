@@ -215,13 +215,14 @@ public class Buyer extends User implements java.io.Serializable {
         try {
             PrintWriter pw = new PrintWriter(new FileWriter(filename, false));
 
-            for (String item : purchaseHistory) {
+            for (int i = 0; i < purchaseHistory.size(); i++) {
+                String item = purchaseHistory.get(i);
                 int idx = Integer.parseInt(item.split(":")[0]);
                 int quantity = Integer.parseInt(item.split(":")[1]);
                 Product p = market.getProductByIndex(idx);
 
-                pw.printf("Name: %s | Store: %s | Quantity: %d | Price: $%.2f\n",
-                        p.getName(), p.getStoreName(), quantity, p.getSalePrice() * quantity);
+                pw.printf("%d,%s,%s,%.2f,%d\n",
+                        i + 1, p.getName(), p.getStoreName(), p.getSalePrice() * quantity, quantity);
             }
             pw.close();
         } catch (Exception e) {
