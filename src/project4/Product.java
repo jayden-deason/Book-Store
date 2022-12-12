@@ -32,7 +32,8 @@ public class Product implements java.io.Serializable {
      * @param originalPrice the price of the product
      * @param index         the index of the product in the csv
      */
-    public Product(String name, String storeName, String description, int quantity, double salePrice, double originalPrice, int index) {
+    public Product(String name, String storeName, String description, int quantity, double salePrice,
+                   double originalPrice, int index) {
         this.name = name;
         this.storeName = storeName;
         this.description = description;

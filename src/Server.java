@@ -19,7 +19,7 @@ public class Server extends Thread {
 
     public static ArrayList<Socket> sockets = new ArrayList<Socket>(); // list of sockets for all current threads
     public static Market market; // overall marketplace
-    public static final Object obj = new Object(); // concurrency gatekeeper
+    public static final Object GATEKEEPER = new Object(); // concurrency gatekeeper
 
     /**
      * The main method creates a new thread and Server object for each new User connection
@@ -55,7 +55,7 @@ public class Server extends Thread {
                 if (socket.isClosed()) return;
 
                 //loginString format: (0 for seller or 1 for buyer),(0 for sign in or 1 for sign up),email,password
-                //Example: "0,1,test123@t.com,123" should be sign up for seller with email:test123@t.com and password 123
+                //Example: "0,1,test123@t.com,123" should be sign up for seller with email:test123@t.com, password 123
                 String loginString = reader.readLine();
                 String[] userDetails = loginString.split(",");
                 if (userDetails[0].equals("-1")) { // extra logout handler
@@ -64,7 +64,7 @@ public class Server extends Thread {
                     if (userDetails[1].equals("0")) { // login to existing account
                         System.out.println("In Buyer Login");
                         Buyer b = null;
-                        synchronized (obj) {
+                        synchronized (GATEKEEPER) {
                             b = market.getBuyerByEmail(userDetails[2]);
                         }
                         if (b == null) {
@@ -86,7 +86,7 @@ public class Server extends Thread {
                         Buyer b = market.getBuyerByEmail(userDetails[2]);
                         if (b == null) {
                             Buyer buyer = null;
-                            synchronized (obj) {
+                            synchronized (GATEKEEPER) {
                                 buyer = new Buyer(userDetails[2], userDetails[3]);
                                 this.market.addBuyer(buyer);
                                 this.market.updateAllFiles();
@@ -100,13 +100,11 @@ public class Server extends Thread {
                             writer.writeObject("N");
                         }
                     }
-                }
-                //Seller
-                else if (userDetails[0].equals("1")) {
+                } else if (userDetails[0].equals("1")) { //Seller
                     if (userDetails[1].equals("0")) { // login to existing account
                         System.out.println("In seller login");
                         Seller s = null;
-                        synchronized (obj) {
+                        synchronized (GATEKEEPER) {
                             s = market.getSellerByEmail(userDetails[2]);
                         }
                         if (s == null) {
@@ -128,7 +126,7 @@ public class Server extends Thread {
                         Seller s = market.getSellerByEmail(userDetails[2]);
                         if (s == null) {
                             Seller seller = null;
-                            synchronized (obj) {
+                            synchronized (GATEKEEPER) {
                                 seller = new Seller(userDetails[2], userDetails[3]);
                                 market.addSeller(seller);
                                 market.updateAllFiles();
@@ -189,7 +187,8 @@ public class Server extends Thread {
                     case "7" ->  // view shopping cart contents
                             this.sendShoppingCart(buyer);
                     case "8" ->  // edit quantity in cart
-                            this.changeShoppingCartQuantity(Integer.parseInt(answer[1]), Integer.parseInt(answer[2]), buyer);
+                            this.changeShoppingCartQuantity(Integer.parseInt(answer[1]), Integer.parseInt(answer[2]),
+                                    buyer);
                     case "9" ->  // view purchase history
                             this.sendPurchaseHistory(buyer);
                     case "10" ->  // view dashboard
@@ -291,20 +290,19 @@ public class Server extends Thread {
         try {
             ArrayList<Product> products;
             if (sortType.equals("quantity")) {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products = this.market.sortByQuantity(true);
                 }
             } else if (sortType.equals("price")) {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products = this.market.sortByPrice(true);
                 }
             } else if (sortType.equals("sales")) {
-                //TODO: fix
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products = this.market.sortByPrice(true);
                 }
             } else {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products = this.market.getAllProducts(true);
                 }
             }
@@ -338,7 +336,7 @@ public class Server extends Thread {
             if (searchContents[1].equals("n/a")) searchContents[1] = null;
             if (searchContents[2].equals("n/a")) searchContents[2] = null;
             ArrayList<Product> searchResults = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 searchResults = market.matchConditions(searchContents[0], searchContents[1],
                         searchContents[2]);
             }
@@ -362,7 +360,7 @@ public class Server extends Thread {
     private void viewProduct(int indexOfProduct) {
         try {
             Product product = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 product = this.market.getProductByIndex(indexOfProduct);
             }
             this.writer.writeObject(product);
@@ -387,7 +385,7 @@ public class Server extends Thread {
     private void addToCart(Buyer buyer, int indexOfProduct, int quantity) {
         try {
             Product p;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 p = market.getProductByIndex(indexOfProduct);
             }
 
@@ -396,7 +394,7 @@ public class Server extends Thread {
                 this.writer.writeObject((String) "N");
                 return;
             }
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 buyer.addProductToCart(p.getIndex(), quantity);
                 System.out.println(buyer.getShoppingCart());
                 market.updateAllFiles();
@@ -421,17 +419,16 @@ public class Server extends Thread {
     private void exportToFile(Buyer buyer) {
         try {
             ArrayList<String> purchaseHistory = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 purchaseHistory = buyer.getPurchaseHistory();
             }
             ArrayList<String> fileInfo = new ArrayList<String>();
-            ;
             for (int i = 0; i < purchaseHistory.size(); i++) {
                 String item = purchaseHistory.get(i);
                 int idx = Integer.parseInt(item.split(":")[0]);
                 int quantity = Integer.parseInt(item.split(":")[1]);
                 Product p = null;
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     p = market.getProductByIndex(idx);
                 }
                 String s = String.format("%d,%s,%s,%.2f,%d\n",
@@ -459,7 +456,7 @@ public class Server extends Thread {
      */
     private void makePurchase(Buyer buyer) {
         try {
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 market.makePurchase(buyer);
                 market.updateAllFiles();
             }
@@ -482,13 +479,13 @@ public class Server extends Thread {
     private void sendShoppingCart(Buyer buyer) {
         try {
             ArrayList<String> shoppingCart = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 shoppingCart = buyer.getShoppingCart();
             }
             HashMap<Product, Integer> shoppingCartProducts = new HashMap<Product, Integer>();
             for (String s : shoppingCart) {
                 Product p = null;
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     p = market.getProductByIndex(Integer.parseInt(s.split(":")[0]));
                 }
                 int quantity = Integer.parseInt(s.split(":")[1]);
@@ -518,7 +515,7 @@ public class Server extends Thread {
     private void changeShoppingCartQuantity(int indexOfProduct, int newQuantity, Buyer buyer) {
         try {
             ArrayList<String> products = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 products = buyer.getShoppingCart();
             }
             boolean exists = false;
@@ -526,7 +523,7 @@ public class Server extends Thread {
                 if (indexOfProduct == Integer.parseInt(product.split(":")[0])) {
                     exists = true;
                     Product p = null;
-                    synchronized (obj) {
+                    synchronized (GATEKEEPER) {
                         p = market.getProductByIndex(Integer.parseInt(product.split(":")[0]));
                     }
                     //Sends Client "N" to signify an error (Invalid Quantity)
@@ -535,7 +532,7 @@ public class Server extends Thread {
                         writer.writeObject((String) "N");
                         return;
                     }
-                    synchronized (obj) {
+                    synchronized (GATEKEEPER) {
                         buyer.editProductQuantity(indexOfProduct, newQuantity);
                         market.updateAllFiles();
                     }
@@ -566,7 +563,7 @@ public class Server extends Thread {
     private void sendPurchaseHistory(Buyer buyer) {
         try {
             ArrayList<String> purchaseHistory = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 purchaseHistory = buyer.getPurchaseHistory();
             }
             HashMap<Product, Integer> previousProducts = new HashMap<Product, Integer>();
@@ -574,7 +571,7 @@ public class Server extends Thread {
                 int idx = Integer.parseInt(item.split(":")[0]);
                 int quantity = Integer.parseInt(item.split(":")[1]);
                 Product p = null;
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     p = market.getProductByIndex(idx);
                 }
                 if (previousProducts.containsKey(p)) {
@@ -606,13 +603,13 @@ public class Server extends Thread {
             ArrayList<String> out = null;
             if (sortType.equals("sales")) {
                 ArrayList<String> dashboard = null;
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     dashboard = buyerDashboardForStoreList(market.sortStoresByProductsSold());
                 }
                 writer.writeObject(dashboard);
             } else if (sortType.equals("history")) {
                 ArrayList<String> dashboard = null;
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     dashboard = buyerDashboardForStoreList(buyer.sortStoresByPurchaseHistory(market));
                 }
                 writer.writeObject(dashboard);
@@ -660,19 +657,19 @@ public class Server extends Thread {
         try {
             ArrayList<Product> products;
             if (sortType.equals("quantity")) {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products = market.sortByQuantity(true);
                 }
             } else if (sortType.equals("price")) {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products = market.sortByPrice(true);
                 }
             } else if (sortType.equals("sales")) {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products = market.sortBySales(true);
                 }
             } else {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products = market.getAllProducts(true);
                 }
             }
@@ -698,15 +695,15 @@ public class Server extends Thread {
     private void sendSellerProducts(Seller seller, String sortType) {
         try {
             ArrayList<Product> products = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 products = seller.getProducts(true);
             }
             if (sortType.equals("sales")) {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products.sort(Comparator.comparingInt(s -> market.getSalesForProduct(s)));
                 }
             } else if (sortType.equals("customers")) {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     products.sort(Comparator.comparingInt(s -> market.getCustomersForProduct(s)));
                 }
             }
@@ -732,7 +729,7 @@ public class Server extends Thread {
             double price = Double.parseDouble(arr[3].strip());
             int quantity = Integer.parseInt(arr[4].strip());
             System.out.println("adding product " + productName);
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 Product product = new Product(productName, storeName, description, quantity, price, price, -1);
                 if (seller.getStoreNames().contains(storeName)) {
                     if (seller.getStoreByName(storeName).getProductNames().contains(productName)) {
@@ -773,7 +770,7 @@ public class Server extends Thread {
             double price = Double.parseDouble(newPrice);
             int quantity = Integer.parseInt(newQuantity);
 
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 Product product = market.getProductByIndex(Integer.parseInt(productIndex));
                 product.setName(newName);
                 product.setDescription(newDescription);
@@ -806,7 +803,7 @@ public class Server extends Thread {
      */
     private void addSellerStore(Seller seller, String storeName) {
         try {
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
 //                if (market.getStoreByName(storeName) == null) {
                 market.addStore(new Store(-1, storeName, seller.getEmail()));
                 market.updateAllFiles();
@@ -828,7 +825,7 @@ public class Server extends Thread {
      */
     private void removeSellerProduct(String productIndex) {
         try {
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 market.removeProduct(market.getProductByIndex(Integer.parseInt(productIndex)));
             }
             writer.writeObject("Y");
@@ -853,7 +850,7 @@ public class Server extends Thread {
     private void seeBuyerCarts(Seller seller) {
         try {
             HashMap<Product, String> productsInCart = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 productsInCart = seller.sendProductsInCart(market);
             }
             this.writer.writeObject((HashMap<Product, String>) productsInCart);
@@ -876,7 +873,7 @@ public class Server extends Thread {
     private void sendStores(Seller seller, String sortType) {
         try {
             ArrayList<String> stores;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 stores = seller.getStoreNamesSorted(sortType);
             }
             writer.writeObject(stores);
@@ -893,19 +890,19 @@ public class Server extends Thread {
      */
     private void sendProductStringsForFile(Seller seller, String storeName) {
         try {
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 if (!seller.getStoreNames().contains(storeName)) {
                     writer.writeObject(null);
                     return;
                 }
             }
             Store store = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 store = seller.getStoreByName(storeName);
             }
             ArrayList<String> out = new ArrayList<>();
             ArrayList<Product> storeProducts = null;
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 storeProducts = store.getProducts();
             }
             for (Product p : storeProducts) {
@@ -928,7 +925,7 @@ public class Server extends Thread {
         System.out.println("got here");
         try {
             for (String line : lines) {
-                synchronized (obj) {
+                synchronized (GATEKEEPER) {
                     Product newProduct = new Product(line);
                     newProduct.setIndex(-1);
                     System.out.println(newProduct);
@@ -937,7 +934,7 @@ public class Server extends Thread {
                     }
                 }
             }
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 market.updateAllFiles();
             }
             writer.writeObject("Y");
@@ -959,7 +956,7 @@ public class Server extends Thread {
      */
     private void sendAllStoresInfo(Seller seller) {
         ArrayList<Store> stores;
-        synchronized (obj) {
+        synchronized (GATEKEEPER) {
             stores = seller.getStores();
         }
         String[][] out = null;
@@ -994,7 +991,7 @@ public class Server extends Thread {
     private void sendStoreStats(String storeName) {
         String info;
         try {
-            synchronized (obj) {
+            synchronized (GATEKEEPER) {
                 Store store = market.getStoreByName(storeName);
                 info = String.join("\n", store.statisticsForSeller(0, market));
 
@@ -1020,7 +1017,7 @@ public class Server extends Thread {
      */
     private void sendProduct(String productIndex) {
         Product p;
-        synchronized (obj) {
+        synchronized (GATEKEEPER) {
             p = market.getProductByIndex(Integer.parseInt(productIndex));
         }
         System.out.println(p);

@@ -22,7 +22,7 @@ public class Market implements java.io.Serializable {
     private final String storesFile; // the filename for store info
     private final String productsFile; // the filename for product info
 
-    private static Market INSTANCE; // singleton pattern
+    private static Market instance; // singleton pattern
 
     /**
      * Get the only existing instance of the market
@@ -30,11 +30,11 @@ public class Market implements java.io.Serializable {
      * @return market instance
      */
     public static Market getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Market("Customers.csv", "Sellers.csv", "Stores.csv", "Products.csv");
+        if (instance == null) {
+            instance = new Market("Customers.csv", "Sellers.csv", "Stores.csv", "Products.csv");
         }
 
-        return INSTANCE;
+        return instance;
     }
 
     /**
@@ -302,7 +302,7 @@ public class Market implements java.io.Serializable {
      * @param buyer the buyer making the purchase
      */
     public void makePurchase(Buyer buyer) {
-        ArrayList<Product> products = new ArrayList<>();
+        ArrayList<Product> cartProducts = new ArrayList<>();
         ArrayList<Integer> quantities = new ArrayList<>();
 
         for (String line : buyer.getShoppingCart()) {
@@ -314,12 +314,12 @@ public class Market implements java.io.Serializable {
                 throw new RuntimeException(String.format("\"%s\"out of stock!", p.getName()));
             }
 
-            products.add(p);
+            cartProducts.add(p);
             quantities.add(Integer.parseInt(line.split(":")[1]));
         }
 
-        for (int i = 0; i < products.size(); i++) {
-            Product p = products.get(i);
+        for (int i = 0; i < cartProducts.size(); i++) {
+            Product p = cartProducts.get(i);
             int quantity = quantities.get(i);
 
             Store s = getStoreByName(p.getStoreName());
@@ -373,7 +373,7 @@ public class Market implements java.io.Serializable {
      */
     public Seller getSellerByEmail(String email) {
         for (Seller s : sellers) {
-            if (s.getEmail().equals(email)) { // TODO: email vs. username confusion
+            if (s.getEmail().equals(email)) {
                 return s;
             }
         }

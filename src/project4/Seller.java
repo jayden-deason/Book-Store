@@ -25,7 +25,7 @@ public class Seller extends User implements java.io.Serializable {
      *
      * @param email    the seller's email
      * @param password the seller's password
-     *                 throws badNaming Exception when a email of password contains a comma, as this would mess up the csv file
+     * @throws BadNamingException when an email of password contains a comma, as this would mess up the csv file
      */
     public Seller(String email, String password) throws BadNamingException {
         super(email, password);
@@ -334,7 +334,8 @@ public class Seller extends User implements java.io.Serializable {
             }
         }
 //        s1.addStore("testStore");
-        System.out.println("Actual: \"" + "Error: You already have a store with the same name!" + "\"" + " == Expected: \"Error: You already have a store with the same name!\"");
+        System.out.println("Actual: \"" + "Error: You already have a store with the same name!" + "\"" +
+                " == Expected: \"Error: You already have a store with the same name!\"");
     }
 
     /**

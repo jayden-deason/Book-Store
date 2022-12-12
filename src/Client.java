@@ -389,9 +389,8 @@ public class Client extends JComponent implements Runnable {
                 Container content = storesFrame.getContentPane();
                 JPanel panel = new JPanel();
                 String[][] storeInfo = getStoreInfo();
-                JTable table = new JTable(storeInfo, new String[]
-                        {"Store Name", "Sales", "Revenue",
-                                "Products in Carts"});
+                JTable table = new JTable(storeInfo, new String[] {"Store Name", "Sales", "Revenue",
+                    "Products in Carts"});
                 for (int row = 0; row < table.getRowCount(); row++) {
                     int rowHeight = table.getRowHeight();
 

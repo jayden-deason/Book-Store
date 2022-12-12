@@ -227,7 +227,8 @@ public class Main {
                             }
 
                             if (choice == 1) {
-                                System.out.println("For the following fields, leave blank if you want to keep them the same");
+                                System.out.println("For the following fields, leave blank if you want to keep them " +
+                                        "the same");
                                 System.out.printf("New name (Current name: '%s'):\n", product.getName());
 
                                 String newName;
@@ -247,7 +248,8 @@ public class Main {
                                 }
 
 
-                                System.out.printf("New description (Current description: '%s'):\n", product.getDescription());
+                                System.out.printf("New description (Current description: '%s'):\n",
+                                        product.getDescription());
                                 String newDescription;
                                 while (true) {
                                     newDescription = scan.nextLine();
@@ -284,7 +286,8 @@ public class Main {
                                     }
                                 }
 
-                                System.out.printf("New original price (Current price: $%.2f):\n", product.getOriginalPrice());
+                                System.out.printf("New original price (Current price: $%.2f):\n",
+                                        product.getOriginalPrice());
                                 String newOriginalPrice;
                                 while (true) {
                                     newOriginalPrice = scan.nextLine();
@@ -414,7 +417,8 @@ public class Main {
                                 }
                             }
 
-                            Product p = new Product(name, storeName, description, quantity, salePrice, originalPrice, -1);
+                            Product p = new Product(name, storeName, description, quantity,
+                                    salePrice, originalPrice, -1);
 
                             printProductPage(p);
 
@@ -560,7 +564,7 @@ public class Main {
 
                         if (inp.equalsIgnoreCase("y") || inp.equalsIgnoreCase("yes")) {
                             System.out.println("What is the quantity?");
-                            int quantity = scan.nextInt(); // TODO: add checks for valid input
+                            int quantity = scan.nextInt();
                             scan.nextLine();
 
                             buyer.addProductToCart(idx, quantity);
@@ -869,8 +873,10 @@ public class Main {
             if (p != null) {
                 int quantity = Integer.parseInt(shoppingCart.get(i).split(":")[1]);
                 if (p.isOnSale()) {
-                    System.out.printf("%d) On Sale! Name: %s | Quantity: %d | Sale Price: $%.2f | Original Price $%.2f\n",
-                            p.getIndex(), p.getName(), quantity, p.getSalePrice() * quantity, p.getOriginalPrice() * quantity);
+                    System.out.printf(
+                            "%d) On Sale! Name: %s | Quantity: %d | Sale Price: $%.2f | Original Price $%.2f\n",
+                            p.getIndex(), p.getName(), quantity, p.getSalePrice() * quantity,
+                            p.getOriginalPrice() * quantity);
                 } else {
                     System.out.printf("%d) Name: %s | Quantity: %d | Price: $%.2f\n",
                             p.getIndex(), p.getName(), quantity, p.getSalePrice() * quantity);
